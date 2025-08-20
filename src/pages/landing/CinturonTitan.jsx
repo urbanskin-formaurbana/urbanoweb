@@ -5,7 +5,7 @@ export default function CinturonTitan() {
   return (
     <>
       <SEO title="FORMA Urbana — Cinturón de Titán" description="Reduce y tonifica al mismo tiempo de forma eficiente." />
-      <Container component="section" sx={{ my: 4 }}>
+      <Container component="section" sx={{ my: 4, textAlign: 'center' }}>
         <Typography variant="h1" gutterBottom>Cinturón de Titán</Typography>
         <Typography sx={{ mb: 2 }}>
           Reduce y tonifica al mismo tiempo de forma eficiente.

@@ -5,7 +5,7 @@ export default function CinturonOrion() {
   return (
     <>
       <SEO title="FORMA Urbana — Cinturón de Orión" description="Reducir y tensar la piel." />
-      <Container component="section" sx={{ my: 4 }}>
+      <Container component="section" sx={{ my: 4, textAlign: 'center' }}>
         <Typography variant="h1" gutterBottom>Cinturón de Orión</Typography>
         <Typography sx={{ mb: 2 }}>Reducir y tensar la piel.</Typography>
         <Box component="ul" sx={{ mb: 2 }}>
