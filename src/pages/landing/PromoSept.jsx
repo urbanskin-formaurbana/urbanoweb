@@ -1,9 +1,9 @@
 import SEO from '../../components/SEO'
 import { Link } from 'react-router-dom'
 
-function Section({ title, children }) {
+function Section({ title, children, ...props }) {
   return (
-    <section style={{margin:'48px 0'}}>
+    <section {...props} style={{margin:'48px 0'}}>
       {title && <h2 style={{fontSize:24, margin:'0 0 12px'}}>{title}</h2>}
       <div>{children}</div>
     </section>

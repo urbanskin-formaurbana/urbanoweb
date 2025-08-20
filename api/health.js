@@ -1,6 +1,7 @@
 // api/health.js
 // Endpoint de salud para monitoreo básico y metadatos de despliegue.
 // Responde con JSON y NO se cachea, útil para checks externos.
+/* eslint-env node */
 
 export default function handler(req, res) {
   const payload = {
