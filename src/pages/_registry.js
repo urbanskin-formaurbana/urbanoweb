@@ -1,15 +1,18 @@
 export const LANDINGS = [
   {
-    path: '/',
-    import: () => import('./landing/Home.jsx'),
+    path: '/cinturon-orion',
+    import: () => import('./landing/CinturonOrion.jsx'),
   },
   {
-    path: '/pricing',
-    import: () => import('./landing/Pricing.jsx'),
+    path: '/cinturon-titan',
+    import: () => import('./landing/CinturonTitan.jsx'),
+  },
+  {
+    path: '/cinturon-acero',
+    import: () => import('./landing/CinturonAcero.jsx'),
   },
   {
     path: '/promo-sept',
     import: () => import('./landing/PromoSept.jsx'),
   },
-  // Ejemplo: { path: '/promo-enero', import: () => import('./landing/PromoEnero.jsx') }
 ]
