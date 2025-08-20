@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import LandingLayout from '../layouts/LandingLayout.jsx'
 import NotFound from '../pages/NotFound.jsx'
 import { LANDINGS } from '../pages/_registry.js'
@@ -9,6 +9,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route element={<LandingLayout />}>
+        <Route index element={<Navigate to="/cinturon-orion" replace />} />
         {LANDINGS.map(({ path, import: importer }, idx) => {
           const Page = React.lazy(importer)
           return (

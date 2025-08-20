@@ -7,12 +7,18 @@ export default function LandingLayout() {
     <Container maxWidth="md" sx={{ py: 3 }}>
       <Box component="header" display="flex" justifyContent="space-between" alignItems="center" mb={3} gap={2}>
         <Box display="flex" alignItems="center" gap={2}>
-          <Link component={RouterLink} to="/" underline="none" color="inherit">
-            Urbanoweb
+          <Link component={RouterLink} to="/cinturon-orion" underline="none" color="inherit">
+            FORMA Urbana
           </Link>
           <Box component="nav" display="flex" gap={2}>
-            <Link component={RouterLink} to="/pricing" underline="hover">
-              Pricing
+            <Link component={RouterLink} to="/cinturon-titan" underline="hover">
+              Cinturón de Titán
+            </Link>
+            <Link component={RouterLink} to="/cinturon-acero" underline="hover">
+              Cinturón de Acero
+            </Link>
+            <Link component={RouterLink} to="/promo-sept" underline="hover">
+              Promo Sept
             </Link>
           </Box>
         </Box>
@@ -22,7 +28,7 @@ export default function LandingLayout() {
         <Outlet />
       </Box>
       <Typography component="footer" mt={6} fontSize={12} color="text.secondary">
-        © {new Date().getFullYear()} Urbanoweb
+        © {new Date().getFullYear()} FORMA Urbana
       </Typography>
     </Container>
   )
