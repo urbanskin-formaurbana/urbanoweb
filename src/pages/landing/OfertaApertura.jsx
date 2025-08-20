@@ -86,11 +86,11 @@ export default function OfertaApertura() {
   return (
     <>
       <SEO title="FORMA Urbana — Oferta de Apertura" description="Información de los tres programas Cinturón." />
-      <Container sx={{ my: 4 }}>
+      <Container sx={{ my: 4, textAlign: 'center' }}>
         <Typography variant="h1" gutterBottom>
           Programas Cinturón
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} justifyContent="center">
           {PROGRAMS.map((program) => (
             <Grid
               key={program.name}

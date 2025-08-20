@@ -5,7 +5,7 @@ export default function CinturonAcero() {
   return (
     <>
       <SEO title="FORMA Urbana — Cinturón de Acero" description="Diseñado para llevar tu músculo abdominal a su máximo potencial." />
-      <Container component="section" sx={{ my: 4 }}>
+      <Container component="section" sx={{ my: 4, textAlign: 'center' }}>
         <Typography variant="h1" gutterBottom>Cinturón de Acero</Typography>
         <Typography sx={{ mb: 2 }}>
           Diseñado para llevar tu músculo abdominal a su máximo potencial.
