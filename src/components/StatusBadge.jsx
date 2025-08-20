@@ -3,6 +3,7 @@
 // Pensado para ver rápidamente qué build está desplegado.
 
 import { useEffect, useState } from 'react'
+import { Box, Typography, Link } from '@mui/material'
 
 export default function StatusBadge() {
   const [data, setData] = useState(null)
@@ -27,33 +28,33 @@ export default function StatusBadge() {
     base: {
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 8,
-      padding: '6px 10px',
+      gap: 1,
+      px: 1.25,
+      py: 0.75,
       borderRadius: 999,
       fontSize: 12,
-      border: '1px solid #ddd',
-      background: '#fff'
+      border: '1px solid',
+      borderColor: 'divider',
+      bgcolor: 'background.paper'
     },
-    dot: (color) => ({
-      width: 8, height: 8, borderRadius: 999, background: color
-    }),
+    dot: (color) => ({ width: 8, height: 8, borderRadius: 999, bgcolor: color }),
     mono: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }
   }
 
   if (err) {
     return (
-      <span style={styles.base} title={err}>
-        <span style={styles.dot('#999')} />
-        <span>Error status</span>
-      </span>
+      <Box sx={styles.base} title={err}>
+        <Box sx={styles.dot('#999')} />
+        <Typography>Error status</Typography>
+      </Box>
     )
   }
   if (!data) {
     return (
-      <span style={styles.base}>
-        <span style={styles.dot('#bbb')} />
-        <span>Cargando…</span>
-      </span>
+      <Box sx={styles.base}>
+        <Box sx={styles.dot('#bbb')} />
+        <Typography>Cargando…</Typography>
+      </Box>
     )
   }
 
@@ -67,19 +68,19 @@ export default function StatusBadge() {
   const commitUrl = repo ? `${repo}/commit/${data.commit}` : null
 
   return (
-    <span style={styles.base} title={data.deployedAt}>
-      <span style={styles.dot(color)} />
-      <span>{env}</span>
-      <span>•</span>
-      <span style={styles.mono}>{branch}</span>
-      <span>@</span>
+    <Box sx={styles.base} title={data.deployedAt}>
+      <Box sx={styles.dot(color)} />
+      <Typography>{env}</Typography>
+      <Typography sx={{ mx: 0.5 }}>•</Typography>
+      <Typography sx={styles.mono}>{branch}</Typography>
+      <Typography>@</Typography>
       {commitUrl ? (
-        <a href={commitUrl} target="_blank" rel="noreferrer" style={{textDecoration:'none'}}>
-          <span style={styles.mono}>{commit}</span>
-        </a>
+        <Link href={commitUrl} target="_blank" rel="noreferrer" sx={{ ...styles.mono, textDecoration: 'none' }}>
+          {commit}
+        </Link>
       ) : (
-        <span style={styles.mono}>{commit}</span>
+        <Typography sx={styles.mono}>{commit}</Typography>
       )}
-    </span>
+    </Box>
   )
 }

@@ -1,22 +1,29 @@
-import { Link, Outlet } from 'react-router-dom'
-import StatusBadge from '../components/StatusBadge.jsx' // ← nuevo
+import { Link as RouterLink, Outlet } from 'react-router-dom'
+import StatusBadge from '../components/StatusBadge.jsx'
+import { Container, Box, Typography, Link } from '@mui/material'
 
 export default function LandingLayout() {
   return (
-    <div style={{maxWidth: 960, margin: '0 auto', padding: 24}}>
-      <header style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, gap:12}}>
-        <div style={{display:'flex', alignItems:'center', gap:12}}>
-        <Link to="/">Urbanoweb</Link>
-        <nav style={{display:'flex', gap:12}}>
-          <Link to="/pricing">Pricing</Link>
-        </nav>
-        </div>
-        <StatusBadge /> {/* ← nuevo */}
-      </header>
-      <main>
+    <Container maxWidth="md" sx={{ py: 3 }}>
+      <Box component="header" display="flex" justifyContent="space-between" alignItems="center" mb={3} gap={2}>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Link component={RouterLink} to="/" underline="none" color="inherit">
+            Urbanoweb
+          </Link>
+          <Box component="nav" display="flex" gap={2}>
+            <Link component={RouterLink} to="/pricing" underline="hover">
+              Pricing
+            </Link>
+          </Box>
+        </Box>
+        <StatusBadge />
+      </Box>
+      <Box component="main">
         <Outlet />
-      </main>
-      <footer style={{marginTop:48, fontSize:12, color:'#666'}}>© {new Date().getFullYear()} Urbanoweb</footer>
-    </div>
+      </Box>
+      <Typography component="footer" mt={6} fontSize={12} color="text.secondary">
+        © {new Date().getFullYear()} Urbanoweb
+      </Typography>
+    </Container>
   )
 }
