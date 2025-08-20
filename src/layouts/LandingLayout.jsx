@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom'
-import StatusBadge from '../components/StatusBadge.jsx' // ← nuevo
+import StatusBadge from '../components/StatusBadge.jsx'
 
 export default function LandingLayout() {
   return (
@@ -11,7 +11,7 @@ export default function LandingLayout() {
           <Link to="/pricing">Pricing</Link>
         </nav>
         </div>
-        <StatusBadge /> {/* ← nuevo */}
+        <StatusBadge />
       </header>
       <main>
         <Outlet />
