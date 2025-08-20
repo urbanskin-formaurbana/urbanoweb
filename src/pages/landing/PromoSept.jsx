@@ -92,12 +92,17 @@ export default function PromoSept() {
         </Typography>
         <Grid container spacing={2}>
           {PROGRAMS.map((program) => (
-            <Grid item xs={12} md={4} key={program.name}>
+            <Grid
+              key={program.name}
+              size={{
+                xs: 12,
+                md: 4
+              }}>
               <ProgramCard program={program} />
             </Grid>
           ))}
         </Grid>
       </Container>
     </>
-  )
+  );
 }
