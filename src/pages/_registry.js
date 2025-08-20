@@ -12,7 +12,7 @@ export const LANDINGS = [
     import: () => import('./landing/CinturonAcero.jsx'),
   },
   {
-    path: '/promo-sept',
-    import: () => import('./landing/PromoSept.jsx'),
+    path: '/oferta-apertura',
+    import: () => import('./landing/OfertaApertura.jsx'),
   },
 ]
