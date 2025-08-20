@@ -82,10 +82,10 @@ function ProgramCard({ program }) {
   )
 }
 
-export default function PromoSept() {
+export default function OfertaApertura() {
   return (
     <>
-      <SEO title="FORMA Urbana — Programas Cinturón" description="Información de los tres programas Cinturón." />
+      <SEO title="FORMA Urbana — Oferta de Apertura" description="Información de los tres programas Cinturón." />
       <Container sx={{ my: 4 }}>
         <Typography variant="h1" gutterBottom>
           Programas Cinturón

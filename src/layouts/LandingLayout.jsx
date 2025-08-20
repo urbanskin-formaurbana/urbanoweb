@@ -8,7 +8,7 @@ export default function LandingLayout() {
       <Box component="header" display="flex" justifyContent="space-between" alignItems="center" mb={3} gap={2}>
         <Box display="flex" alignItems="center" gap={2}>
           <Link component={RouterLink} to="/cinturon-orion" underline="none" color="inherit">
-            FORMA Urbana
+            Cinturón de Orión
           </Link>
           <Box component="nav" display="flex" gap={2}>
             <Link component={RouterLink} to="/cinturon-titan" underline="hover">
@@ -16,9 +16,6 @@ export default function LandingLayout() {
             </Link>
             <Link component={RouterLink} to="/cinturon-acero" underline="hover">
               Cinturón de Acero
-            </Link>
-            <Link component={RouterLink} to="/promo-sept" underline="hover">
-              Promo Sept
             </Link>
           </Box>
         </Box>
