@@ -1,13 +1,17 @@
 import { Link, Outlet } from 'react-router-dom'
+import StatusBadge from '../components/StatusBadge.jsx' // ← nuevo
 
 export default function LandingLayout() {
   return (
     <div style={{maxWidth: 960, margin: '0 auto', padding: 24}}>
-      <header style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24}}>
+      <header style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, gap:12}}>
+        <div style={{display:'flex', alignItems:'center', gap:12}}>
         <Link to="/">Urbanoweb</Link>
         <nav style={{display:'flex', gap:12}}>
           <Link to="/pricing">Pricing</Link>
         </nav>
+        </div>
+        <StatusBadge /> {/* ← nuevo */}
       </header>
       <main>
         <Outlet />
