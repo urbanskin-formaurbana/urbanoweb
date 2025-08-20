@@ -1,4 +1,4 @@
-import SEO from '../../components/SEO'
+import SEO from '../../components/SEO.jsx'
 import { Link as RouterLink } from 'react-router-dom'
 import {
   Container,

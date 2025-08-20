@@ -1,4 +1,4 @@
-import SEO from '../../components/SEO'
+import SEO from '../../components/SEO.jsx'
 import { Container, Typography, Box } from '@mui/material'
 
 export default function CinturonTitan() {
