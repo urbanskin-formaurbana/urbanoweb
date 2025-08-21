@@ -308,7 +308,7 @@ export default function CinturonOrion() {
           ¿Listo para empezar?
         </Typography>
         <Typography sx={{ mb: 3 }}>
-          Reservá tu <strong>sesión</strong> o asegurá tu <strong>Cuponera 6 — Oferta de Apertura</strong>.
+          Reservá tu <strong>sesión</strong> o asegurá tu <strong>Cuponera 6 en Oferta de Apertura</strong>.
         </Typography>
         <Button variant="contained" color="success" size="large" href={WHATSAPP_LINK} sx={{ fontWeight: 'bold' }}>
           Escribinos ahora
@@ -316,13 +316,25 @@ export default function CinturonOrion() {
       </Container>
       <Container component="footer" sx={{ py: 4 }}>
         <Typography variant="body2" align="center">
-          Los resultados individuales varían. Este protocolo <strong>no reemplaza</strong> indicaciones médicas, dieta o ejercicio; <strong>los potencia</strong>. Estudio tras estudio indica <strong>seguridad y confort</strong> en dispositivos 635–680 nm cuando se aplican correctamente. ({' '}
+          Los resultados individuales varían. Este protocolo <strong>no reemplaza</strong> indicaciones médicas, dieta o ejercicio; <strong>los potencia</strong>. Estudio tras estudio indica <strong>seguridad y confort</strong> en dispositivos 635–680 nm cuando se aplican correctamente. Puedes revisar los siguientes estudios si aún tienes curiosidad: ({' '}
           <Link href="https://europepmc.org/article/MED/20014253?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
             Europe PMC
           </Link>
           ,{' '}
           <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
             JCAD
+          </Link>
+          ,{' '}
+          <Link href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?" target="_blank" rel="noopener noreferrer" underline="always">
+            MDedge
+          </Link>
+          ,{' '}
+          <Link href="https://www.verywellhealth.com/wood-therapy-6362588?" target="_blank" rel="noopener noreferrer" underline="always">
+            Verywell Health
+          </Link>
+          ,{' '}
+          <Link href="https://link.springer.com/article/10.1007/s11764-020-00928-1?" target="_blank" rel="noopener noreferrer" underline="always">
+            SpringerLink
           </Link>
           )
         </Typography>
