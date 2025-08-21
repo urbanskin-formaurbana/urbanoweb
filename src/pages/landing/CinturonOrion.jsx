@@ -90,14 +90,10 @@ export default function CinturonOrion() {
           <li>Luchás con el sobrepeso y <strong>no ves cambios</strong> en el abdomen pese a dieta/ejercicio.</li>
           <li>Querés <strong>algo cómodo y progresivo</strong>, sin quirófano ni agujas.</li>
           <li>Buscás un <strong>primer impulso visible</strong> que te anime a <strong>mantener</strong> (no a empezar de cero).</li>
-          <li>Tenés agenda apretada y necesitás <strong>cero downtime</strong>.</li>
+          <li>Tenés agenda apretada y <strong>no podés darte el lujo de parar</strong>.</li>
         </Box>
         <Typography align="center">
-          <strong>No lo recomendamos</strong> si estás embarazada o en lactancia, usás marcapasos, tenés cáncer activo o una condición médica que contraindique fototerapia o masajes profundos. Ante dudas, consultá a tu médico. (Criterios similares se usan en los ensayos clínicos de Lipo Láser no invasivo). ({' '}
-          <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-            JCAD
-          </Link>
-          )
+          <strong>No lo recomendamos</strong> si estás embarazada o en lactancia, usás marcapasos, tenés cáncer activo o una condición médica que contraindique fototerapia o masajes profundos. Ante dudas, consultá a tu médico.
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
