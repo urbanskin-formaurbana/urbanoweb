@@ -22,8 +22,8 @@ export default function CinturonAcero() {
   return (
     <>
       <SEO
-        title="FORMA Urbana — Cinturón de Acero | EMSCULPT NEO + Radiofrecuencia (Montevideo)"
-        description="Definí y tensá abdomen en 60’: EMSCULPT NEO (HIFEM + RF) + RF de piel + Maderoterapia + Drenaje. Sesión $1.900. Cuponera 6 a $6.200 (Oferta de Apertura). Reservá por WhatsApp."
+        title="FORMA Urbana — Cinturón de Acero | Body Sculpt + Radiofrecuencia (Montevideo)"
+        description="Definí y tensá abdomen en 60’: Body Sculpt (HIFEM + RF) + RF de piel + Maderoterapia + Drenaje. Sesión $1.900. Cuponera 6 a $6.200 (Oferta de Apertura). Reservá por WhatsApp."
       />
         <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
           <Container>
@@ -40,7 +40,7 @@ export default function CinturonAcero() {
             Llevá tu abdomen a su <strong>máximo potencial</strong>.
           </Typography>
           <Typography sx={{ mb: 4 }}>
-            <strong>Protocolo 4‑en‑1</strong>: <strong>30’ EMSCULPT NEO (HIFEM® + RF)</strong> + <strong>Radiofrecuencia focal de piel</strong> + <strong>Maderoterapia</strong> + <strong>Drenaje linfático</strong>. En una sola visita: <strong>más tono, menos contorno y piel más firme</strong>, sin downtime. ({' '}
+            <strong>Protocolo 4‑en‑1</strong>: <strong>30’ Body Sculpt (HIFEM® + RF)</strong> + <strong>Radiofrecuencia focal de piel</strong> + <strong>Maderoterapia</strong> + <strong>Drenaje linfático</strong>. En una sola visita: <strong>más tono, menos contorno y piel más firme</strong>, sin downtime. ({' '}
             <Link href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" color="inherit" underline="always">
               Europe PMC
             </Link>
@@ -72,7 +72,7 @@ export default function CinturonAcero() {
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 800, mx: 'auto' }}>
           <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
-            1) EMSCULPT NEO: músculo <strong>y</strong> grasa, a la vez
+            1) Body Sculpt: músculo <strong>y</strong> grasa, a la vez
           </Typography>
           <Typography>
             Combina <strong>HIFEM®</strong> (contracciones supramáximas que ningún entrenamiento reproduce) con <strong>radiofrecuencia sincronizada</strong> que calienta el tejido de forma segura. La <strong>sinergia</strong> logra <strong>aumento de masa/espesor muscular</strong> y <strong>reducción de grasa subcutánea</strong> en <strong>30 minutos</strong>. ({' '}
@@ -119,7 +119,7 @@ export default function CinturonAcero() {
             )
           </Typography>
           <Typography>
-            Es el <strong>complemento ideal</strong> a EMSCULPT NEO: el NEO actúa <strong>en músculo y grasa</strong>; la RF focal acá se dirige <strong>a la piel</strong> para un <strong>acabado más terso</strong>. ({' '}
+            Es el <strong>complemento ideal</strong> a Body Sculpt: el NEO actúa <strong>en músculo y grasa</strong>; la RF focal acá se dirige <strong>a la piel</strong> para un <strong>acabado más terso</strong>. ({' '}
             <Link href="https://www.oaepublish.com/articles/2347-9264.2021.60?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
               OAE Publish
             </Link>
@@ -174,7 +174,7 @@ export default function CinturonAcero() {
         </Typography>
         <Box component="ol" sx={{ maxWidth: 600, mx: 'auto', textAlign: 'left' }}>
           <li>
-            <strong>EMSCULPT NEO — 30’ (HIFEM + RF sincronizada)</strong> Sensación: <strong>contracciones intensas</strong> con <strong>calor tolerable</strong>; no invasivo, sin downtime. ({' '}
+            <strong>Body Sculpt — 30’ (HIFEM + RF sincronizada)</strong> Sensación: <strong>contracciones intensas</strong> con <strong>calor tolerable</strong>; no invasivo, sin downtime. ({' '}
             <Link href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
               Europe PMC
             </Link>
@@ -317,7 +317,7 @@ export default function CinturonAcero() {
             )
           </li>
           <li>
-            <strong>EMSCULPT NEO 30’</strong> (músculo + grasa). ({' '}
+            <strong>Body Sculpt 30’</strong> (músculo + grasa). ({' '}
             <Link href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
               Europe PMC
             </Link>
@@ -440,7 +440,7 @@ export default function CinturonAcero() {
       </Container>
       <Container component="footer" sx={{ py: 4 }}>
         <Typography variant="body2" align="center">
-          Los resultados varían según composición corporal y hábitos. Este protocolo <strong>no reemplaza</strong> nutrición/entrenamiento ni indicación médica; <strong>los potencia</strong>. <strong>EMSCULPT NEO (HIFEM+RF)</strong> cuenta con publicaciones (incluido <strong>ensayo aleatorizado</strong>); la <strong>RF en piel</strong> tiene base fisiológica y revisiones clínicas; el <strong>drenaje</strong> se usa como coadyuvante; la <strong>maderoterapia</strong> es complementaria con evidencia limitada. Evaluación previa obligatoria. ({' '}
+          Los resultados varían según composición corporal y hábitos. Este protocolo <strong>no reemplaza</strong> nutrición/entrenamiento ni indicación médica; <strong>los potencia</strong>. <strong>Body Sculpt (HIFEM+RF)</strong> cuenta con publicaciones (incluido <strong>ensayo aleatorizado</strong>); la <strong>RF en piel</strong> tiene base fisiológica y revisiones clínicas; el <strong>drenaje</strong> se usa como coadyuvante; la <strong>maderoterapia</strong> es complementaria con evidencia limitada. Evaluación previa obligatoria. ({' '}
           <Link href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
             Europe PMC
           </Link>

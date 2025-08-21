@@ -36,9 +36,9 @@ const PROGRAMS = [
   {
     name: 'Cinturón de Titán',
     path: '/cinturon-titan',
-    description: 'Reducí y tonificá a la vez con EMSCULPT NEO + Lipo Láser.',
+    description: 'Reducí y tonificá a la vez con Body Sculpt + Lipo Láser.',
     features: [
-      '30 minutos de EMSCULPT NEO (HIFEM + RF)',
+      '30 minutos de Body Sculpt (HIFEM + RF)',
       '30 minutos de Lipo Láser',
       'Maderoterapia',
       'Pulido (drenaje/modelador)'
@@ -56,7 +56,7 @@ const PROGRAMS = [
     path: '/cinturon-acero',
     description: 'Tono muscular avanzado y piel más firme con NEO + radiofrecuencia.',
     features: [
-      '30 minutos de EMSCULPT NEO',
+      '30 minutos de Body Sculpt',
       'Radiofrecuencia (piel)',
       'Maderoterapia',
       'Drenaje linfático'
@@ -81,7 +81,7 @@ const SELECTION = [
   {
     question: '¿Querés reducir y tonificar a la vez?',
     program: PROGRAMS[1],
-    text: 'Músculo + grasa en la misma sesión con EMSCULPT NEO y afinado de contorno.'
+    text: 'Músculo + grasa en la misma sesión con Body Sculpt y afinado de contorno.'
   },
   {
     question: '¿Ya tenés base y querés seguir definiendo?',
@@ -226,8 +226,8 @@ export default function OfertaApertura() {
             <Typography variant="h5">Tecnología protagonista</Typography>
             <Box component="ul" sx={{ pl: 2, m: 0 }}>
               <li><strong>Orión:</strong> <strong>Lipo Láser 635 nm</strong> + maderoterapia + drenaje. Evidencia en reducción de perímetro en ensayos controlados (no es “bajar kilos”).</li>
-              <li><strong>Titán:</strong> <strong>EMSCULPT NEO (HIFEM + RF simultánea)</strong> + Lipo Láser + “Pulido”. Ensayos aleatorizados con “sham” y evaluaciones por MRI/US respaldan reducción de grasa y aumento de espesor muscular.</li>
-              <li><strong>Acero:</strong> <strong>EMSCULPT NEO</strong> para músculo/grasa + <strong>radiofrecuencia</strong> focal en piel para firmeza.</li>
+              <li><strong>Titán:</strong> <strong>Body Sculpt (HIFEM + RF simultánea)</strong> + Lipo Láser + “Pulido”. Ensayos aleatorizados con “sham” y evaluaciones por MRI/US respaldan reducción de grasa y aumento de espesor muscular.</li>
+              <li><strong>Acero:</strong> <strong>Body Sculpt</strong> para músculo/grasa + <strong>radiofrecuencia</strong> focal en piel para firmeza.</li>
             </Box>
           </Box>
           <Box>
@@ -301,13 +301,13 @@ export default function OfertaApertura() {
           <Box>
             <Typography variant="h5">Cinturón de Titán</Typography>
             <Typography>
-              30’ <strong>EMSCULPT NEO (HIFEM + RF)</strong> → <strong>músculo + grasa</strong> · 30’ Lipo Láser → <strong>afinado</strong> · Maderoterapia + Pulido → <strong>acabado</strong>.
+              30’ <strong>Body Sculpt (HIFEM + RF)</strong> → <strong>músculo + grasa</strong> · 30’ Lipo Láser → <strong>afinado</strong> · Maderoterapia + Pulido → <strong>acabado</strong>.
             </Typography>
           </Box>
           <Box>
             <Typography variant="h5">Cinturón de Acero</Typography>
             <Typography>
-              30’ <strong>EMSCULPT NEO</strong> → <strong>tono real</strong> · <strong>Radiofrecuencia</strong> focal en piel → <strong>firmeza</strong> · Maderoterapia + Drenaje → <strong>perfilado</strong>.
+              30’ <strong>Body Sculpt</strong> → <strong>tono real</strong> · <strong>Radiofrecuencia</strong> focal en piel → <strong>firmeza</strong> · Maderoterapia + Drenaje → <strong>perfilado</strong>.
             </Typography>
           </Box>
         </Stack>

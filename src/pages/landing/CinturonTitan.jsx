@@ -22,8 +22,8 @@ export default function CinturonTitan() {
   return (
     <>
       <SEO
-        title="FORMA Urbana — Cinturón de Titán | EMSCULPT NEO + Lipo Láser (Montevideo)"
-        description="Definí y reducí abdomen en la misma sesión: EMSCULPT NEO (HIFEM + RF) + Lipo Láser 635 nm + Maderoterapia + Pulido. Sesión $2.000. Cuponera 6 a $6.600 (Oferta de Apertura). Reservá por WhatsApp."
+        title="FORMA Urbana — Cinturón de Titán | Body Sculpt + Lipo Láser (Montevideo)"
+        description="Definí y reducí abdomen en la misma sesión: Body Sculpt (HIFEM + RF) + Lipo Láser 635 nm + Maderoterapia + Pulido. Sesión $2.000. Cuponera 6 a $6.600 (Oferta de Apertura). Reservá por WhatsApp."
       />
         <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
           <Container>
@@ -40,7 +40,7 @@ export default function CinturonTitan() {
             Reduce <strong>y</strong> tonifica en la misma sesión.
           </Typography>
           <Typography sx={{ mb: 4 }}>
-            <strong>Protocolo 4‑en‑1</strong>: <strong>30’ EMSCULPT NEO (HIFEM + RF) + 30’ Lipo Láser 635 nm + Maderoterapia + Pulido (drenaje/modelador)</strong>. No invasivo, sin downtime, pensado para <strong>marcar abdomen</strong> y <strong>bajar contorno</strong> de forma eficiente. ({' '}
+            <strong>Protocolo 4‑en‑1</strong>: <strong>30’ Body Sculpt (HIFEM + RF) + 30’ Lipo Láser 635 nm + Maderoterapia + Pulido (drenaje/modelador)</strong>. No invasivo, sin downtime, pensado para <strong>marcar abdomen</strong> y <strong>bajar contorno</strong> de forma eficiente. ({' '}
             <Link href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" color="inherit" underline="always">
               BTL Aesthetics
             </Link>
@@ -76,7 +76,7 @@ export default function CinturonTitan() {
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 800, mx: 'auto' }}>
           <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
-            1) EMSCULPT NEO: músculo + grasa, a la vez
+            1) Body Sculpt: músculo + grasa, a la vez
           </Typography>
           <Typography>
             Tecnología que <strong>combina simultáneamente</strong> <strong>HIFEM®</strong> (contracciones supramáximas) con <strong>radiofrecuencia (RF)</strong> que calienta tejido subcutáneo y músculo. El resultado es <strong>sinergia</strong>: <strong>construcción muscular</strong> + <strong>reducción de grasa</strong> en una sesión de <strong>30 minutos</strong>. ({' '}
@@ -142,7 +142,7 @@ export default function CinturonTitan() {
         </Stack>
         <Box sx={{ mt: 3, p: 2, bgcolor: 'success.light', borderLeft: 4, borderColor: 'success.main' }}>
           <Typography>
-            <strong>En simple:</strong> EMSCULPT NEO <strong>activa y define</strong> el músculo mientras <strong>reduce grasa</strong>; el Lipo Láser <strong>afina contorno</strong>; el Pulido <strong>drena y perfila</strong> el acabado.
+            <strong>En simple:</strong> Body Sculpt <strong>activa y define</strong> el músculo mientras <strong>reduce grasa</strong>; el Lipo Láser <strong>afina contorno</strong>; el Pulido <strong>drena y perfila</strong> el acabado.
           </Typography>
         </Box>
       </Container>
@@ -181,7 +181,7 @@ export default function CinturonTitan() {
         </Typography>
         <Box component="ol" sx={{ maxWidth: 600, mx: 'auto', textAlign: 'left' }}>
           <li>
-            <strong>EMSCULPT NEO — 30’</strong> sobre abdomen (RF + HIFEM simultáneo). Sensación: <strong>contracciones intensas</strong> con <strong>calor tipo “piedras calientes”</strong>; no invasivo, sin downtime. ({' '}
+            <strong>Body Sculpt — 30’</strong> sobre abdomen (RF + HIFEM simultáneo). Sensación: <strong>contracciones intensas</strong> con <strong>calor tipo “piedras calientes”</strong>; no invasivo, sin downtime. ({' '}
             <Link href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
               BTL Aesthetics
             </Link>
@@ -204,7 +204,7 @@ export default function CinturonTitan() {
         </Box>
         <Box sx={{ mt: 3, p: 2, bgcolor: 'success.light', borderLeft: 4, borderColor: 'success.main' }}>
           <Typography>
-            <strong>Diferencia vs. Cinturón de Orión:</strong> Titán <strong>añade EMSCULPT NEO</strong> (músculo + grasa con evidencia sólida) y el <strong>Pulido</strong> es <strong>100% a medida</strong> según tu caso (no un flujo fijo). ({' '}
+            <strong>Diferencia vs. Cinturón de Orión:</strong> Titán <strong>añade Body Sculpt</strong> (músculo + grasa con evidencia sólida) y el <strong>Pulido</strong> es <strong>100% a medida</strong> según tu caso (no un flujo fijo). ({' '}
             <Link href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
               Europe PMC
             </Link>
@@ -330,7 +330,7 @@ export default function CinturonTitan() {
             <strong>Evaluación</strong> (objetivo y zona).
           </li>
           <li>
-            <strong>EMSCULPT NEO 30’</strong> (definición + grasa). ({' '}
+            <strong>Body Sculpt 30’</strong> (definición + grasa). ({' '}
             <Link href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
               BTL Aesthetics
             </Link>
@@ -390,7 +390,7 @@ export default function CinturonTitan() {
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
-              <Typography>¿EMSCULPT NEO es mejor que otras opciones no invasivas?</Typography>
+              <Typography>¿Body Sculpt es mejor que otras opciones no invasivas?</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
@@ -440,7 +440,7 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                <strong>Titán</strong>: suma <strong>EMSCULPT NEO</strong>, con respaldo en <strong>estudios</strong> (músculo + grasa). El <strong>Pulido</strong> es <strong>a medida</strong>. <br />
+                <strong>Titán</strong>: suma <strong>Body Sculpt</strong>, con respaldo en <strong>estudios</strong> (músculo + grasa). El <strong>Pulido</strong> es <strong>a medida</strong>. <br />
                 <strong>Orión</strong>: protocolo <strong>entry‑level</strong> sin HIFEM+RF; flujo fijo (Lipo Láser + Maderoterapia + Drenaje). ({' '}
                 <Link href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
                   Europe PMC
@@ -464,7 +464,7 @@ export default function CinturonTitan() {
       </Container>
       <Container component="footer" sx={{ py: 4 }}>
         <Typography variant="body2" align="center">
-          Los resultados varían según composición corporal y hábitos. Este protocolo <strong>no reemplaza</strong> indicación médica, entrenamiento o nutrición; <strong>los potencia</strong>. EMSCULPT NEO y Lipo Láser cuentan con <strong>publicaciones revisadas por pares</strong> sobre <strong>reducción de grasa</strong> y/o <strong>aumento muscular</strong>; la <strong>maderoterapia</strong> es un <strong>complemento</strong> con evidencia formal limitada. Siempre realizamos evaluación previa. ({' '}
+          Los resultados varían según composición corporal y hábitos. Este protocolo <strong>no reemplaza</strong> indicación médica, entrenamiento o nutrición; <strong>los potencia</strong>. Body Sculpt y Lipo Láser cuentan con <strong>publicaciones revisadas por pares</strong> sobre <strong>reducción de grasa</strong> y/o <strong>aumento muscular</strong>; la <strong>maderoterapia</strong> es un <strong>complemento</strong> con evidencia formal limitada. Siempre realizamos evaluación previa. ({' '}
           <Link href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
             Europe PMC
           </Link>
