@@ -178,82 +178,26 @@ export default function CinturonAcero() {
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Qué incluye cada sesión (60–70 min)
+          Qué incluye cada sesión
         </Typography>
         <Box
           component="ol"
           sx={{ maxWidth: 600, mx: "auto", textAlign: "left" }}
         >
           <li>
-            <strong>MSculpt — 30’ (HIFEM + RF sincronizada)</strong> Sensación:{" "}
-            <strong>contracciones intensas</strong> con{" "}
-            <strong>calor tolerable</strong>; no invasivo, sin downtime. ({" "}
-            <Link
-              href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Europe PMC
-            </Link>
-            ,{" "}
-            <Link
-              href="https://www.folkplasticsurgery.com/procedures/emsculpt-neo?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Folk Plastic Surgery
-            </Link>
-            )
+            <strong>MSculpt — 30’ (HIFEM)</strong> Sensación:{" "}
+            <strong>contracciones intensas</strong>; no invasivo, sin reposo.
           </li>
           <li>
-            <strong>Radiofrecuencia focal de piel — 15–20’</strong> Objetivo:{" "}
-            <strong>firmeza</strong>. Trabajamos en el{" "}
-            <strong>colágeno dérmico</strong> (tensión inmediata + remodelación
-            en semanas). ({" "}
-            <Link
-              href="https://www.advancesincosmeticsurgery.com/article/S2542-4327%2821%2900016-3/fulltext?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              advancesincosmeticsurgery.com
-            </Link>
-            ,{" "}
-            <Link
-              href="https://www.oaepublish.com/articles/2347-9264.2021.60?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              OAE Publish
-            </Link>
-            )
+            <strong>Radiofrecuencia</strong> Objetivo: <strong>firmeza</strong>.
+            Trabajamos en el <strong>colágeno dérmico</strong> (tensión
+            inmediata + remodelación en sesiones).
           </li>
           <li>
-            <strong>Pulido manual — 10–15’</strong>{" "}
-            <strong>Drenaje linfático</strong> (descongestión) +{" "}
-            <strong>modelador/maderoterapia</strong> (contorno),{" "}
-            <strong>dosificado</strong> según tu respuesta del día. ({" "}
-            <Link
-              href="https://my.clevelandclinic.org/health/treatments/21768-lymphatic-drainage-massage?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Cleveland Clinic
-            </Link>
-            ,{" "}
-            <Link
-              href="https://www.verywellhealth.com/wood-therapy-6362588?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Verywell Health
-            </Link>
-            )
+            <strong>Maderoterapia y Masaje Modelador</strong> Objetivo:
+            Continuar con el tensado de la piel, y la definición de la figura.
+            <strong>modelador + maderoterapia</strong> (contorno),{" "}
+            <strong>dosificado</strong> según tu respuesta del día.
           </li>
         </Box>
         <Box
@@ -266,11 +210,10 @@ export default function CinturonAcero() {
           }}
         >
           <Typography>
-            <strong>Diferencia clave vs. paquetes “entry‑level”:</strong> acá
-            sumás <strong>tonificación muscular avanzada</strong> (NEO){" "}
-            <strong>más</strong> una{" "}
-            <strong>pasada específica de RF para piel</strong>; el pulido se
-            ajusta <strong>a medida</strong> para rematar el acabado.
+            <strong>Diferencia clave con los otros paquetes:</strong> acá nos
+            enfocamos en la <strong>tonificación muscular avanzada</strong> y
+            usamos <strong>Radiofrecuencia para seguir tenzando la piel</strong>
+            ; el masaje se ajusta para rematar el acabado.
           </Typography>
         </Box>
       </Container>
