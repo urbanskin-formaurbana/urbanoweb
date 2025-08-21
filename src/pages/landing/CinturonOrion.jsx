@@ -118,34 +118,18 @@ export default function CinturonOrion() {
         </Typography>
         <Box component="ul" sx={{ maxWidth: 600, mx: 'auto', textAlign: 'left', mb: 2 }}>
           <li>
-            <strong>Menos contorno</strong> en la zona tratada (cintura/abdomen) con progreso <strong>sesión a sesión</strong>. ({' '}
-            <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-              JCAD
-            </Link>
-            )
+            <strong>Menos contorno</strong> en la zona tratada (cintura/abdomen) con progreso <strong>sesión a sesión</strong>.
           </li>
           <li>
-            <strong>Piel más firme</strong> y uniforme al combinar energía + técnica manual. ({' '}
-            <Link href="https://www.verywellhealth.com/wood-therapy-6362588?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              Verywell Health
-            </Link>
-            )
+            <strong>Piel más firme</strong> y uniforme al combinar energía + técnica manual.
           </li>
           <li>
-            <strong>Cero downtime</strong>: salís y seguís con tu día. ({' '}
-            <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-              JCAD
-            </Link>
-            )
+            <strong>Cero reposo</strong>: salís y seguís con tu rutina.
           </li>
         </Box>
         <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderLeft: 4, borderColor: 'success.main' }}>
           <Typography>
-            En un <strong>estudio doble ciego</strong> en brazos, el grupo con 635 nm redujo <strong>3,7 cm</strong> de circunferencia combinada tras 6 sesiones (sin cambios en el IMC). Resultado <strong>progresivo y acumulativo</strong>. ({' '}
-            <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-              JCAD
-            </Link>
-            )
+            En un <strong>estudio donde ni los pacientes ni los médicos saben quién está recibiendo el tratamiento real y quién no</strong>, el grupo que recibió tratamiento con Lipo Laser en brazos redujo <strong>3,7 cm</strong> de circunferencia combinada tras 6 sesiones (sin cambios en el IMC). Resultado <strong>progresivo y acumulativo</strong>.
           </Typography>
         </Box>
       </Container>
