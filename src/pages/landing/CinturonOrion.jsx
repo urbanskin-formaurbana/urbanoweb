@@ -25,7 +25,6 @@ export default function CinturonOrion() {
         title="FORMA Urbana — Cinturón de Orión | Lipo Láser 635 nm + Maderoterapia + Drenaje (Montevideo)"
         description="Reducí el contorno abdominal sin cirugía. Protocolo 3‑en‑1: Lipo Láser 635 nm + Maderoterapia + Drenaje Linfático. Sesión $1.500. Cuponera 6 a $5.500 (Oferta de Apertura)."
       />
-
       <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
         <Container>
           <Box sx={{ width: 120, height: 120, mx: 'auto', mb: 3, bgcolor: 'grey.200', borderRadius: 2 }} />
@@ -51,13 +50,11 @@ export default function CinturonOrion() {
           </Button>
         </Container>
       </Box>
-
       <Container sx={{ py: 4 }}>
         <Typography align="center" sx={{ fontStyle: 'italic' }}>
           En Montevideo. No invasivo. Sin agujas. Piel intacta. Apto como <strong>nivel inicial</strong> para personas poco activas físicamente.
         </Typography>
       </Container>
-
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
           ¿Por qué el Cinturón de Orión funciona?
@@ -103,7 +100,6 @@ export default function CinturonOrion() {
           </Typography>
         </Box>
       </Container>
-
       <Container component="section" sx={{ py: 4, bgcolor: 'grey.50' }}>
         <Typography variant="h3" align="center" gutterBottom>
           ¿Es para mí?
@@ -125,7 +121,6 @@ export default function CinturonOrion() {
           )
         </Typography>
       </Container>
-
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
           Qué incluye cada sesión
@@ -154,7 +149,6 @@ export default function CinturonOrion() {
           </li>
         </Box>
       </Container>
-
       <Container component="section" sx={{ py: 4, bgcolor: 'grey.50' }}>
         <Typography variant="h3" align="center" gutterBottom>
           Beneficios que vas a notar
@@ -192,13 +186,17 @@ export default function CinturonOrion() {
           </Typography>
         </Box>
       </Container>
-
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
           Precios y cuponeras (UYU)
         </Typography>
         <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6,
+              md: 3
+            }}>
             <Card sx={{ textAlign: 'center', height: '100%' }}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
@@ -210,7 +208,12 @@ export default function CinturonOrion() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6,
+              md: 3
+            }}>
             <Card sx={{ textAlign: 'center', border: 2, borderColor: 'success.main', position: 'relative', height: '100%' }}>
               <CardContent>
                 <Chip label="Oferta de Apertura" color="success" size="small" sx={{ position: 'absolute', top: 16, right: 16 }} />
@@ -224,7 +227,12 @@ export default function CinturonOrion() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6,
+              md: 3
+            }}>
             <Card sx={{ textAlign: 'center', height: '100%' }}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
@@ -237,7 +245,12 @@ export default function CinturonOrion() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6,
+              md: 3
+            }}>
             <Card sx={{ textAlign: 'center', height: '100%' }}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
@@ -255,7 +268,6 @@ export default function CinturonOrion() {
           <strong>Recomendación directa:</strong> si querés <strong>máxima relación precio/sesión hoy</strong>, la <strong>Cuponera 6</strong> está imbatible por la <strong>Oferta de Apertura</strong>. Si tu objetivo es <strong>acompañar varias semanas</strong> y bloquear precio, elegí <strong>8 o 10</strong>.
         </Typography>
       </Container>
-
       <Container component="section" sx={{ py: 4, bgcolor: 'grey.50' }}>
         <Typography variant="h3" align="center" gutterBottom>
           Cómo es el paso a paso
@@ -289,7 +301,6 @@ export default function CinturonOrion() {
           </li>
         </Box>
       </Container>
-
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
           Preguntas frecuentes
@@ -392,7 +403,6 @@ export default function CinturonOrion() {
           </Accordion>
         </Box>
       </Container>
-
       <Container component="section" sx={{ py: 6, textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText' }}>
         <Typography variant="h3" gutterBottom>
           ¿Listo para empezar?
@@ -404,7 +414,6 @@ export default function CinturonOrion() {
           Escribinos ahora
         </Button>
       </Container>
-
       <Container component="footer" sx={{ py: 4 }}>
         <Typography variant="body2" align="center">
           Los resultados individuales varían. Este protocolo <strong>no reemplaza</strong> indicaciones médicas, dieta o ejercicio; <strong>los potencia</strong>. Estudio tras estudio indica <strong>seguridad y confort</strong> en dispositivos 635–680 nm cuando se aplican correctamente. ({' '}
@@ -419,6 +428,6 @@ export default function CinturonOrion() {
         </Typography>
       </Container>
     </>
-  )
+  );
 }
 
