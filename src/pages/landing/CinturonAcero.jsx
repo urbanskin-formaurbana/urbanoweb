@@ -147,7 +147,7 @@ export default function CinturonAcero() {
           ¿Es para mí?
         </Typography>
         <Typography align="center" sx={{ mb: 2 }}>
-          Elegí <strong>Cinturón de Acero</strong> si:
+          Elegí <strong>Cinturón de Acero</strong> SI:
         </Typography>
         <Box
           component="ul"
@@ -155,7 +155,7 @@ export default function CinturonAcero() {
         >
           <li>
             Querés <strong>seguir definiendo</strong> y{" "}
-            <strong>cerrar la grasa rebelde</strong> del abdomen sin parar tu
+            <strong>quemar la grasa rebelde</strong> del abdomen sin parar tu
             rutina.
           </li>
           <li>
@@ -170,19 +170,10 @@ export default function CinturonAcero() {
         </Box>
         <Typography align="center">
           <strong>No recomendado</strong> si estás embarazada/lactando o tenés{" "}
-          <strong>marcapasos, implantes metálicos/electrónicos</strong>, tumores
-          activos, fiebre/infección local o <strong>músculos lesionados</strong>
-          . Evaluamos tu caso antes de iniciar. (
-          <em>Resumen de contraindicaciones del fabricante/guías.</em> ({" "}
-          <Link
-            href="https://ptacts.uspto.gov/ptacts/public-informations/petitions/1547819/download-documents?artifactId=knpgWL0skoQUU64yKWvHzhQ4yOnmHT-Gk5P4siWLAhCGBUExhgE74Zs&utm_source=chatgpt.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="always"
-          >
-            PTACTS
-          </Link>
-          ))
+          <strong>marcapasos, implantes metálicos/electrónicos</strong>,
+          problemas cardíacos, tumores activos, fiebre/infección local o{" "}
+          <strong>músculos lesionados</strong>. Evaluamos tu caso antes de
+          iniciar.
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
