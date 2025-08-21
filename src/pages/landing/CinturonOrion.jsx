@@ -33,7 +33,7 @@ export default function CinturonOrion() {
               alt="Cinturón de Orión"
               sx={{ width: '100%', maxWidth: 400, height: 'auto', mx: 'auto', mb: 3, borderRadius: 2 }}
             />
-            <Typography variant="h1" sx={{ fontWeight: 'bold' }} gutterBottom>
+            <Typography variant="h2" component="h1" sx={{ fontWeight: 'bold' }} gutterBottom>
               Cinturón de Orión
             </Typography>
           <Typography variant="h5" gutterBottom>
@@ -67,10 +67,10 @@ export default function CinturonOrion() {
             <strong>Desbloquea la grasa “resistente”</strong>: El lipo láser usa una luz roja suave para "despertar" las células de grasa. Esto hace que abran pequeños poros por un momento y liberen la grasa que tienen adentro. Así, las células se achican, <strong>pero no se destruyen.</strong>
           </Typography>
           <Typography>
-            <strong>Moviliza y moldea</strong>: la <strong>Maderoterapia</strong> estimula la microcirculación y el tejido subcutáneo para mejorar textura y contorno. La evidencia formal es limitada, pero muchos pacientes refieren piel más uniforme cuando se combina con otros métodos.
+            <strong>Moviliza y moldea</strong>: La <strong>Maderoterapia</strong> estimula la microcirculación y el tejido subcutáneo para mejorar textura y contorno. La evidencia formal es limitada, pero muchos pacientes refieren piel más uniforme cuando se combina con otros métodos.
           </Typography>
           <Typography>
-            <strong>Estimula el colageno de tu piel</strong>: la <strong>Radiofrecuencia</strong> reafirma y rejuvenece tu piel, estimulando el colágeno y la elastina. Combate la flacidez y mejora la textura.
+            <strong>Estimula el colageno de tu piel</strong>: La <strong>Radiofrecuencia</strong> reafirma y rejuvenece tu piel, estimulando el colágeno y la elastina. Combate la flacidez y mejora la textura.
           </Typography>
         </Stack>
         <Box sx={{ mt: 3, p: 2, bgcolor: 'success.light', borderLeft: 4, borderColor: 'success.main' }}>
@@ -83,16 +83,16 @@ export default function CinturonOrion() {
         <Typography variant="h3" align="center" gutterBottom>
           ¿Es para mí?
         </Typography>
-        <Typography align="center" sx={{ mb: 2 }}>
-          Este protocolo está <strong>diseñado para vos</strong> si:
+        <Typography align="left" sx={{ mb: 2 }}>
+          Este protocolo está <strong>diseñado para vos</strong> SI:
         </Typography>
         <Box component="ul" sx={{ maxWidth: 600, mx: 'auto', textAlign: 'left', mb: 2 }}>
           <li>Luchás con el sobrepeso y <strong>no ves cambios</strong> en el abdomen pese a dieta/ejercicio.</li>
-          <li>Querés <strong>algo cómodo y progresivo</strong>, sin quirófano ni agujas.</li>
+          <li>Querés <strong>algo cómodo y progresivo</strong>, sin quirófano, ni agujas.</li>
           <li>Buscás un <strong>primer impulso visible</strong> que te anime a <strong>mantener</strong> (no a empezar de cero).</li>
           <li>Tenés agenda apretada y <strong>no podés darte el lujo de parar</strong>.</li>
         </Box>
-        <Typography align="center">
+        <Typography align="left">
           <strong>No lo recomendamos</strong> si estás embarazada o en lactancia, usás marcapasos, tenés cáncer activo o una condición médica que contraindique fototerapia o masajes profundos. Ante dudas, consultá a tu médico.
         </Typography>
       </Container>
@@ -170,7 +170,7 @@ export default function CinturonOrion() {
                 <Typography variant="h4" color="success.main" gutterBottom>
                   $ 6.200
                 </Typography>
-                <Typography variant="body2">ahorrás 2.800 vs 6 sueltas.</Typography>
+                <Typography variant="body2">ahorrás $ 2.800 vs 6 sueltas.</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -186,9 +186,9 @@ export default function CinturonOrion() {
                   Cuponera 8
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  8.800
+                  $ 8.800
                 </Typography>
-                <Typography variant="body2">ahorrás 3.200 vs 8 sueltas.</Typography>
+                <Typography variant="body2">ahorrás $ 3.200 vs 8 sueltas.</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -204,9 +204,9 @@ export default function CinturonOrion() {
                   Cuponera 10
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  10.500
+                  $ 10.500
                 </Typography>
-                <Typography variant="body2">ahorrás 4.500 vs 10 sueltas.</Typography>
+                <Typography variant="body2">ahorrás $ 4.500 vs 10 sueltas.</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -253,7 +253,7 @@ export default function CinturonOrion() {
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
-              <Typography>¿Duele?</Typography>
+              <Typography>¿Es doloroso?</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>No. Es <strong>indoloro</strong> y no requiere de reposo.
