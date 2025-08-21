@@ -191,55 +191,26 @@ export default function CinturonTitan() {
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Qué incluye cada sesión (60–70 minutos aprox.)
+          ¿Qué incluye cada sesión?
         </Typography>
         <Box
           component="ol"
           sx={{ maxWidth: 600, mx: "auto", textAlign: "left" }}
         >
           <li>
-            <strong>MSculpt — 30’</strong> sobre abdomen (RF + HIFEM
-            simultáneo). Sensación: <strong>contracciones intensas</strong> con{" "}
-            <strong>calor tipo “piedras calientes”</strong>; no invasivo, sin
-            downtime. ({" "}
-            <Link
-              href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              BTL Aesthetics
-            </Link>
-            )
+            <strong>MSculpt — 30’</strong> sobre abdomen y flancos (HIFEM).
+            Sensación: <strong>contracciones intensas</strong>; no invasivo, sin
+            reposo.
           </li>
           <li>
-            <strong>Lipo Láser — 30’</strong> (láser frío 635 nm).{" "}
-            <strong>Indoloro</strong>. ({" "}
-            <Link
-              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              MDedge
-            </Link>
-            )
+            <strong>Lipo Láser</strong> (láser frío 635 nm).{" "}
+            <strong>Indoloro</strong>.
           </li>
           <li>
-            <strong>Maderoterapia + Pulido</strong>: combinamos{" "}
-            <strong>drenaje linfático</strong> y{" "}
-            <strong>masaje modelador</strong> según tu respuesta del día para{" "}
+            <strong>Maderoterapia + Pulido</strong>: combinamos maderoterapia y{" "}
+            masaje modelador según tu respuesta del día para{" "}
             <strong>bajar retención</strong> y{" "}
-            <strong>mejorar el acabado</strong>. ({" "}
-            <Link
-              href="https://link.springer.com/article/10.1007/s11764-020-00928-1?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              SpringerLink
-            </Link>
-            )
+            <strong>mejorar el acabado</strong>.
           </li>
         </Box>
         <Box
@@ -253,18 +224,8 @@ export default function CinturonTitan() {
         >
           <Typography>
             <strong>Diferencia vs. Cinturón de Orión:</strong> Titán{" "}
-            <strong>añade MSculpt</strong> (músculo + grasa con evidencia
-            sólida) y el <strong>Pulido</strong> es{" "}
-            <strong>100% a medida</strong> según tu caso (no un flujo fijo). ({" "}
-            <Link
-              href="https://europepmc.org/article/PMC/PMC9028295?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Europe PMC
-            </Link>
-            )
+            <strong>añade MSculpt</strong> que reduce y tonifica con 25mil
+            contracciones en una sesión. Sí! 25mil contracciones musculares.
           </Typography>
         </Box>
       </Container>
