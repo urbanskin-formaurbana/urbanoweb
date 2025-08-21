@@ -135,7 +135,7 @@ export default function CinturonOrion() {
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Precios y cuponeras (UYU)
+          Precios y cuponeras
         </Typography>
         <Grid container spacing={3} justifyContent="center">
           <Grid
@@ -150,7 +150,7 @@ export default function CinturonOrion() {
                   Sesión
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  1.500
+                  $ 1.500
                 </Typography>
               </CardContent>
             </Card>
@@ -168,9 +168,9 @@ export default function CinturonOrion() {
                   Cuponera 6
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  5.500
+                  $ 6.200
                 </Typography>
-                <Typography variant="body2">≈917 por sesión; ahorrás 3.500 vs 6 sueltas — 39%.</Typography>
+                <Typography variant="body2">ahorrás 2.800 vs 6 sueltas.</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -186,9 +186,9 @@ export default function CinturonOrion() {
                   Cuponera 8
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  7.900
+                  8.800
                 </Typography>
-                <Typography variant="body2">≈988 por sesión; ahorrás 4.100 vs 8 sueltas — 34%.</Typography>
+                <Typography variant="body2">ahorrás 3.200 vs 8 sueltas.</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -204,15 +204,15 @@ export default function CinturonOrion() {
                   Cuponera 10
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  9.800
+                  10.500
                 </Typography>
-                <Typography variant="body2">980 por sesión; ahorrás 5.200 vs 10 sueltas — 35%.</Typography>
+                <Typography variant="body2">ahorrás 4.500 vs 10 sueltas.</Typography>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
         <Typography align="center" sx={{ mt: 3 }}>
-          <strong>Recomendación directa:</strong> si querés <strong>máxima relación precio/sesión hoy</strong>, la <strong>Cuponera 6</strong> está imbatible por la <strong>Oferta de Apertura</strong>. Si tu objetivo es <strong>acompañar varias semanas</strong> y bloquear precio, elegí <strong>8 o 10</strong>.
+          <strong>Recomendación directa:</strong> si querés <strong>máxima relación precio/sesión</strong>, la <strong>Cuponera 6</strong> está imbatible por la <strong>Oferta de Apertura</strong>. Si tu objetivo es <strong>acompañar varias semanas</strong> y bloquear precio, elegí <strong>8 o 10</strong>.
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: 'grey.50' }}>
