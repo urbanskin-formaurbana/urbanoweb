@@ -224,24 +224,13 @@ export default function CinturonOrion() {
             <strong>Evaluación rápida</strong> (zona + objetivos).
           </li>
           <li>
-            <strong>Lipo Láser 30’</strong> en abdomen. ({' '}
-            <Link href="https://europepmc.org/article/PMC/3769994?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              Europe PMC
-            </Link>
-            )
+            <strong>Lipo Láser</strong> en abdomen in flancos.
           </li>
           <li>
             <strong>Maderoterapia</strong> para moldear.
           </li>
           <li>
-            <strong>Drenaje linfático</strong> para movilizar. ({' '}
-            <Link href="https://link.springer.com/article/10.1007/s11764-020-00928-1?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              SpringerLink
-            </Link>
-            )
-          </li>
-          <li>
-            <strong>Tips post</strong> (agua, breve caminata el mismo día).
+            <strong>Radiofrecuencia</strong> para tensar la piel.
           </li>
           <li>
             <strong>Plan de mantenimiento</strong> sencillo para sostener resultados.
