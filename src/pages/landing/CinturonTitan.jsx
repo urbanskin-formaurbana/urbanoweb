@@ -653,15 +653,6 @@ export default function CinturonTitan() {
           </Link>
           ,{" "}
           <Link
-            href="https://winterparkfamilyphysicians.com/wp-content/uploads/2023/04/Emsculpt_NEO_CLIN_General_Patient_Record_ENUS104.pdf?"
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="always"
-          >
-            Winter Park Family Physicians
-          </Link>
-          ,{" "}
-          <Link
             href="https://sa1s3.patientpop.com/assets/docs/290920.pdf?"
             target="_blank"
             rel="noopener noreferrer"
