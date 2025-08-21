@@ -178,42 +178,15 @@ export default function CinturonTitan() {
           </li>
           <li>
             Querés <strong>resultados acumulativos</strong> en pocas semanas
-            (serie corta inicial). ({" "}
-            <Link
-              href="https://bodycontouringacademy.com/emsculpt-neo-facts/?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              bodycontouringacademy.com
-            </Link>
-            )
+            (serie corta inicial).
           </li>
         </Box>
         <Typography align="center">
-          <strong>Contraindicaciones (resumen):</strong> embarazo/lactancia;{" "}
+          <strong>Contraindicaciones:</strong> embarazo/lactancia;{" "}
           <strong>implantes metálicos o electrónicos</strong> (p. ej.,
-          marcapasos, ciertos DIU/cobre) en zonas cercanas; tumores activos;
-          fiebre, infecciones locales, trastornos hemorrágicos; músculos
-          lesionados. Siempre evaluamos tu caso antes de iniciar. ({" "}
-          <Link
-            href="https://uploads.teachablecdn.com/attachments/ArBU8tV9TIujyDiBhiyu_Emsculpt_GUIDE_Clinical-guide_A4_EN101_preview.pdf?utm_source=chatgpt.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="always"
-          >
-            Teachable
-          </Link>
-          ,{" "}
-          <Link
-            href="https://winterparkfamilyphysicians.com/wp-content/uploads/2023/04/Emsculpt_NEO_CLIN_General_Patient_Record_ENUS104.pdf?utm_source=chatgpt.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="always"
-          >
-            Winter Park Family Physicians
-          </Link>
-          )
+          marcapasos, ciertos DIU/cobre) en zonas cercanas; problemas cardíacos;
+          tumores activos; fiebre, infecciones locales, trastornos hemorrágicos;
+          músculos lesionados. Siempre evaluamos tu caso antes de iniciar.
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
@@ -230,7 +203,7 @@ export default function CinturonTitan() {
             <strong>calor tipo “piedras calientes”</strong>; no invasivo, sin
             downtime. ({" "}
             <Link
-              href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?utm_source=chatgpt.com"
+              href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -243,7 +216,7 @@ export default function CinturonTitan() {
             <strong>Lipo Láser — 30’</strong> (láser frío 635 nm).{" "}
             <strong>Indoloro</strong>. ({" "}
             <Link
-              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?utm_source=chatgpt.com"
+              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -259,7 +232,7 @@ export default function CinturonTitan() {
             <strong>bajar retención</strong> y{" "}
             <strong>mejorar el acabado</strong>. ({" "}
             <Link
-              href="https://link.springer.com/article/10.1007/s11764-020-00928-1?utm_source=chatgpt.com"
+              href="https://link.springer.com/article/10.1007/s11764-020-00928-1?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -284,7 +257,7 @@ export default function CinturonTitan() {
             sólida) y el <strong>Pulido</strong> es{" "}
             <strong>100% a medida</strong> según tu caso (no un flujo fijo). ({" "}
             <Link
-              href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
+              href="https://europepmc.org/article/PMC/PMC9028295?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -309,7 +282,7 @@ export default function CinturonTitan() {
             <strong>mantenimiento</strong> según objetivo. Los cambios siguen
             mejorando varias semanas tras la última sesión. ({" "}
             <Link
-              href="https://bodycontouringacademy.com/emsculpt-neo-facts/?utm_source=chatgpt.com"
+              href="https://bodycontouringacademy.com/emsculpt-neo-facts/?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -318,7 +291,7 @@ export default function CinturonTitan() {
             </Link>
             ,{" "}
             <Link
-              href="https://skintightmedicalspa.com/body-sculpting/emsculpt-neo-results-timeline/?utm_source=chatgpt.com"
+              href="https://skintightmedicalspa.com/body-sculpting/emsculpt-neo-results-timeline/?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -333,7 +306,7 @@ export default function CinturonTitan() {
             <strong>más definición</strong>; <strong>no</strong> es un
             tratamiento de “bajar kilos”. ({" "}
             <Link
-              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?utm_source=chatgpt.com"
+              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -470,7 +443,7 @@ export default function CinturonTitan() {
           <li>
             <strong>MSculpt 30’</strong> (definición + grasa). ({" "}
             <Link
-              href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?utm_source=chatgpt.com"
+              href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -482,7 +455,7 @@ export default function CinturonTitan() {
           <li>
             <strong>Lipo Láser 30’</strong> (contorno). ({" "}
             <Link
-              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?utm_source=chatgpt.com"
+              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -494,7 +467,7 @@ export default function CinturonTitan() {
           <li>
             <strong>Pulido</strong> (drenaje/modelador personalizado). ({" "}
             <Link
-              href="https://link.springer.com/article/10.1007/s11764-020-00928-1?utm_source=chatgpt.com"
+              href="https://link.springer.com/article/10.1007/s11764-020-00928-1?"
               target="_blank"
               rel="noopener noreferrer"
               underline="always"
@@ -533,7 +506,7 @@ export default function CinturonTitan() {
                 Se sienten <strong>contracciones intensas</strong> y{" "}
                 <strong>calor tolerable</strong>; salís y seguís con tu día. ({" "}
                 <Link
-                  href="https://sa1s3.patientpop.com/assets/docs/290920.pdf?utm_source=chatgpt.com"
+                  href="https://sa1s3.patientpop.com/assets/docs/290920.pdf?"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="always"
@@ -556,7 +529,7 @@ export default function CinturonTitan() {
                 completar la serie (el cuerpo sigue eliminando grasa y el
                 músculo sigue adaptándose). ({" "}
                 <Link
-                  href="https://skintightmedicalspa.com/body-sculpting/emsculpt-neo-results-timeline/?utm_source=chatgpt.com"
+                  href="https://skintightmedicalspa.com/body-sculpting/emsculpt-neo-results-timeline/?"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="always"
@@ -595,7 +568,7 @@ export default function CinturonTitan() {
                 <strong>no la ofrecen</strong> tecnologías de “grasa sola” o
                 “músculo solo”. ({" "}
                 <Link
-                  href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
+                  href="https://europepmc.org/article/PMC/PMC9028295?"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="always"
@@ -616,7 +589,7 @@ export default function CinturonTitan() {
                 <strong>definición muscular</strong>; el peso puede no cambiar
                 aunque baje el perímetro y suba la firmeza. ({" "}
                 <Link
-                  href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
+                  href="https://europepmc.org/article/PMC/PMC9028295?"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="always"
@@ -638,7 +611,7 @@ export default function CinturonTitan() {
                 cercanos, tumores activos, fiebre/infecciones, músculos
                 lesionados. Te asesoramos antes de empezar. ({" "}
                 <Link
-                  href="https://uploads.teachablecdn.com/attachments/ArBU8tV9TIujyDiBhiyu_Emsculpt_GUIDE_Clinical-guide_A4_EN101_preview.pdf?utm_source=chatgpt.com"
+                  href="https://uploads.teachablecdn.com/attachments/ArBU8tV9TIujyDiBhiyu_Emsculpt_GUIDE_Clinical-guide_A4_EN101_preview.pdf?"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="always"
@@ -647,7 +620,7 @@ export default function CinturonTitan() {
                 </Link>
                 ,{" "}
                 <Link
-                  href="https://winterparkfamilyphysicians.com/wp-content/uploads/2023/04/Emsculpt_NEO_CLIN_General_Patient_Record_ENUS104.pdf?utm_source=chatgpt.com"
+                  href="https://winterparkfamilyphysicians.com/wp-content/uploads/2023/04/Emsculpt_NEO_CLIN_General_Patient_Record_ENUS104.pdf?"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="always"
@@ -673,7 +646,7 @@ export default function CinturonTitan() {
                 sin HIFEM+RF; flujo fijo (Lipo Láser + Maderoterapia + Drenaje).
                 ({" "}
                 <Link
-                  href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
+                  href="https://europepmc.org/article/PMC/PMC9028295?"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="always"
@@ -825,12 +798,30 @@ export default function CinturonTitan() {
           </Link>
           ,{" "}
           <Link
-            href="https://www.healthline.com/health/beauty-skin-care/wood-therapy?utm_source=chatgpt.com"
+            href="https://www.healthline.com/health/beauty-skin-care/wood-therapy?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
           >
             Healthline
+          </Link>
+          ,{" "}
+          <Link
+            href="https://uploads.teachablecdn.com/attachments/ArBU8tV9TIujyDiBhiyu_Emsculpt_GUIDE_Clinical-guide_A4_EN101_preview.pdf?"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            Teachable
+          </Link>
+          ,{" "}
+          <Link
+            href="https://winterparkfamilyphysicians.com/wp-content/uploads/2023/04/Emsculpt_NEO_CLIN_General_Patient_Record_ENUS104.pdf?"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            Winter Park Family Physicians
           </Link>
           )
         </Typography>
