@@ -40,7 +40,7 @@ export default function CinturonOrion() {
             Cintura más definida, sin cirugía.
           </Typography>
           <Typography sx={{ mb: 4 }}>
-            <strong>Protocolo 3‑en‑1</strong> para reducir contorno abdominal y tensar la piel: <strong>Lipo Láser (635 nm) + Maderoterapia + Radiofrecuencia</strong>. Sesiones cómodas, sin necesidad de reposo, ni afectar tu rutina en lo absoluto. Resultados que te motivan cuando te veas al espejo. Tu cambio empieza hoy.
+            <strong>Protocolo 3‑en‑1</strong> para reducir contorno abdominal y tensar la piel: <strong>Lipo Láser (635 nm) + Maderoterapia + Radiofrecuencia</strong>. Sesiones cómodas, sin afectar tu rutina en lo absoluto. Resultados que te motivan cuando te veas al espejo. Tu cambio empieza hoy.
           </Typography>
           <Button variant="contained" color="success" size="large" href={WHATSAPP_LINK} sx={{ fontWeight: 'bold' }}>
             Escribinos por WhatsApp
@@ -49,7 +49,7 @@ export default function CinturonOrion() {
       </Box>
         <Container sx={{ py: 4 }}>
           <Typography align="center" sx={{ fontStyle: 'italic' }}>
-            En Montevideo. No invasivo. Sin agujas. Piel intacta. Apto como <strong>nivel inicial</strong> para personas poco activas físicamente.
+            En Montevideo Centro. No invasivo. Sin agujas. Piel intacta. Apto como <strong>nivel inicial</strong> para personas poco activas físicamente.
           </Typography>
           <Box
             component="img"
