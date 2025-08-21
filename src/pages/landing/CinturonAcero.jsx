@@ -449,7 +449,7 @@ export default function CinturonAcero() {
           ¿Listo para esculpir y tensar en la misma sesión?
         </Typography>
         <Typography sx={{ mb: 3 }}>
-          Asegurá tu <strong>Cuponera 6 — Oferta de Apertura</strong> o reservá{" "}
+          Asegurá tu <strong>Cuponera 6 en Oferta de Apertura</strong> o reservá{" "}
           <strong>1 sesión</strong> para arrancar.
         </Typography>
         <Button
@@ -467,14 +467,13 @@ export default function CinturonAcero() {
           Los resultados varían según composición corporal y hábitos. Este
           protocolo <strong>no reemplaza</strong> nutrición/entrenamiento ni
           indicación médica; <strong>los potencia</strong>.{" "}
-          <strong>MSculpt (HIFEM+RF)</strong> cuenta con publicaciones (incluido{" "}
-          <strong>ensayo aleatorizado</strong>); la <strong>RF en piel</strong>{" "}
-          tiene base fisiológica y revisiones clínicas; el{" "}
-          <strong>drenaje</strong> se usa como coadyuvante; la{" "}
-          <strong>maderoterapia</strong> es complementaria con evidencia
-          limitada. Evaluación previa obligatoria. ({" "}
+          <strong>MSculpt (HIFEM)</strong> cuenta con publicaciones; la{" "}
+          <strong>Radiofrecuencia en piel</strong> tiene base fisiológica y
+          revisiones clínicas; el <strong>drenaje y la maderoterapia</strong> se
+          usan como acompañamiento. Evaluación previa obligatoria. Si seguís con
+          curiosidad, podés revisar los siguientes estudios:{" "}
           <Link
-            href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
+            href="https://europepmc.org/article/PMC/PMC9028295?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -483,7 +482,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://351face.com/wp-content/uploads/2020/11/Emsculpt-NEO_CLIN_MRI-study_Jacob_summary_ENUS100.pdf?utm_source=chatgpt.com"
+            href="https://351face.com/wp-content/uploads/2020/11/Emsculpt-NEO_CLIN_MRI-study_Jacob_summary_ENUS100.pdf?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -492,7 +491,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://www.advancesincosmeticsurgery.com/article/S2542-4327%2821%2900016-3/fulltext?utm_source=chatgpt.com"
+            href="https://www.advancesincosmeticsurgery.com/article/S2542-4327%2821%2900016-3/fulltext?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -501,7 +500,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://www.oaepublish.com/articles/2347-9264.2021.60?utm_source=chatgpt.com"
+            href="https://www.oaepublish.com/articles/2347-9264.2021.60?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -510,7 +509,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://my.clevelandclinic.org/health/treatments/21768-lymphatic-drainage-massage?utm_source=chatgpt.com"
+            href="https://my.clevelandclinic.org/health/treatments/21768-lymphatic-drainage-massage?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -519,7 +518,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://www.verywellhealth.com/wood-therapy-6362588?utm_source=chatgpt.com"
+            href="https://www.verywellhealth.com/wood-therapy-6362588?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -528,7 +527,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://www.wolterskluwer.com/en/news/radiofrequency-heating-plus-electromagnetic-stimulation-reduces-belly-fat-and-increases-muscle?utm_source=chatgpt.com"
+            href="https://www.wolterskluwer.com/en/news/radiofrequency-heating-plus-electromagnetic-stimulation-reduces-belly-fat-and-increases-muscle?"
             target="_blank"
             rel="noopener noreferrer"
             color="inherit"
@@ -538,7 +537,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://medicalxpress.com/news/2022-04-radiofrequency-electromagnetic-belly-fat-muscle.pdf?utm_source=chatgpt.com"
+            href="https://medicalxpress.com/news/2022-04-radiofrequency-electromagnetic-belly-fat-muscle.pdf?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -547,7 +546,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://academic.oup.com/asj/article/44/8/850/7626230?utm_source=chatgpt.com"
+            href="https://academic.oup.com/asj/article/44/8/850/7626230?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -556,7 +555,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://www.thieme-connect.com/products/ejournals/pdf/10.1055/s-0033-1363756.pdf?utm_source=chatgpt.com"
+            href="https://www.thieme-connect.com/products/ejournals/pdf/10.1055/s-0033-1363756.pdf?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -565,7 +564,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://www.nhs.uk/conditions/lymphoedema/treatment/?utm_source=chatgpt.com"
+            href="https://www.nhs.uk/conditions/lymphoedema/treatment/?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -574,7 +573,7 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://wendyreganmd.com/wp-content/uploads/2024/10/Emsculpt-Neo-Pre-and-Post-Care-Instructions.pdf?utm_source=chatgpt.com"
+            href="https://wendyreganmd.com/wp-content/uploads/2024/10/Emsculpt-Neo-Pre-and-Post-Care-Instructions.pdf?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
@@ -583,14 +582,13 @@ export default function CinturonAcero() {
           </Link>
           ,{" "}
           <Link
-            href="https://norcaldermatology.com/procedure/emsculpt-neo/?utm_source=chatgpt.com"
+            href="https://norcaldermatology.com/procedure/emsculpt-neo/?"
             target="_blank"
             rel="noopener noreferrer"
             underline="always"
           >
             Dermatology Center NorCal
           </Link>
-          )
         </Typography>
       </Container>
     </>
