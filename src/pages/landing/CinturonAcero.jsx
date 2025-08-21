@@ -242,7 +242,7 @@ export default function CinturonAcero() {
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Precios y cuponeras (UYU)
+          Precios y cuponeras
         </Typography>
         <Grid container spacing={3} justifyContent="center">
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -252,7 +252,7 @@ export default function CinturonAcero() {
                   Sesión
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  1.900
+                  $ 1.900
                 </Typography>
               </CardContent>
             </Card>
@@ -278,10 +278,10 @@ export default function CinturonAcero() {
                   Cuponera 6
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  6.200
+                  $ 6.200
                 </Typography>
                 <Typography variant="body2">
-                  ≈1.033 por sesión; ahorrás 5.200 vs 6 sueltas — 45,6%.
+                  ahorrás $ 5.200 vs 6 sueltas.
                 </Typography>
               </CardContent>
             </Card>
@@ -293,10 +293,10 @@ export default function CinturonAcero() {
                   Cuponera 8
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  8.200
+                  $ 9.200
                 </Typography>
                 <Typography variant="body2">
-                  ≈1.025 por sesión; ahorrás 7.000 vs 8 sueltas — 46,1%.
+                  ahorrás $ 6.000 vs 8 sueltas.
                 </Typography>
               </CardContent>
             </Card>
@@ -308,24 +308,20 @@ export default function CinturonAcero() {
                   Cuponera 10
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  10.200
+                  $ 11.000
                 </Typography>
                 <Typography variant="body2">
-                  ≈1.020 por sesión; ahorrás 8.800 vs 10 sueltas — 46,3%.
+                  ahorrás $ 8.000 vs 10 sueltas.
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
         <Typography align="center" sx={{ mt: 3 }}>
-          <strong>Recomendación ejecutiva:</strong>
+          <strong>Recomendación:</strong>
           <br />
-          <strong>Mejor precio por sesión:</strong> <strong>Cuponera 10</strong>
-          .
-          <br />
-          <strong>Entrada inteligente + descuento agresivo hoy:</strong>{" "}
-          <strong>Cuponera 6 — Oferta de Apertura</strong> (cerrás la serie
-          inicial y dejás 2 sesiones para consolidar, sin sobrepagar).
+          <strong>Mejor precio por sesión:</strong> <strong>Cuponera 6</strong>{" "}
+          por Oferta de Apertura.
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
