@@ -226,43 +226,17 @@ export default function CinturonAcero() {
           sx={{ maxWidth: 600, mx: "auto", textAlign: "left", mb: 2 }}
         >
           <li>
-            <strong>Serie inicial típica:</strong> <strong>4 sesiones</strong>{" "}
-            separadas <strong>5–10 días</strong>; la definición y el contorno
+            <strong>Serie inicial típica:</strong>{" "}
+            <strong>2 o 3 sesiones</strong> por semana, con 1 o 2 días de
+            descanso entre sesiones, según el caso; la definición y el contorno
             siguen <strong>mejorando hasta ~3 meses</strong> después de terminar
-            la serie. Luego, <strong>mantenimiento</strong> según objetivo. ({" "}
-            <Link
-              href="https://wendyreganmd.com/wp-content/uploads/2024/10/Emsculpt-Neo-Pre-and-Post-Care-Instructions.pdf?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Harbour Direct Primary Care Inc.
-            </Link>
-            ,{" "}
-            <Link
-              href="https://norcaldermatology.com/procedure/emsculpt-neo/?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Dermatology Center NorCal
-            </Link>
-            )
+            la serie. Luego, <strong>mantenimiento</strong> según objetivo.
           </li>
           <li>
             <strong>Expectativa realista:</strong>{" "}
-            <strong>menos contorno</strong> +{" "}
-            <strong>más tono/definición</strong>; <strong>no</strong> es un
-            tratamiento de “kilos”. ({" "}
-            <Link
-              href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Europe PMC
-            </Link>
-            )
+            <strong>menos contorno</strong>,{" "}
+            <strong>más tono, mejor definición</strong>; <strong>no</strong> es
+            un tratamiento de “kilos”.
           </li>
         </Box>
       </Container>
@@ -690,6 +664,24 @@ export default function CinturonAcero() {
             underline="always"
           >
             nhs.uk
+          </Link>
+          ,{" "}
+          <Link
+            href="https://wendyreganmd.com/wp-content/uploads/2024/10/Emsculpt-Neo-Pre-and-Post-Care-Instructions.pdf?utm_source=chatgpt.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            Harbour Direct Primary Care Inc.
+          </Link>
+          ,{" "}
+          <Link
+            href="https://norcaldermatology.com/procedure/emsculpt-neo/?utm_source=chatgpt.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            Dermatology Center NorCal
           </Link>
           )
         </Typography>
