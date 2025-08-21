@@ -75,7 +75,7 @@ export default function CinturonOrion() {
         </Stack>
         <Box sx={{ mt: 3, p: 2, bgcolor: 'success.light', borderLeft: 4, borderColor: 'success.main' }}>
           <Typography>
-            Según estudios, la luz roja entre 635 y 680 nm ayuda a reducir centímetros después de 6 sesiones en 2 semanas, sin bajar de peso. Es para modelar el cuerpo, no para adelgazar.
+            Según estudios, la luz roja del lipo laser (entre 635 y 680 nm) ayuda a reducir centímetros después de 6 sesiones en 2 semanas, sin bajar de peso. Es para modelar el cuerpo, no para adelgazar.
           </Typography>
         </Box>
       </Container>
