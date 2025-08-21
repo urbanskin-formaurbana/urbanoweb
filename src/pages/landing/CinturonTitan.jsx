@@ -371,44 +371,18 @@ export default function CinturonTitan() {
             <strong>Evaluación</strong> (objetivo y zona).
           </li>
           <li>
-            <strong>MSculpt 30’</strong> (definición + grasa). ({" "}
-            <Link
-              href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              BTL Aesthetics
-            </Link>
-            )
+            <strong>MSculpt 30’</strong> (definición + grasa).
           </li>
           <li>
-            <strong>Lipo Láser 30’</strong> (contorno). ({" "}
-            <Link
-              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              MDedge
-            </Link>
-            )
+            <strong>Lipo Láser</strong> (contorno).
           </li>
           <li>
-            <strong>Pulido</strong> (drenaje/modelador personalizado). ({" "}
-            <Link
-              href="https://link.springer.com/article/10.1007/s11764-020-00928-1?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              SpringerLink
-            </Link>
-            )
+            <strong>Maderoterapia</strong> y Pulido (drenaje/modelador
+            personalizado).
           </li>
           <li>
-            <strong>Tips post</strong>: hidratación y mini‑caminata el mismo
-            día.
+            <strong>Plan de mantenimiento</strong> sencillo para sostener
+            resultados.
           </li>
         </Box>
       </Container>
