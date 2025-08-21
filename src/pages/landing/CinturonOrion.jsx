@@ -247,11 +247,7 @@ export default function CinturonOrion() {
               <Typography>¿Duele?</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Typography>No. Es <strong>indoloro</strong> y sin downtime. ({' '}
-                <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-                  JCAD
-                </Link>
-                )
+              <Typography>No. Es <strong>indoloro</strong> y no requiere de reposo.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -261,11 +257,7 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Muchas personas notan <strong>cambios en contorno</strong> desde las primeras sesiones; los estudios con 635 nm miden resultados <strong>a las 2 semanas</strong> (6 sesiones). Tu caso puede variar. ({' '}
-                <Link href="https://europepmc.org/article/MED/20014253?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-                  Europe PMC
-                </Link>
-                )
+                Muchas personas notan <strong>cambios en contorno</strong> desde las primeras sesiones; los estudios con Lipo Laser miden resultados <strong>a las 2 semanas</strong> (6 sesiones). Tu caso puede variar.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -275,15 +267,7 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                No es un tratamiento de “kilos”. Es <strong>contorneado</strong> (reducción de perímetro) y <strong>mejor textura</strong>; podés mantener y potenciar con hábitos básicos. ({' '}
-                <Link href="https://europepmc.org/article/MED/20014253?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-                  Europe PMC
-                </Link>
-                ,{' '}
-                <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-                  JCAD
-                </Link>
-                )
+                No es un tratamiento de “kilos”. Es <strong>contorneado</strong> (reducción de perímetro) y <strong>mejor textura</strong>; podés mantener y potenciar con hábitos básicos.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -293,33 +277,17 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Emite <strong>luz roja de baja intensidad</strong> (≈635 nm) que <strong>fotoactiva</strong> al adipocito, genera <strong>poros transitorios</strong> en la membrana y permite <strong>liberar lípidos</strong>, reduciendo su volumen. ({' '}
-                <Link href="https://europepmc.org/article/PMC/3769994?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-                  Europe PMC
-                </Link>
-                ,{' '}
-                <Link href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-                  MDedge
-                </Link>
-                )
+                Emite <strong>luz roja de baja intensidad</strong> (≈635 nm) que <strong>fotoactiva</strong> al adipocito, genera <strong>poros transitorios</strong> en la membrana y permite <strong>liberar lípidos</strong>, reduciendo su volumen.
               </Typography>
             </AccordionDetails>
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
-              <Typography>¿Para qué suman la Maderoterapia y el Drenaje?</Typography>
+              <Typography>¿Para qué suman la Maderoterapia y la Radiofrecuencia?</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                La primera <strong>modela y estimula</strong> la microcirculación; el segundo <strong>favorece el movimiento de fluidos</strong> y puede ayudar a bajar la hinchazón. (La evidencia de Maderoterapia es <strong>limitada</strong>; se usa como <strong>coadyuvante</strong>.) ({' '}
-                <Link href="https://www.verywellhealth.com/wood-therapy-6362588?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-                  Verywell Health
-                </Link>
-                ,{' '}
-                <Link href="https://link.springer.com/article/10.1007/s11764-020-00928-1?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-                  SpringerLink
-                </Link>
-                )
+                La primera <strong>modela y estimula</strong> la microcirculación; el segundo <strong>favorece la producción de colágeno y elastina</strong>, tensando la piel.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -329,11 +297,7 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Embarazo, lactancia, marcapasos, cáncer activo u otras condiciones que desaconsejen fototerapia o masajes profundos. Si tenés dudas, <strong>consultá a tu médico</strong>. (Criterios alineados a ensayos clínicos). ({' '}
-                <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-                  JCAD
-                </Link>
-                )
+                Embarazo, lactancia, marcapasos, problemas cardíacos, cáncer activo u otras condiciones que desaconsejen fototerapia o masajes profundos. Si tenés dudas, <strong>consultá a tu médico</strong>. (Criterios alineados a ensayos clínicos).
               </Typography>
             </AccordionDetails>
           </Accordion>
