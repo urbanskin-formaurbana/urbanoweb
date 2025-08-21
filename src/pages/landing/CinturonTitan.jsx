@@ -511,7 +511,7 @@ export default function CinturonTitan() {
         }}
       >
         <Typography variant="h3" gutterBottom>
-          ¿Listo para definir abdomen y cerrar esa grasa rebelde?
+          ¿Listo para definir abdomen y quemar esa grasa rebelde?
         </Typography>
         <Typography sx={{ mb: 3 }}>
           Asegurá tu <strong>Cuponera 6 — Oferta de Apertura</strong> o reservá{" "}
@@ -536,8 +536,8 @@ export default function CinturonTitan() {
           <strong>publicaciones revisadas por pares</strong> sobre{" "}
           <strong>reducción de grasa</strong> y/o{" "}
           <strong>aumento muscular</strong>; la <strong>maderoterapia</strong>{" "}
-          es un <strong>complemento</strong> con evidencia formal limitada.
-          Siempre realizamos evaluación previa. ({" "}
+          es un <strong>complemento</strong>. Siempre realizamos evaluación
+          previa. Si sigues con curiosidad podés revisar estos estudios:{" "}
           <Link
             href="https://europepmc.org/article/PMC/PMC9028295?"
             target="_blank"
@@ -674,7 +674,6 @@ export default function CinturonTitan() {
           >
             PatientPop
           </Link>
-          )
         </Typography>
       </Container>
     </>
