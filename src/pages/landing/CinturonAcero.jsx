@@ -48,7 +48,12 @@ export default function CinturonAcero() {
               borderRadius: 2,
             }}
           />
-          <Typography variant="h1" sx={{ fontWeight: "bold" }} gutterBottom>
+          <Typography
+            variant="h2"
+            component="h1"
+            sx={{ fontWeight: "bold" }}
+            gutterBottom
+          >
             Cinturón de Acero
           </Typography>
           <Typography variant="h5" gutterBottom>
@@ -94,79 +99,23 @@ export default function CinturonAcero() {
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          ¿Por qué funciona (lo esencial y sin humo)?
+          ¿Por qué funciona?
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 800, mx: "auto" }}>
           <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
-            1) MSculpt: músculo <strong>y</strong> grasa, a la vez
+            1. MSculpt: músculo <strong>y</strong> grasa, al mismo tiempo
           </Typography>
           <Typography>
-            Combina <strong>HIFEM®</strong> (contracciones supramáximas que
-            ningún entrenamiento reproduce) con{" "}
-            <strong>radiofrecuencia sincronizada</strong> que calienta el tejido
-            de forma segura. La <strong>sinergia</strong> logra{" "}
+            Utiliza Tecnología <strong>HIFEM®</strong> (contracciones
+            supramáximas que ningún entrenamiento reproduce). La{" "}
+            <strong>sinergia</strong> logra{" "}
             <strong>aumento de masa/espesor muscular</strong> y{" "}
             <strong>reducción de grasa subcutánea</strong> en{" "}
-            <strong>30 minutos</strong>. ({" "}
-            <Link
-              href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Europe PMC
-            </Link>
-            )
-          </Typography>
-          <Typography>
-            <strong>Respaldo clínico</strong>: estudios con{" "}
-            <strong>MRI/ultrasonido</strong> y un{" "}
-            <strong>ensayo aleatorizado controlado “sham”</strong> reportan{" "}
-            <strong>disminución de grasa</strong> y{" "}
-            <strong>engrosamiento muscular</strong> tras una serie corta;
-            también se han publicado datos positivos en{" "}
-            <strong>abdomen lateral</strong>.{" "}
-            <em>(Promedios poblacionales; no promesas individuales.)</em> ({" "}
-            <Link
-              href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Europe PMC
-            </Link>
-            ,{" "}
-            <Link
-              href="https://medicalxpress.com/news/2022-04-radiofrequency-electromagnetic-belly-fat-muscle.pdf?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Medical Xpress
-            </Link>
-            ,{" "}
-            <Link
-              href="https://351face.com/wp-content/uploads/2020/11/Emsculpt-NEO_CLIN_MRI-study_Jacob_summary_ENUS100.pdf?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Advanced Cosmetic Surgery
-            </Link>
-            ,{" "}
-            <Link
-              href="https://academic.oup.com/asj/article/44/8/850/7626230?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Oxford Academic
-            </Link>
-            )
+            <strong>30 minutos</strong>.
           </Typography>
           <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
-            2) Radiofrecuencia (RF) focal: <strong>tensión de la piel</strong>{" "}
-            que se nota
+            2. Radiofrecuencia (RF): <strong>tensión de la piel</strong> que se
+            nota
           </Typography>
           <Typography>
             La RF <strong>calienta el colágeno dérmico</strong> hasta el rango
@@ -176,92 +125,20 @@ export default function CinturonAcero() {
               contracción inmediata de fibras
             </strong> y <strong>neocolagénesis</strong> en semanas. Resultado:{" "}
             <strong>mejor firmeza y textura</strong> en la cubierta cutánea del
-            abdomen. ({" "}
-            <Link
-              href="https://www.advancesincosmeticsurgery.com/article/S2542-4327%2821%2900016-3/fulltext?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              advancesincosmeticsurgery.com
-            </Link>
-            ,{" "}
-            <Link
-              href="https://www.oaepublish.com/articles/2347-9264.2021.60?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              OAE Publish
-            </Link>
-            ,{" "}
-            <Link
-              href="https://www.thieme-connect.com/products/ejournals/pdf/10.1055/s-0033-1363756.pdf?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Thieme
-            </Link>
-            )
-          </Typography>
-          <Typography>
-            Es el <strong>complemento ideal</strong> a MSculpt: el NEO actúa{" "}
-            <strong>en músculo y grasa</strong>; la RF focal acá se dirige{" "}
-            <strong>a la piel</strong> para un{" "}
-            <strong>acabado más terso</strong>. ({" "}
-            <Link
-              href="https://www.oaepublish.com/articles/2347-9264.2021.60?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              OAE Publish
-            </Link>
-            )
+            abdomen.
           </Typography>
           <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
-            3) Pulido manual: madero + drenaje (con transparencia)
+            3. Maderoterapia + drenaje
           </Typography>
           <Typography>
-            <strong>Drenaje linfático manual</strong>: técnica suave con uso
-            establecido en <strong>linfedema/edemas</strong>; ayuda a{" "}
+            <strong>Drenaje linfático manual</strong>: técnica suave que ayuda a{" "}
             <strong>mover fluidos</strong> y a sentirse menos hinchado como{" "}
-            <strong>coadyuvante</strong> estético. ({" "}
-            <Link
-              href="https://my.clevelandclinic.org/health/treatments/21768-lymphatic-drainage-massage?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Cleveland Clinic
-            </Link>
-            ,{" "}
-            <Link
-              href="https://www.nhs.uk/conditions/lymphoedema/treatment/?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              nhs.uk
-            </Link>
-            )
+            <strong>coadyuvante</strong> estético.
           </Typography>
           <Typography>
-            <strong>Maderoterapia/modelador</strong>: popular para{" "}
-            <strong>moldear</strong>; la{" "}
-            <strong>evidencia científica es limitada</strong>, por eso la usamos
-            como <strong>apoyo</strong> post‑energía, ajustando intensidad a tu
-            caso. ({" "}
-            <Link
-              href="https://www.verywellhealth.com/wood-therapy-6362588?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Verywell Health
-            </Link>
-            )
+            <strong>Maderoterapia</strong>: popular para{" "}
+            <strong>moldear</strong>; la usamos como <strong>apoyo</strong>,
+            ajustando intensidad a tu caso.
           </Typography>
         </Stack>
       </Container>
@@ -843,6 +720,42 @@ export default function CinturonAcero() {
             underline="always"
           >
             Wolters Kluwer
+          </Link>
+          ,{" "}
+          <Link
+            href="https://medicalxpress.com/news/2022-04-radiofrequency-electromagnetic-belly-fat-muscle.pdf?utm_source=chatgpt.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            Medical Xpress
+          </Link>
+          ,{" "}
+          <Link
+            href="https://academic.oup.com/asj/article/44/8/850/7626230?utm_source=chatgpt.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            Oxford Academic
+          </Link>
+          ,{" "}
+          <Link
+            href="https://www.thieme-connect.com/products/ejournals/pdf/10.1055/s-0033-1363756.pdf?utm_source=chatgpt.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            Thieme
+          </Link>
+          ,{" "}
+          <Link
+            href="https://www.nhs.uk/conditions/lymphoedema/treatment/?utm_source=chatgpt.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            nhs.uk
           </Link>
           )
         </Typography>
