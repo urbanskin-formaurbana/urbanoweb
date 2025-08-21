@@ -244,6 +244,15 @@ export default function CinturonOrion() {
         <Box sx={{ maxWidth: 800, mx: 'auto' }}>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
+              <Typography>¿Cuál es la duración de la sesión?</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography>Tiene una duración aproximada de <strong>90 minutos</strong>.
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary expandIcon={<Box>+</Box>}>
               <Typography>¿Duele?</Typography>
             </AccordionSummary>
             <AccordionDetails>
