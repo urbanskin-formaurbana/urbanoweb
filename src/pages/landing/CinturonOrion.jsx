@@ -40,15 +40,7 @@ export default function CinturonOrion() {
             Cintura más definida, sin cirugía.
           </Typography>
           <Typography sx={{ mb: 4 }}>
-            <strong>Protocolo 3‑en‑1</strong> para reducir contorno abdominal y tensar la piel: <strong>Lipo Láser (635 nm) + Maderoterapia + Radiofrecuencia</strong>. Sesiones cómodas, sin necesidad de reposo, ni afectar tu rutina en lo absoluto. Resultados que te motivan cuando te veas al espejo. Tu cambio empieza hoy. ({' '}
-            <Link href="https://europepmc.org/article/PMC/3769994?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" color="inherit" underline="always">
-              Europe PMC
-            </Link>
-            ,{' '}
-            <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" color="inherit" underline="always">
-              JCAD
-            </Link>
-            )
+            <strong>Protocolo 3‑en‑1</strong> para reducir contorno abdominal y tensar la piel: <strong>Lipo Láser (635 nm) + Maderoterapia + Radiofrecuencia</strong>. Sesiones cómodas, sin necesidad de reposo, ni afectar tu rutina en lo absoluto. Resultados que te motivan cuando te veas al espejo. Tu cambio empieza hoy.
           </Typography>
           <Button variant="contained" color="success" size="large" href={WHATSAPP_LINK} sx={{ fontWeight: 'bold' }}>
             Escribinos por WhatsApp
@@ -72,29 +64,13 @@ export default function CinturonOrion() {
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 800, mx: 'auto' }}>
           <Typography>
-            <strong>Desbloquea la grasa “resistente”</strong>: el Lipo Láser de baja intensidad (luz roja ≈635 nm) fotoactiva los adipocitos y <strong>abre poros transitorios</strong> en su membrana; así liberan triglicéridos y <strong>disminuye su volumen</strong> (no destruye la célula). ({' '}
-            <Link href="https://europepmc.org/article/PMC/3769994?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              Europe PMC
-            </Link>
-            ,{' '}
-            <Link href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              MDedge
-            </Link>
-            )
+            <strong>Desbloquea la grasa “resistente”</strong>: El lipo láser usa una luz roja suave para "despertar" las células de grasa. Esto hace que abran pequeños poros por un momento y liberen la grasa que tienen adentro. Así, las células se achican, <strong>pero no se destruyen.</strong>
           </Typography>
           <Typography>
-            <strong>Moviliza y moldea</strong>: la <strong>Maderoterapia</strong> estimula la microcirculación y el tejido subcutáneo para mejorar textura y contorno. La evidencia formal es limitada, pero muchos pacientes refieren piel más uniforme cuando se combina con otros métodos. ({' '}
-            <Link href="https://www.verywellhealth.com/wood-therapy-6362588?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              Verywell Health
-            </Link>
-            )
+            <strong>Moviliza y moldea</strong>: la <strong>Maderoterapia</strong> estimula la microcirculación y el tejido subcutáneo para mejorar textura y contorno. La evidencia formal es limitada, pero muchos pacientes refieren piel más uniforme cuando se combina con otros métodos.
           </Typography>
           <Typography>
-            <strong>Drena lo liberado</strong>: el <strong>Drenaje Linfático Manual</strong> favorece el movimiento de fluidos y ayuda a bajar la hinchazón; es una técnica reconocida en protocolos de edema/linfedema y se usa como coadyuvante estético. ({' '}
-            <Link href="https://link.springer.com/article/10.1007/s11764-020-00928-1?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              SpringerLink
-            </Link>
-            )
+            <strong>Estimula el colageno de tu piel</strong>: la <strong>Radiofrecuencia</strong> reafirma y rejuvenece tu piel, estimulando el colágeno y la elastina. Combate la flacidez y mejora la textura.
           </Typography>
         </Stack>
         <Box sx={{ mt: 3, p: 2, bgcolor: 'success.light', borderLeft: 4, borderColor: 'success.main' }}>
