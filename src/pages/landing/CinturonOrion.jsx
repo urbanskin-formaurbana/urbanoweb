@@ -75,15 +75,7 @@ export default function CinturonOrion() {
         </Stack>
         <Box sx={{ mt: 3, p: 2, bgcolor: 'success.light', borderLeft: 4, borderColor: 'success.main' }}>
           <Typography>
-            <strong>Lo que dice la ciencia:</strong> En estudios controlados, la fotobiomodulación a 635–680 nm mostró <strong>reducciones de perímetro</strong> tras <strong>6 sesiones</strong> (2 semanas), manteniendo <strong>el mismo peso</strong>; es decir, <strong>contorneado</strong>, no “bajar kilos”. ({' '}
-            <Link href="https://europepmc.org/article/MED/20014253?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              Europe PMC
-            </Link>
-            ,{' '}
-            <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-              JCAD
-            </Link>
-            )
+            Según estudios, la luz roja entre 635 y 680 nm ayuda a reducir centímetros después de 6 sesiones en 2 semanas, sin bajar de peso. Es para modelar el cuerpo, no para adelgazar.
           </Typography>
         </Box>
       </Container>
