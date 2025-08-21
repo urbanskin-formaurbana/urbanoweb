@@ -408,16 +408,7 @@ export default function CinturonTitan() {
             <AccordionDetails>
               <Typography>
                 Se sienten <strong>contracciones intensas</strong> y{" "}
-                <strong>calor tolerable</strong>; salís y seguís con tu día. ({" "}
-                <Link
-                  href="https://sa1s3.patientpop.com/assets/docs/290920.pdf?"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  PatientPop
-                </Link>
-                )
+                <strong>calor tolerable</strong>; salís y seguís con tu día.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -431,16 +422,7 @@ export default function CinturonTitan() {
                 <strong>menos contorno</strong> <strong>sesión a sesión</strong>
                 ; el pico se observa <strong>semanas</strong> después al
                 completar la serie (el cuerpo sigue eliminando grasa y el
-                músculo sigue adaptándose). ({" "}
-                <Link
-                  href="https://skintightmedicalspa.com/body-sculpting/emsculpt-neo-results-timeline/?"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Skin Tight MedSpa
-                </Link>
-                )
+                músculo sigue adaptándose).
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -470,16 +452,7 @@ export default function CinturonTitan() {
                 <strong>evidencia de imagen</strong> (MRI/US) y{" "}
                 <strong>ensayo aleatorizado</strong>. Esa combinación simultánea{" "}
                 <strong>no la ofrecen</strong> tecnologías de “grasa sola” o
-                “músculo solo”. ({" "}
-                <Link
-                  href="https://europepmc.org/article/PMC/PMC9028295?"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Europe PMC
-                </Link>
-                )
+                “músculo solo”.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -491,73 +464,38 @@ export default function CinturonTitan() {
               <Typography>
                 No. Es <strong>contorneado</strong> y{" "}
                 <strong>definición muscular</strong>; el peso puede no cambiar
-                aunque baje el perímetro y suba la firmeza. ({" "}
-                <Link
-                  href="https://europepmc.org/article/PMC/PMC9028295?"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Europe PMC
-                </Link>
-                )
+                aunque baje el perímetro y suba la firmeza.
               </Typography>
             </AccordionDetails>
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
-              <Typography>¿Quiénes no deberían hacerlo?</Typography>
+              <Typography>¿Hay contraindicaciones?</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
                 Embarazo/lactancia,{" "}
                 <strong>marcapasos o implantes metálicos/electrónicos</strong>{" "}
-                cercanos, tumores activos, fiebre/infecciones, músculos
-                lesionados. Te asesoramos antes de empezar. ({" "}
-                <Link
-                  href="https://uploads.teachablecdn.com/attachments/ArBU8tV9TIujyDiBhiyu_Emsculpt_GUIDE_Clinical-guide_A4_EN101_preview.pdf?"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Teachable
-                </Link>
-                ,{" "}
-                <Link
-                  href="https://winterparkfamilyphysicians.com/wp-content/uploads/2023/04/Emsculpt_NEO_CLIN_General_Patient_Record_ENUS104.pdf?"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Winter Park Family Physicians
-                </Link>
-                )
+                cercanos, problemas cardíacos, tumores activos,
+                fiebre/infecciones, músculos lesionados. Te asesoramos antes de
+                empezar.
               </Typography>
             </AccordionDetails>
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
               <Typography>
-                ¿En qué se diferencia de Cinturón de Orión?
+                ¿En qué se diferencia del Cinturón de Orión?
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                <strong>Titán</strong>: suma <strong>MSculpt</strong>, con
-                respaldo en <strong>estudios</strong> (músculo + grasa). El{" "}
-                <strong>Pulido</strong> es <strong>a medida</strong>. <br />
-                <strong>Orión</strong>: protocolo <strong>entry‑level</strong>{" "}
-                sin HIFEM+RF; flujo fijo (Lipo Láser + Maderoterapia + Drenaje).
-                ({" "}
-                <Link
-                  href="https://europepmc.org/article/PMC/PMC9028295?"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Europe PMC
-                </Link>
-                )
+                <strong>Titán</strong>: Suma <strong>MSculpt</strong>, con
+                respaldo en <strong>estudios</strong> (músculo + grasa). La{" "}
+                <strong>maderoterapia</strong> y el Pulido son{" "}
+                <strong>personalizados</strong>. <br />
+                <strong>Orión</strong>: Es un protocolo{" "}
+                <strong>de entrada</strong>.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -726,6 +664,15 @@ export default function CinturonTitan() {
             underline="always"
           >
             Winter Park Family Physicians
+          </Link>
+          ,{" "}
+          <Link
+            href="https://sa1s3.patientpop.com/assets/docs/290920.pdf?"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="always"
+          >
+            PatientPop
           </Link>
           )
         </Typography>
