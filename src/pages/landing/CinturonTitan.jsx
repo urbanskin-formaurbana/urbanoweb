@@ -48,7 +48,12 @@ export default function CinturonTitan() {
               borderRadius: 2,
             }}
           />
-          <Typography variant="h1" sx={{ fontWeight: "bold" }} gutterBottom>
+          <Typography
+            variant="h2"
+            component="h1"
+            sx={{ fontWeight: "bold" }}
+            gutterBottom
+          >
             Cinturón de Titán
           </Typography>
           <Typography variant="h5" gutterBottom>
