@@ -12,12 +12,13 @@ export default function LandingLayout() {
   ]
 
   return (
-    <Container maxWidth="md" sx={{ py: 3 }}>
-      <Box component="header" display="flex" justifyContent="space-between" alignItems="center" mb={3} gap={2}>
-        <Box component="nav" display="flex" alignItems="center" gap={2}>
-          {links.map(({ to, label }) => {
-            const isActive = pathname === to
-            return (
+    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
+      <Container maxWidth="md" sx={{ py: 3 }}>
+        <Box component="header" display="flex" justifyContent="space-between" alignItems="center" mb={3} gap={2}>
+          <Box component="nav" display="flex" alignItems="center" gap={2}>
+            {links.map(({ to, label }) => {
+              const isActive = pathname === to
+              return (
               <Link
                 key={to}
                 component={isActive ? 'span' : RouterLink}
@@ -34,11 +35,12 @@ export default function LandingLayout() {
         <StatusBadge />
       </Box>
       <Box component="main">
-        <Outlet />
-      </Box>
-      <Typography component="footer" mt={6} fontSize={12} color="text.secondary">
-        © {new Date().getFullYear()} FORMA Urbana
-      </Typography>
-    </Container>
+          <Outlet />
+        </Box>
+        <Typography component="footer" mt={6} fontSize={12} color="text.secondary">
+          © {new Date().getFullYear()} FORMA Urbana
+        </Typography>
+      </Container>
+    </Box>
   )
 }

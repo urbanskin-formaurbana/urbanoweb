@@ -25,12 +25,17 @@ export default function CinturonOrion() {
         title="FORMA Urbana — Cinturón de Orión | Lipo Láser 635 nm + Maderoterapia + Drenaje (Montevideo)"
         description="Reducí el contorno abdominal sin cirugía. Protocolo 3‑en‑1: Lipo Láser 635 nm + Maderoterapia + Drenaje Linfático. Sesión $1.500. Cuponera 6 a $5.500 (Oferta de Apertura)."
       />
-      <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
-        <Container>
-          <Box sx={{ width: 120, height: 120, mx: 'auto', mb: 3, bgcolor: 'grey.200', borderRadius: 2 }} />
-          <Typography variant="h1" sx={{ fontWeight: 'bold' }} gutterBottom>
-            Cinturón de Orión
-          </Typography>
+        <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
+          <Container>
+            <Box
+              component="img"
+              src="/landings/cinturon-orion/placeholder-hero.svg"
+              alt="Cinturón de Orión"
+              sx={{ width: '100%', maxWidth: 400, height: 'auto', mx: 'auto', mb: 3, borderRadius: 2 }}
+            />
+            <Typography variant="h1" sx={{ fontWeight: 'bold' }} gutterBottom>
+              Cinturón de Orión
+            </Typography>
           <Typography variant="h5" gutterBottom>
             Cintura más definida, sin cirugía.
           </Typography>
@@ -50,11 +55,17 @@ export default function CinturonOrion() {
           </Button>
         </Container>
       </Box>
-      <Container sx={{ py: 4 }}>
-        <Typography align="center" sx={{ fontStyle: 'italic' }}>
-          En Montevideo. No invasivo. Sin agujas. Piel intacta. Apto como <strong>nivel inicial</strong> para personas poco activas físicamente.
-        </Typography>
-      </Container>
+        <Container sx={{ py: 4 }}>
+          <Typography align="center" sx={{ fontStyle: 'italic' }}>
+            En Montevideo. No invasivo. Sin agujas. Piel intacta. Apto como <strong>nivel inicial</strong> para personas poco activas físicamente.
+          </Typography>
+          <Box
+            component="img"
+            src="/landings/cinturon-orion/placeholder-extra.svg"
+            alt="Resultados del Cinturón de Orión"
+            sx={{ width: '100%', maxWidth: 600, mx: 'auto', mt: 4, borderRadius: 2 }}
+          />
+        </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
           ¿Por qué el Cinturón de Orión funciona?

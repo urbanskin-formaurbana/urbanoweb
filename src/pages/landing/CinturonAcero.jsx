@@ -25,12 +25,17 @@ export default function CinturonAcero() {
         title="FORMA Urbana — Cinturón de Acero | EMSCULPT NEO + Radiofrecuencia (Montevideo)"
         description="Definí y tensá abdomen en 60’: EMSCULPT NEO (HIFEM + RF) + RF de piel + Maderoterapia + Drenaje. Sesión $1.900. Cuponera 6 a $6.200 (Oferta de Apertura). Reservá por WhatsApp."
       />
-      <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
-        <Container>
-          <Box sx={{ width: 120, height: 120, mx: 'auto', mb: 3, bgcolor: 'grey.200', borderRadius: 2 }} />
-          <Typography variant="h1" sx={{ fontWeight: 'bold' }} gutterBottom>
-            Cinturón de Acero
-          </Typography>
+        <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
+          <Container>
+            <Box
+              component="img"
+              src="/landings/cinturon-acero/placeholder-hero.svg"
+              alt="Cinturón de Acero"
+              sx={{ width: '100%', maxWidth: 400, height: 'auto', mx: 'auto', mb: 3, borderRadius: 2 }}
+            />
+            <Typography variant="h1" sx={{ fontWeight: 'bold' }} gutterBottom>
+              Cinturón de Acero
+            </Typography>
           <Typography variant="h5" gutterBottom>
             Llevá tu abdomen a su <strong>máximo potencial</strong>.
           </Typography>
@@ -50,11 +55,17 @@ export default function CinturonAcero() {
           </Button>
         </Container>
       </Box>
-      <Container sx={{ py: 4 }}>
-        <Typography align="center" sx={{ fontStyle: 'italic' }}>
-          En <strong>Montevideo</strong>. <strong>Nivel avanzado</strong> (para quienes ya vienen cuidándose y quieren <strong>seguir tonificando músculo y piel</strong>). <strong>No invasivo. Sin agujas. Agenda activa.</strong>
-        </Typography>
-      </Container>
+        <Container sx={{ py: 4 }}>
+          <Typography align="center" sx={{ fontStyle: 'italic' }}>
+            En <strong>Montevideo</strong>. <strong>Nivel avanzado</strong> (para quienes ya vienen cuidándose y quieren <strong>seguir tonificando músculo y piel</strong>). <strong>No invasivo. Sin agujas. Agenda activa.</strong>
+          </Typography>
+          <Box
+            component="img"
+            src="/landings/cinturon-acero/placeholder-extra.svg"
+            alt="Resultados del Cinturón de Acero"
+            sx={{ width: '100%', maxWidth: 600, mx: 'auto', mt: 4, borderRadius: 2 }}
+          />
+        </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
           ¿Por qué funciona (lo esencial y sin humo)?

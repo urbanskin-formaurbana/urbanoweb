@@ -25,12 +25,17 @@ export default function CinturonTitan() {
         title="FORMA Urbana — Cinturón de Titán | EMSCULPT NEO + Lipo Láser (Montevideo)"
         description="Definí y reducí abdomen en la misma sesión: EMSCULPT NEO (HIFEM + RF) + Lipo Láser 635 nm + Maderoterapia + Pulido. Sesión $2.000. Cuponera 6 a $6.600 (Oferta de Apertura). Reservá por WhatsApp."
       />
-      <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
-        <Container>
-          <Box sx={{ width: 120, height: 120, mx: 'auto', mb: 3, bgcolor: 'grey.200', borderRadius: 2 }} />
-          <Typography variant="h1" sx={{ fontWeight: 'bold' }} gutterBottom>
-            Cinturón de Titán
-          </Typography>
+        <Box component="header" sx={{ textAlign: 'center', bgcolor: 'success.light', color: 'success.contrastText', py: { xs: 6, md: 8 } }}>
+          <Container>
+            <Box
+              component="img"
+              src="/landings/cinturon-titan/placeholder-hero.svg"
+              alt="Cinturón de Titán"
+              sx={{ width: '100%', maxWidth: 400, height: 'auto', mx: 'auto', mb: 3, borderRadius: 2 }}
+            />
+            <Typography variant="h1" sx={{ fontWeight: 'bold' }} gutterBottom>
+              Cinturón de Titán
+            </Typography>
           <Typography variant="h5" gutterBottom>
             Reduce <strong>y</strong> tonifica en la misma sesión.
           </Typography>
@@ -54,11 +59,17 @@ export default function CinturonTitan() {
           </Button>
         </Container>
       </Box>
-      <Container sx={{ py: 4 }}>
-        <Typography align="center" sx={{ fontStyle: 'italic' }}>
-          En <strong>Montevideo</strong>. <strong>Nivel intermedio</strong> (ideal para quienes ya vienen cuidándose y quieren <strong>rematar la grasa rebelde</strong> del abdomen). <strong>Sin agujas, sin quirófano.</strong>
-        </Typography>
-      </Container>
+        <Container sx={{ py: 4 }}>
+          <Typography align="center" sx={{ fontStyle: 'italic' }}>
+            En <strong>Montevideo</strong>. <strong>Nivel intermedio</strong> (ideal para quienes ya vienen cuidándose y quieren <strong>rematar la grasa rebelde</strong> del abdomen). <strong>Sin agujas, sin quirófano.</strong>
+          </Typography>
+          <Box
+            component="img"
+            src="/landings/cinturon-titan/placeholder-extra.svg"
+            alt="Resultados del Cinturón de Titán"
+            sx={{ width: '100%', maxWidth: 600, mx: 'auto', mt: 4, borderRadius: 2 }}
+          />
+        </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
           ¿Por qué el Cinturón de Titán funciona?
