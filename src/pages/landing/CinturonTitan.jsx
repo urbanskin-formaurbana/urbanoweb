@@ -239,48 +239,21 @@ export default function CinturonTitan() {
         >
           <li>
             <strong>Series iniciales habituales:</strong>{" "}
-            <strong>4 sesiones</strong> separadas 5–10 días; luego{" "}
-            <strong>mantenimiento</strong> según objetivo. Los cambios siguen
-            mejorando varias semanas tras la última sesión. ({" "}
-            <Link
-              href="https://bodycontouringacademy.com/emsculpt-neo-facts/?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              bodycontouringacademy.com
-            </Link>
-            ,{" "}
-            <Link
-              href="https://skintightmedicalspa.com/body-sculpting/emsculpt-neo-results-timeline/?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Skin Tight MedSpa
-            </Link>
-            )
+            <strong>2 o 3 sesiones</strong> por semana descansando con un día de
+            por medio, según cada caso; Los cambios siguen mejorando luego de la
+            última sesión.
           </li>
           <li>
             <strong>Objetivo realista:</strong>{" "}
             <strong>menos contorno abdominal</strong> +{" "}
             <strong>más definición</strong>; <strong>no</strong> es un
-            tratamiento de “bajar kilos”. ({" "}
-            <Link
-              href="https://cdn.mdedge.com/files/s3fs-public/issues/articles/SCMS_Vol_32_No_1_Body_Contouring.pdf?"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              MDedge
-            </Link>
-            )
+            tratamiento de “bajar kilos”.
           </li>
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Precios y cuponeras (UYU)
+          Precios y cuponeras
         </Typography>
         <Grid container spacing={3} justifyContent="center">
           <Grid
@@ -296,7 +269,7 @@ export default function CinturonTitan() {
                   Sesión
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  2.000
+                  $ 2.000
                 </Typography>
               </CardContent>
             </Card>
@@ -328,10 +301,10 @@ export default function CinturonTitan() {
                   Cuponera 6
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  6.600
+                  $ 6.600
                 </Typography>
                 <Typography variant="body2">
-                  ≈1.100 por sesión; ahorrás 5.400 vs 6 sueltas — 45%.
+                  ahorrás $ 5.400 vs 6 sueltas.
                 </Typography>
               </CardContent>
             </Card>
@@ -349,10 +322,10 @@ export default function CinturonTitan() {
                   Cuponera 8
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  8.900
+                  $ 9.200
                 </Typography>
                 <Typography variant="body2">
-                  ≈1.113 por sesión; ahorrás 7.100 vs 8 sueltas — 44%.
+                  ahorrás $ 6.800 vs 8 sueltas.
                 </Typography>
               </CardContent>
             </Card>
@@ -370,10 +343,10 @@ export default function CinturonTitan() {
                   Cuponera 10
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  10.900
+                  $ 11.900
                 </Typography>
                 <Typography variant="body2">
-                  ≈1.090 por sesión; ahorrás 9.100 vs 10 sueltas — 46%.
+                  ahorrás $ 8.100 vs 10 sueltas.
                 </Typography>
               </CardContent>
             </Card>
@@ -381,13 +354,9 @@ export default function CinturonTitan() {
         </Grid>
         <Typography align="center" sx={{ mt: 3 }}>
           <strong>Recomendación directa:</strong>{" "}
-          <strong>Mejor precio por sesión:</strong> <strong>Cuponera 10</strong>
-          . <br />
-          <strong>
-            Mejor ticket de entrada + descuento agresivo hoy:
-          </strong>{" "}
-          <strong>Cuponera 6 — Oferta de Apertura</strong> (ideal para completar
-          la serie inicial y validar resultados sin gastar de más).
+          <strong>Mejor precio por sesión:</strong> <strong>Cuponera 6</strong>{" "}
+          en Oferta de Apertura (ideal para completar una serie inicial y
+          validar resultados sin gastar de más).
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
