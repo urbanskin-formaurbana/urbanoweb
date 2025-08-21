@@ -119,7 +119,7 @@ export default function CinturonTitan() {
             <strong>Evidencia clínica</strong>: Reportes promedian{" "}
             <strong>≈30% menos grasa</strong> y{" "}
             <strong>≈25% más músculo</strong>, medidos con{" "}
-            <strong>MRI/US</strong> (promedios, no promesas individuales). ( )
+            <strong>MRI/US</strong> (promedios, no promesas individuales).
           </Typography>
           <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
             2. Lipo Láser: contorno y piel más tensa
@@ -155,7 +155,7 @@ export default function CinturonTitan() {
           }}
         >
           <Typography>
-            <strong>En simple:</strong> MSculpt <strong>activa y define</strong>{" "}
+            <strong>Es simple:</strong> MSculpt <strong>activa y define</strong>{" "}
             el músculo mientras <strong>reduce grasa</strong> al mismo tiempo;
             el Lipo Láser <strong>afina contorno</strong>; el Pulido{" "}
             <strong>drena y perfila</strong> el acabado.
@@ -542,7 +542,7 @@ export default function CinturonTitan() {
           <strong>reducción de grasa</strong> y/o{" "}
           <strong>aumento muscular</strong>; la <strong>maderoterapia</strong>{" "}
           es un <strong>complemento</strong>. Siempre realizamos evaluación
-          previa. Si sigues con curiosidad podés revisar estos estudios:{" "}
+          previa. Si seguís con curiosidad podés revisar estos estudios:{" "}
           <Link
             href="https://europepmc.org/article/PMC/PMC9028295?"
             target="_blank"
@@ -587,16 +587,6 @@ export default function CinturonTitan() {
             underline="always"
           >
             Verywell Health
-          </Link>
-          ,{" "}
-          <Link
-            href="https://btlaesthetics.com/en/for-providers/emsculpt-neo-providers?"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="inherit"
-            underline="always"
-          >
-            BTL Aesthetics
           </Link>
           ,{" "}
           <Link
