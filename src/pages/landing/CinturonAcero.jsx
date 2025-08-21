@@ -334,56 +334,20 @@ export default function CinturonAcero() {
         >
           <li>
             <strong>Evaluación rápida</strong> (objetivos, antecedentes,
-            contraindicaciones). ({" "}
-            <Link
-              href="https://ptacts.uspto.gov/ptacts/public-informations/petitions/1547819/download-documents?artifactId=knpgWL0skoQUU64yKWvHzhQ4yOnmHT-Gk5P4siWLAhCGBUExhgE74Zs&utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              PTACTS
-            </Link>
-            )
+            contraindicaciones).
           </li>
           <li>
-            <strong>MSculpt 30’</strong> (músculo + grasa). ({" "}
-            <Link
-              href="https://europepmc.org/article/PMC/PMC9028295?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Europe PMC
-            </Link>
-            )
+            <strong>MSculpt 30’</strong> (músculo + grasa).
           </li>
           <li>
-            <strong>RF focal 15–20’</strong> (piel). ({" "}
-            <Link
-              href="https://www.advancesincosmeticsurgery.com/article/S2542-4327%2821%2900016-3/fulltext?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              advancesincosmeticsurgery.com
-            </Link>
-            )
+            <strong>Radiofrecuencia</strong> (piel).
           </li>
           <li>
-            <strong>Pulido</strong> (drenaje/modelador). ({" "}
-            <Link
-              href="https://my.clevelandclinic.org/health/treatments/21768-lymphatic-drainage-massage?utm_source=chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              Cleveland Clinic
-            </Link>
-            )
+            <strong>Masaje modelador</strong> (pulido/drenaje).
           </li>
           <li>
-            <strong>Tips post:</strong> hidratación + mini‑caminata el mismo
-            día.
+            <strong>Plan de mantenimiento</strong> sencillo para sostener
+            resultados.
           </li>
         </Box>
       </Container>
@@ -394,21 +358,23 @@ export default function CinturonAcero() {
         <Box sx={{ maxWidth: 800, mx: "auto" }}>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
-              <Typography>¿Duele?</Typography>
+              <Typography>¿Cuál es la duración de la sesión?</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography>
+                Tiene una duración aproximada de{" "}
+                <strong>60 a 70 minutos</strong>.
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary expandIcon={<Box>+</Box>}>
+              <Typography>¿Es doloroso?</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
                 Sentís <strong>contracciones fuertes</strong> y{" "}
-                <strong>calor tolerable</strong>; salís y seguís con tu día. ({" "}
-                <Link
-                  href="https://www.folkplasticsurgery.com/procedures/emsculpt-neo?utm_source=chatgpt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Folk Plastic Surgery
-                </Link>
-                )
+                <strong>calor tolerable</strong>; salís y seguís con tu día.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -420,48 +386,22 @@ export default function CinturonAcero() {
               <Typography>
                 Vas notando <strong>más tono</strong> y{" "}
                 <strong>menos contorno</strong> <strong>sesión a sesión</strong>
-                ; el pico suele verse <strong>~3 meses</strong> después de
-                completar la serie. ({" "}
-                <Link
-                  href="https://norcaldermatology.com/procedure/emsculpt-neo/?utm_source=chatgpt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Dermatology Center NorCal
-                </Link>
-                )
+                .
               </Typography>
             </AccordionDetails>
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
-              <Typography>¿Qué hace exactamente la RF en la piel?</Typography>
+              <Typography>
+                ¿Qué hace exactamente la Radiofreciencia en la piel?
+              </Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
                 Genera <strong>calentamiento controlado</strong> que{" "}
                 <strong>contrae</strong> colágeno y <strong>estimula</strong>{" "}
                 nueva producción (neocolagénesis) →{" "}
-                <strong>mejor firmeza/elasticidad</strong>. ({" "}
-                <Link
-                  href="https://www.advancesincosmeticsurgery.com/article/S2542-4327%2821%2900016-3/fulltext?utm_source=chatgpt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  advancesincosmeticsurgery.com
-                </Link>
-                ,{" "}
-                <Link
-                  href="https://www.oaepublish.com/articles/2347-9264.2021.60?utm_source=chatgpt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  OAE Publish
-                </Link>
-                )
+                <strong>mejor firmeza/elasticidad</strong>.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -476,50 +416,21 @@ export default function CinturonAcero() {
                 El <strong>drenaje</strong> ayuda a{" "}
                 <strong>mover fluidos</strong> (útil como coadyuvante); la{" "}
                 <strong>maderoterapia</strong> se usa para{" "}
-                <strong>modelar</strong>, pero su{" "}
-                <strong>evidencia es limitada</strong> — la aplicamos{" "}
-                <strong>con criterio</strong>. ({" "}
-                <Link
-                  href="https://my.clevelandclinic.org/health/treatments/21768-lymphatic-drainage-massage?utm_source=chatgpt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Cleveland Clinic
-                </Link>
-                ,{" "}
-                <Link
-                  href="https://www.verywellhealth.com/wood-therapy-6362588?utm_source=chatgpt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  Verywell Health
-                </Link>
-                )
+                <strong>modelar</strong>, la aplicamos{" "}
+                <strong>con criterio</strong>.
               </Typography>
             </AccordionDetails>
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
-              <Typography>¿Quiénes no deberían hacerlo?</Typography>
+              <Typography>¿Existe alguna contraindicación?</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
                 Embarazo/lactancia; <strong>marcapasos</strong> u otros{" "}
-                <strong>implantes metálicos/electrónicos</strong>; tumores
-                activos; fiebre/infecciones locales;{" "}
+                <strong>implantes metálicos/electrónicos</strong>; problemas
+                cardíacos; tumores activos; fiebre/infecciones locales;{" "}
                 <strong>músculos lesionados</strong>. Siempre evaluamos tu caso.
-                ({" "}
-                <Link
-                  href="https://ptacts.uspto.gov/ptacts/public-informations/petitions/1547819/download-documents?artifactId=knpgWL0skoQUU64yKWvHzhQ4yOnmHT-Gk5P4siWLAhCGBUExhgE74Zs&utm_source=chatgpt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="always"
-                >
-                  PTACTS
-                </Link>
-                )
               </Typography>
             </AccordionDetails>
           </Accordion>
