@@ -102,25 +102,13 @@ export default function CinturonOrion() {
         </Typography>
         <Box component="ol" sx={{ maxWidth: 600, mx: 'auto', textAlign: 'left' }}>
           <li>
-            <strong>30 minutos de Lipo Láser</strong> (láser frío de baja intensidad, ≈635 nm) sobre abdomen. <strong>Sensación:</strong> indolora, sin calor significativo. ({' '}
-            <Link href="https://jcadonline.com/effect-of-635nm-low-level-laser-therapy-on-upper-arm-circumference-reduction-a-double-blind-randomized-sham-controlled-trial/" target="_blank" rel="noopener noreferrer" underline="always">
-              JCAD
-            </Link>
-            )
+            <strong>Lipo Láser</strong> sobre abdomen. <strong>Sensación:</strong> indolora, sin calor significativo.
           </li>
           <li>
-            <strong>Maderoterapia</strong> específica para abdomen: maniobras para modelar, activar circulación y mejorar textura. <em>Evidencia clínica formal aún en desarrollo; se usa como coadyuvante.</em> ({' '}
-            <Link href="https://www.verywellhealth.com/wood-therapy-6362588?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              Verywell Health
-            </Link>
-            )
+            <strong>Maderoterapia</strong> específica para abdomen: maniobras para modelar, activar circulación y mejorar textura.
           </li>
           <li>
-            <strong>Masaje de drenaje linfático</strong> para movilizar fluidos y favorecer la eliminación. ({' '}
-            <Link href="https://link.springer.com/article/10.1007/s11764-020-00928-1?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" underline="always">
-              SpringerLink
-            </Link>
-            )
+            <strong>Radiofrecuencia</strong> para favorecer la formación de nuevo colágeno. El drenaje linfático. La circulación de la piel y el tejido subcutáneo.
           </li>
         </Box>
       </Container>
