@@ -70,7 +70,7 @@ export default function CinturonOrion() {
           </Button>
         </Container>
       </Box>
-      <Container sx={{ py: 4 }}>
+      <Container sx={{ py: 2 }}>
         <Typography align="center" sx={{ fontStyle: "italic" }}>
           En Montevideo Centro. No invasivo. Sin agujas. Piel intacta. Apto como{" "}
           <strong>nivel inicial</strong> para personas poco activas físicamente.
@@ -87,7 +87,7 @@ export default function CinturonOrion() {
           }}
         />
       </Container>
-      <Container component="section" sx={{ py: 4 }}>
+      <Container component="section" sx={{ py: 2 }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -132,7 +132,7 @@ export default function CinturonOrion() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -169,7 +169,7 @@ export default function CinturonOrion() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4 }}>
+      <Container component="section" sx={{ py: 2 }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -196,7 +196,7 @@ export default function CinturonOrion() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -240,7 +240,7 @@ export default function CinturonOrion() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4 }}>
+      <Container component="section" sx={{ py: 2 }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -360,7 +360,7 @@ export default function CinturonOrion() {
           bloquear precio, elegí 8 o 10.
         </Typography>
       </Container>
-      <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -390,7 +390,7 @@ export default function CinturonOrion() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4 }}>
+      <Container component="section" sx={{ py: 2 }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -484,7 +484,7 @@ export default function CinturonOrion() {
       <Container
         component="section"
         sx={{
-          py: 6,
+          py: 2,
           textAlign: "center",
           bgcolor: "success.light",
           color: "success.contrastText",
@@ -508,7 +508,7 @@ export default function CinturonOrion() {
           Escribinos ahora
         </Button>
       </Container>
-      <Container component="footer" sx={{ py: 4 }}>
+      <Container component="footer" sx={{ py: 2 }}>
         <Typography variant="body2" align="center">
           Los resultados individuales varían. Este protocolo no reemplaza
           indicaciones médicas, dieta o ejercicio; los potencia. Estudio tras
