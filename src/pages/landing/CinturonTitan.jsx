@@ -35,19 +35,6 @@ export default function CinturonTitan() {
         }}
       >
         <Container>
-          <Box
-            component="img"
-            src="/landings/cinturon-titan/placeholder-hero.svg"
-            alt="Cinturón de Titán"
-            sx={{
-              width: "100%",
-              maxWidth: 400,
-              height: "auto",
-              mx: "auto",
-              mb: 3,
-              borderRadius: 2,
-            }}
-          />
           <Typography
             variant="h2"
             component="h1"
