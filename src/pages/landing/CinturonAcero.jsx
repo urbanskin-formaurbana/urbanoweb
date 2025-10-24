@@ -245,33 +245,41 @@ export default function CinturonAcero() {
             </Card>
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card
-              sx={{
-                textAlign: "center",
-                border: 2,
-                borderColor: "success.main",
-                position: "relative",
-                height: "100%",
-              }}
-            >
-              <CardContent>
-                <Chip
-                  label="Oferta de Apertura"
-                  color="success"
-                  size="small"
-                  sx={{ position: "absolute", top: 16, right: 16 }}
-                />
-                <Typography variant="h5" gutterBottom>
-                  Cuponera 6
-                </Typography>
-                <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 6.200
-                </Typography>
-                <Typography variant="body2">
-                  ahorrás $ 5.200 vs 6 sueltas.
-                </Typography>
-              </CardContent>
-            </Card>
+            <Box sx={{ position: "relative", height: "100%" }}>
+              <Chip
+                label="Oferta de Apertura"
+                color="success"
+                size="small"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 25,
+                  transform: "translateY(-50%)",
+                  zIndex: 2,
+                  boxShadow: 1,
+                }}
+              />
+              <Card
+                sx={{
+                  textAlign: "center",
+                  border: 2,
+                  borderColor: "success.main",
+                  height: "100%",
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h5" gutterBottom>
+                    Cuponera 6
+                  </Typography>
+                  <Typography variant="h4" color="success.main" gutterBottom>
+                    $ 6.200
+                  </Typography>
+                  <Typography variant="body2">
+                    ahorrás $ 5.200 vs 6 sueltas.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Box>
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{ textAlign: "center", height: "100%" }}>
