@@ -35,6 +35,7 @@ export default function LandingLayout() {
             />
             {links.map(({ to, label }) => {
               const isActive = pathname === to;
+              const mobileLabel = label.replace(/ de /i, "\nde ");
               return (
                 <Link
                   key={to}
@@ -50,7 +51,7 @@ export default function LandingLayout() {
                     pointerEvents: isActive ? "none" : "auto",
                   }}
                 >
-                  {label}
+                  {mobileLabel}
                 </Link>
               );
             })}
