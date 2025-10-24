@@ -270,7 +270,7 @@ export default function CinturonOrion() {
                   label="Oferta de Apertura"
                   color="success"
                   size="small"
-                  sx={{ position: "absolute", top: 16, right: 16 }}
+                  sx={{ position: "absolute", top: 0, right: 16 }}
                 />
                 <Typography variant="h5" gutterBottom>
                   Cuponera 6
