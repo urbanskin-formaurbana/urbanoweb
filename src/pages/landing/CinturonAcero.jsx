@@ -15,7 +15,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import FormaUrbanaLogo from "../../assets/images/FormaUrbanaLogo.svg";
 
 const WHATSAPP_LINK = "https://wa.me/59893770785";
 
@@ -36,17 +35,6 @@ export default function CinturonAcero() {
         }}
       >
         <Container>
-          <Box
-            component="img"
-            src={FormaUrbanaLogo}
-            alt="FORMA Urbana"
-            sx={{
-              display: "block",
-              mx: "auto",
-              height: { xs: 56, sm: 72, md: 96, lg: 112 },
-              mb: 1.5,
-            }}
-          />
           <Typography
             variant="h2"
             component="h1"
