@@ -45,14 +45,12 @@ export default function CinturonAcero() {
             Cinturón de Acero
           </Typography>
           <Typography variant="h5" gutterBottom>
-            Llevá tu abdomen a su <strong>máximo potencial</strong>.
+            Llevá tu abdomen a su máximo potencial.
           </Typography>
           <Typography sx={{ mb: 4 }}>
-            <strong>Protocolo 4‑en‑1</strong>:{" "}
-            <strong>30’ MSculpt (HIFEM®)</strong> +{" "}
-            <strong>Radiofrecuencia</strong> + <strong>Maderoterapia</strong> +{" "}
-            <strong>Masaje Modelador</strong>. En una sola visita:{" "}
-            <strong>más tono, menos contorno y piel más firme</strong>.
+            Protocolo 4‑en‑1: 30’ MSculpt (HIFEM®) + Radiofrecuencia +
+            Maderoterapia + Masaje Modelador. En una sola visita: más tono,
+            menos contorno y piel más firme.
           </Typography>
           <Button
             variant="contained"
@@ -69,10 +67,9 @@ export default function CinturonAcero() {
       </Box>
       <Container sx={{ py: 4 }}>
         <Typography align="center" sx={{ fontStyle: "italic" }}>
-          En <strong>Montevideo Centro</strong>. <strong>Nivel avanzado</strong>
-          , para quienes ya vienen cuidándose y quieren{" "}
-          <strong>seguir tonificando músculo y piel</strong>.{" "}
-          <strong>No invasivo. Sin cirujías.</strong>
+          En Montevideo Centro. Nivel avanzado , para quienes ya vienen
+          cuidándose y quieren seguir tonificando músculo y piel. No invasivo.
+          Sin cirujías.
         </Typography>
         <Box
           component="img"
@@ -92,42 +89,33 @@ export default function CinturonAcero() {
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 700, mx: "auto" }}>
           <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
-            1. MSculpt: músculo <strong>y</strong> grasa, al mismo tiempo
+            1. MSculpt: músculo y grasa, al mismo tiempo
           </Typography>
           <Typography>
-            Utiliza Tecnología <strong>HIFEM®</strong> (contracciones
-            supramáximas que ningún entrenamiento reproduce). La{" "}
-            <strong>sinergia</strong> logra{" "}
-            <strong>aumento de masa/espesor muscular</strong> y{" "}
-            <strong>reducción de grasa subcutánea</strong> en{" "}
-            <strong>30 minutos</strong>.
+            Utiliza Tecnología HIFEM® (contracciones supramáximas que ningún
+            entrenamiento reproduce). La sinergia logra aumento de masa/espesor
+            muscular y reducción de grasa subcutánea en 30 minutos.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
-            2. Radiofrecuencia (RF): <strong>tensión de la piel</strong> que se
-            nota
+            2. Radiofrecuencia (RF): tensión de la piel que se nota
           </Typography>
           <Typography>
-            La RF <strong>calienta el colágeno dérmico</strong> hasta el rango
-            terapéutico (
-            <strong>~40–42 °C en superficie / ≈50 °C en tejidos blandos</strong>
-            ), lo que provoca <strong>
-              contracción inmediata de fibras
-            </strong> y <strong>neocolagénesis</strong> en semanas. Resultado:{" "}
-            <strong>mejor firmeza y textura</strong> en la cubierta cutánea del
+            La RF calienta el colágeno dérmico hasta el rango terapéutico (
+            ~40–42 °C en superficie / ≈50 °C en tejidos blandos ), lo que
+            provoca contracción inmediata de fibras y neocolagénesis en semanas.
+            Resultado: mejor firmeza y textura en la cubierta cutánea del
             abdomen.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             3. Maderoterapia + drenaje
           </Typography>
           <Typography>
-            <strong>Drenaje linfático manual</strong>: técnica suave que ayuda a{" "}
-            <strong>mover fluidos</strong> y a sentirse menos hinchado como{" "}
-            <strong>coadyuvante</strong> estético.
+            Drenaje linfático manual: técnica suave que ayuda a mover fluidos y
+            a sentirse menos hinchado como coadyuvante estético.
           </Typography>
           <Typography>
-            <strong>Maderoterapia</strong>: popular para{" "}
-            <strong>moldear</strong>; la usamos como <strong>apoyo</strong>,
-            ajustando intensidad a tu caso.
+            Maderoterapia: popular para moldear; la usamos como apoyo, ajustando
+            intensidad a tu caso.
           </Typography>
         </Stack>
       </Container>
@@ -140,31 +128,28 @@ export default function CinturonAcero() {
           sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
           <Typography align="left" sx={{ mb: 2 }}>
-            Elegí <strong>Cinturón de Acero</strong> SI:
+            Elegí Cinturón de Acero SI:
           </Typography>
           <Typography align="left" sx={{ mb: 2 }}>
             <li>
-              Querés <strong>seguir definiendo</strong> y{" "}
-              <strong>quemar la grasa rebelde</strong> del abdomen sin parar tu
-              rutina.
+              Querés seguir definiendo y quemar la grasa rebelde del abdomen sin
+              parar tu rutina.
             </li>
             <li>
-              Buscás <strong>tono real</strong> (músculo) +{" "}
-              <strong>mejor piel</strong> (tensión){" "}
-              <strong>en la misma sesión</strong>.
+              Buscás tono real (músculo) + mejor piel (tensión) en la misma
+              sesión.
             </li>
             <li>
-              Preferís <strong>resultados acumulativos</strong> en pocas
-              semanas, con protocolo claro y medible.
+              Preferís resultados acumulativos en pocas semanas, con protocolo
+              claro y medible.
             </li>
           </Typography>
 
           <Typography align="left">
-            <strong>No recomendado</strong> si estás embarazada/lactando o tenés{" "}
-            <strong>marcapasos, implantes metálicos/electrónicos</strong>,
-            problemas cardíacos, tumores activos, fiebre/infección local o{" "}
-            <strong>músculos lesionados</strong>. Evaluamos tu caso antes de
-            iniciar.
+            No recomendado si estás embarazada/lactando o tenés marcapasos,
+            implantes metálicos/electrónicos, problemas cardíacos, tumores
+            activos, fiebre/infección local o músculos lesionados. Evaluamos tu
+            caso antes de iniciar.
           </Typography>
         </Box>
       </Container>
@@ -177,19 +162,17 @@ export default function CinturonAcero() {
           sx={{ maxWidth: 800, mx: "auto", textAlign: "left" }}
         >
           <li>
-            <strong>MSculpt — 30’ (HIFEM)</strong> Sensación:{" "}
-            <strong>contracciones intensas</strong>; no invasivo, sin reposo.
+            MSculpt — 30’ (HIFEM) Sensación: contracciones intensas; no
+            invasivo, sin reposo.
           </li>
           <li>
-            <strong>Radiofrecuencia</strong> Objetivo: <strong>firmeza</strong>.
-            Trabajamos en el <strong>colágeno dérmico</strong> (tensión
-            inmediata + remodelación en sesiones).
+            Radiofrecuencia Objetivo: firmeza. Trabajamos en el colágeno dérmico
+            (tensión inmediata + remodelación en sesiones).
           </li>
           <li>
-            <strong>Maderoterapia y Masaje Modelador</strong> Objetivo:
-            Continuar con el tensado de la piel, y la definición de la figura.
-            <strong>modelador + maderoterapia</strong> (contorno),{" "}
-            <strong>dosificado</strong> según tu respuesta del día.
+            Maderoterapia y Masaje Modelador Objetivo: Continuar con el tensado
+            de la piel, y la definición de la figura. modelador + maderoterapia
+            (contorno), dosificado según tu respuesta del día.
           </li>
         </Box>
         <Box
@@ -204,10 +187,9 @@ export default function CinturonAcero() {
           }}
         >
           <Typography>
-            <strong>Diferencia clave con los otros paquetes:</strong> acá nos
-            enfocamos en la <strong>tonificación muscular avanzada</strong> y
-            usamos <strong>Radiofrecuencia para seguir tenzando la piel</strong>
-            ; el masaje se ajusta para rematar el acabado.
+            Diferencia clave con los otros paquetes: acá nos enfocamos en la
+            tonificación muscular avanzada y usamos Radiofrecuencia para seguir
+            tenzando la piel ; el masaje se ajusta para rematar el acabado.
           </Typography>
         </Box>
       </Container>
@@ -220,17 +202,14 @@ export default function CinturonAcero() {
           sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
           <li>
-            <strong>Serie inicial típica:</strong>{" "}
-            <strong>2 o 3 sesiones</strong> por semana, con 1 o 2 días de
-            descanso entre sesiones, según el caso; la definición y el contorno
-            siguen <strong>mejorando hasta ~3 meses</strong> después de terminar
-            la serie. Luego, <strong>mantenimiento</strong> según objetivo.
+            <strong>Serie inicial típica:</strong> 2 o 3 sesiones por semana,
+            con 1 o 2 días de descanso entre sesiones, según el caso; la
+            definición y el contorno siguen mejorando hasta ~3 meses después de
+            terminar la serie. Luego, mantenimiento según objetivo.
           </li>
           <li>
-            <strong>Expectativa realista:</strong>{" "}
-            <strong>menos contorno</strong>,{" "}
-            <strong>más tono, mejor definición</strong>; <strong>no</strong> es
-            un tratamiento de “kilos”.
+            <strong>Expectativa realista:</strong> menos contorno, más tono,
+            mejor definición; no es un tratamiento de “kilos”.
           </li>
         </Box>
       </Container>
@@ -322,8 +301,7 @@ export default function CinturonAcero() {
         <Typography align="center" sx={{ mt: 3 }}>
           <strong>Recomendación:</strong>
           <br />
-          <strong>Mejor precio por sesión:</strong> <strong>Cuponera 6</strong>{" "}
-          por Oferta de Apertura.
+          Mejor precio por sesión: Cuponera 6 por Oferta de Apertura.
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
@@ -364,8 +342,7 @@ export default function CinturonAcero() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Tiene una duración aproximada de{" "}
-                <strong>60 a 70 minutos</strong>.
+                Tiene una duración aproximada de 60 a 70 minutos.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -375,8 +352,8 @@ export default function CinturonAcero() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Sentís <strong>contracciones fuertes</strong> y{" "}
-                <strong>calor tolerable</strong>; salís y seguís con tu día.
+                Sentís contracciones fuertes y calor tolerable; salís y seguís
+                con tu día.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -386,9 +363,7 @@ export default function CinturonAcero() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Vas notando <strong>más tono</strong> y{" "}
-                <strong>menos contorno</strong> <strong>sesión a sesión</strong>
-                .
+                Vas notando más tono y menos contorno sesión a sesión .
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -400,10 +375,8 @@ export default function CinturonAcero() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Genera <strong>calentamiento controlado</strong> que{" "}
-                <strong>contrae</strong> colágeno y <strong>estimula</strong>{" "}
-                nueva producción (neocolagénesis) →{" "}
-                <strong>mejor firmeza/elasticidad</strong>.
+                Genera calentamiento controlado que contrae colágeno y estimula{" "}
+                nueva producción (neocolagénesis) → mejor firmeza/elasticidad.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -415,11 +388,8 @@ export default function CinturonAcero() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                El <strong>drenaje</strong> ayuda a{" "}
-                <strong>mover fluidos</strong> (útil como coadyuvante); la{" "}
-                <strong>maderoterapia</strong> se usa para{" "}
-                <strong>modelar</strong>, la aplicamos{" "}
-                <strong>con criterio</strong>.
+                El drenaje ayuda a mover fluidos (útil como coadyuvante); la{" "}
+                maderoterapia se usa para modelar, la aplicamos con criterio.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -429,10 +399,10 @@ export default function CinturonAcero() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Embarazo/lactancia; <strong>marcapasos</strong> u otros{" "}
-                <strong>implantes metálicos/electrónicos</strong>; problemas
-                cardíacos; tumores activos; fiebre/infecciones locales;{" "}
-                <strong>músculos lesionados</strong>. Siempre evaluamos tu caso.
+                Embarazo/lactancia; marcapasos u otros implantes
+                metálicos/electrónicos; problemas cardíacos; tumores activos;
+                fiebre/infecciones locales; músculos lesionados. Siempre
+                evaluamos tu caso.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -451,8 +421,8 @@ export default function CinturonAcero() {
           ¿Listo para esculpir y tensar en la misma sesión?
         </Typography>
         <Typography sx={{ mb: 3 }}>
-          Asegurá tu <strong>Cuponera 6 en Oferta de Apertura</strong> o reservá{" "}
-          <strong>1 sesión</strong> para arrancar.
+          Asegurá tu Cuponera 6 en Oferta de Apertura o reservá 1 sesión para
+          arrancar.
         </Typography>
         <Button
           variant="contained"
@@ -469,13 +439,12 @@ export default function CinturonAcero() {
       <Container component="footer" sx={{ py: 4 }}>
         <Typography variant="body2" align="center">
           Los resultados varían según composición corporal y hábitos. Este
-          protocolo <strong>no reemplaza</strong> nutrición/entrenamiento ni
-          indicación médica; <strong>los potencia</strong>.{" "}
-          <strong>MSculpt (HIFEM)</strong> cuenta con publicaciones; la{" "}
-          <strong>Radiofrecuencia en piel</strong> tiene base fisiológica y
-          revisiones clínicas; el <strong>drenaje y la maderoterapia</strong> se
-          usan como acompañamiento. Evaluación previa obligatoria. Si seguís con
-          curiosidad, podés revisar los siguientes estudios:{" "}
+          protocolo no reemplaza nutrición/entrenamiento ni indicación médica;
+          los potencia. MSculpt (HIFEM) cuenta con publicaciones; la{" "}
+          Radiofrecuencia en piel tiene base fisiológica y revisiones clínicas;
+          el drenaje y la maderoterapia se usan como acompañamiento. Evaluación
+          previa obligatoria. Si seguís con curiosidad, podés revisar los
+          siguientes estudios:{" "}
           <Link
             href="https://europepmc.org/article/PMC/PMC9028295?"
             target="_blank"

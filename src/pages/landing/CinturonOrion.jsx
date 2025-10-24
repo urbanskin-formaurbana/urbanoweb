@@ -48,13 +48,10 @@ export default function CinturonOrion() {
             Cintura más definida, sin cirugía.
           </Typography>
           <Typography sx={{ mb: 4 }}>
-            <strong>Protocolo 3‑en‑1</strong> para reducir contorno abdominal y
-            tensar la piel:{" "}
-            <strong>
-              Lipo Láser (635 nm) + Maderoterapia + Radiofrecuencia
-            </strong>
-            . Sesiones cómodas, sin afectar tu rutina en lo absoluto. Resultados
-            que te motivan cuando te veas al espejo. Tu cambio empieza hoy.
+            Protocolo 3‑en‑1 para reducir contorno abdominal y tensar la piel:{" "}
+            Lipo Láser (635 nm) + Maderoterapia + Radiofrecuencia . Sesiones
+            cómodas, sin afectar tu rutina en lo absoluto. Resultados que te
+            motivan cuando te veas al espejo. Tu cambio empieza hoy.
           </Typography>
           <Button
             variant="contained"
@@ -95,21 +92,18 @@ export default function CinturonOrion() {
             <strong>Desbloquea la grasa “resistente”</strong>: El lipo láser usa
             una luz roja suave para "despertar" las células de grasa. Esto hace
             que abran pequeños poros por un momento y liberen la grasa que
-            tienen adentro. Así, las células se achican,{" "}
-            <strong>pero no se destruyen.</strong>
+            tienen adentro. Así, las células se achican, pero no se destruyen.
           </Typography>
           <Typography>
-            <strong>Moviliza y moldea</strong>: La{" "}
-            <strong>Maderoterapia</strong> estimula la microcirculación y el
-            tejido subcutáneo para mejorar textura y contorno. La evidencia
-            formal es limitada, pero muchos pacientes refieren piel más uniforme
-            cuando se combina con otros métodos.
+            <strong>Moviliza y moldea</strong>: La Maderoterapia estimula la
+            microcirculación y el tejido subcutáneo para mejorar textura y
+            contorno. La evidencia formal es limitada, pero muchos pacientes
+            refieren piel más uniforme cuando se combina con otros métodos.
           </Typography>
           <Typography>
-            <strong>Estimula el colageno de tu piel</strong>: La{" "}
-            <strong>Radiofrecuencia</strong> reafirma y rejuvenece tu piel,
-            estimulando el colágeno y la elastina. Combate la flacidez y mejora
-            la textura.
+            <strong>Estimula el colageno de tu piel</strong>: La Radiofrecuencia
+            reafirma y rejuvenece tu piel, estimulando el colágeno y la
+            elastina. Combate la flacidez y mejora la textura.
           </Typography>
         </Stack>
         <Box
@@ -139,26 +133,20 @@ export default function CinturonOrion() {
           sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
           <Typography align="left" sx={{ mb: 2 }}>
-            Este protocolo está <strong>diseñado para vos</strong> SI:
+            Este protocolo está diseñado para vos SI:
           </Typography>
 
           <Typography align="left" sx={{ mb: 2 }}>
             <li>
-              Luchás con el sobrepeso y <strong>no ves cambios</strong> en el
-              abdomen pese a dieta/ejercicio.
+              Luchás con el sobrepeso y no ves cambios en el abdomen pese a
+              dieta/ejercicio.
             </li>
+            <li>Querés algo cómodo y progresivo, sin quirófano, ni agujas.</li>
             <li>
-              Querés <strong>algo cómodo y progresivo</strong>, sin quirófano,
-              ni agujas.
+              Buscás un primer impulso visible que te anime a mantener (no a
+              empezar de cero).
             </li>
-            <li>
-              Buscás un <strong>primer impulso visible</strong> que te anime a{" "}
-              <strong>mantener</strong> (no a empezar de cero).
-            </li>
-            <li>
-              Tenés agenda apretada y{" "}
-              <strong>no podés darte el lujo de parar</strong>.
-            </li>
+            <li>Tenés agenda apretada y no podés darte el lujo de parar.</li>
           </Typography>
 
           <Typography align="left">
@@ -178,8 +166,8 @@ export default function CinturonOrion() {
           sx={{ maxWidth: 800, mx: "auto", textAlign: "left" }}
         >
           <li>
-            <strong>Lipo Láser</strong> sobre abdomen.{" "}
-            <strong>Sensación:</strong> indolora, sin calor significativo.
+            <strong>Lipo Láser</strong> sobre abdomen. Sensación: indolora, sin
+            calor significativo.
           </li>
           <li>
             <strong>Maderoterapia</strong> específica para abdomen: maniobras
@@ -202,7 +190,7 @@ export default function CinturonOrion() {
         >
           <li>
             <strong>Menos contorno</strong> en la zona tratada (cintura/abdomen)
-            con progreso <strong>sesión a sesión</strong>.
+            con progreso sesión a sesión.
           </li>
           <li>
             <strong>Piel más firme</strong> y uniforme al combinar energía +
@@ -224,15 +212,11 @@ export default function CinturonOrion() {
           }}
         >
           <Typography>
-            En un{" "}
-            <strong>
-              estudio donde ni los pacientes ni los médicos saben quién está
-              recibiendo el tratamiento real y quién no
-            </strong>
-            , el grupo que recibió tratamiento con Lipo Laser en brazos redujo{" "}
-            <strong>3,7 cm</strong> de circunferencia combinada tras 6 sesiones
-            (sin cambios en el IMC). Resultado{" "}
-            <strong>progresivo y acumulativo</strong>.
+            En un estudio donde ni los pacientes ni los médicos saben quién está
+            recibiendo el tratamiento real y quién no , el grupo que recibió
+            tratamiento con Lipo Laser en brazos redujo 3,7 cm de circunferencia
+            combinada tras 6 sesiones (sin cambios en el IMC). Resultado{" "}
+            progresivo y acumulativo.
           </Typography>
         </Box>
       </Container>
@@ -346,12 +330,10 @@ export default function CinturonOrion() {
           </Grid>
         </Grid>
         <Typography align="center" sx={{ mt: 3 }}>
-          <strong>Recomendación directa:</strong> si querés{" "}
-          <strong>máxima relación precio/sesión</strong>, la{" "}
-          <strong>Cuponera 6</strong> está imbatible por la{" "}
-          <strong>Oferta de Apertura</strong>. Si tu objetivo es{" "}
-          <strong>acompañar varias semanas</strong> y bloquear precio, elegí{" "}
-          <strong>8 o 10</strong>.
+          <strong>Recomendación directa:</strong> si querés máxima relación
+          precio/sesión, la <strong>Cuponera 6</strong> está imbatible por la{" "}
+          Oferta de Apertura. Si tu objetivo es acompañar varias semanas y
+          bloquear precio, elegí 8 o 10.
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
@@ -391,7 +373,7 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Tiene una duración aproximada de <strong>90 minutos</strong>.
+                Tiene una duración aproximada de 90 minutos.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -400,9 +382,7 @@ export default function CinturonOrion() {
               <Typography>¿Es doloroso?</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Typography>
-                No. Es <strong>indoloro</strong> y no requiere de reposo.
-              </Typography>
+              <Typography>No. Es indoloro y no requiere de reposo.</Typography>
             </AccordionDetails>
           </Accordion>
           <Accordion>
@@ -411,10 +391,9 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Muchas personas notan <strong>cambios en contorno</strong> desde
-                las primeras sesiones; los estudios con Lipo Laser miden
-                resultados <strong>a las 2 semanas</strong> (6 sesiones). Tu
-                caso puede variar.
+                Muchas personas notan cambios en contorno desde las primeras
+                sesiones; los estudios con Lipo Laser miden resultados a las 2
+                semanas (6 sesiones). Tu caso puede variar.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -424,9 +403,9 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                No es un tratamiento de “kilos”. Es <strong>contorneado</strong>{" "}
-                (reducción de perímetro) y <strong>mejor textura</strong>; podés
-                mantener y potenciar con hábitos básicos.
+                No es un tratamiento de “kilos”. Es contorneado (reducción de
+                perímetro) y mejor textura; podés mantener y potenciar con
+                hábitos básicos.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -436,10 +415,9 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Emite <strong>luz roja de baja intensidad</strong> (≈635 nm) que{" "}
-                <strong>fotoactiva</strong> al adipocito, genera{" "}
-                <strong>poros transitorios</strong> en la membrana y permite{" "}
-                <strong>liberar lípidos</strong>, reduciendo su volumen.
+                Emite luz roja de baja intensidad (≈635 nm) que fotoactiva al
+                adipocito, genera poros transitorios en la membrana y permite{" "}
+                liberar lípidos, reduciendo su volumen.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -451,10 +429,8 @@ export default function CinturonOrion() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                La primera <strong>modela y estimula</strong> la
-                microcirculación; el segundo{" "}
-                <strong>favorece la producción de colágeno y elastina</strong>,
-                tensando la piel.
+                La primera modela y estimula la microcirculación; el segundo{" "}
+                favorece la producción de colágeno y elastina, tensando la piel.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -466,9 +442,8 @@ export default function CinturonOrion() {
               <Typography>
                 Embarazo, lactancia, marcapasos, problemas cardíacos, cáncer
                 activo u otras condiciones que desaconsejen fototerapia o
-                masajes profundos. Si tenés dudas,{" "}
-                <strong>consultá a tu médico</strong>. (Criterios alineados a
-                ensayos clínicos).
+                masajes profundos. Si tenés dudas, consultá a tu médico.
+                (Criterios alineados a ensayos clínicos).
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -487,8 +462,7 @@ export default function CinturonOrion() {
           ¿Listo para empezar?
         </Typography>
         <Typography sx={{ mb: 3 }}>
-          Reservá tu <strong>sesión</strong> o asegurá tu{" "}
-          <strong>Cuponera 6 en Oferta de Apertura</strong>.
+          Reservá tu sesión o asegurá tu Cuponera 6 en Oferta de Apertura.
         </Typography>
         <Button
           variant="contained"
@@ -504,10 +478,9 @@ export default function CinturonOrion() {
       </Container>
       <Container component="footer" sx={{ py: 4 }}>
         <Typography variant="body2" align="center">
-          Los resultados individuales varían. Este protocolo{" "}
-          <strong>no reemplaza</strong> indicaciones médicas, dieta o ejercicio;{" "}
-          <strong>los potencia</strong>. Estudio tras estudio indica{" "}
-          <strong>seguridad y confort</strong> en dispositivos 635–680 nm cuando
+          Los resultados individuales varían. Este protocolo no reemplaza
+          indicaciones médicas, dieta o ejercicio; los potencia. Estudio tras
+          estudio indica seguridad y confort en dispositivos 635–680 nm cuando
           se aplican correctamente. Puedes revisar los siguientes estudios si
           aún tienes curiosidad: ({" "}
           <Link

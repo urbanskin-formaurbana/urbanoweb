@@ -45,17 +45,13 @@ export default function CinturonTitan() {
             Cinturón de Titán
           </Typography>
           <Typography variant="h5" gutterBottom>
-            Reduce <strong>y</strong> tonifica en la misma sesión.
+            Reduce y tonifica en la misma sesión.
           </Typography>
           <Typography sx={{ mb: 4 }}>
-            <strong>Protocolo 4‑en‑1</strong>:{" "}
-            <strong>
-              MSculpt (HIFEM) + Lipo Láser 635 nm + Maderoterapia + Pulido
-              (drenaje/modelador)
-            </strong>
-            . No invasivo, sin reposo, pensado para{" "}
-            <strong>marcar abdomen</strong> y <strong>bajar contorno</strong> de
-            forma eficiente.
+            Protocolo 4‑en‑1: MSculpt (HIFEM) + Lipo Láser 635 nm +
+            Maderoterapia + Pulido (drenaje/modelador) . No invasivo, sin
+            reposo, pensado para marcar abdomen y bajar contorno de forma
+            eficiente.
           </Typography>
           <Button
             variant="contained"
@@ -72,10 +68,9 @@ export default function CinturonTitan() {
       </Box>
       <Container sx={{ py: 4 }}>
         <Typography align="center" sx={{ fontStyle: "italic" }}>
-          En <strong>Montevideo Centro</strong>.{" "}
-          <strong>Nivel intermedio</strong> (ideal para quienes ya vienen
-          cuidándose y quieren <strong>quemar la grasa rebelde</strong> del
-          abdomen y flancos). <strong>Sin agujas, y sin cirugías.</strong>
+          En Montevideo Centro. <strong>Nivel intermedio</strong> (ideal para
+          quienes ya vienen cuidándose y quieren quemar la grasa rebelde del
+          abdomen y flancos). Sin agujas, y sin cirugías.
         </Typography>
         <Box
           component="img"
@@ -98,17 +93,14 @@ export default function CinturonTitan() {
             1. MSculpt: músculo + grasa, a la vez
           </Typography>
           <Typography>
-            Tecnología <strong>HIFEM®</strong> que genera 25.000 contracciones
-            musculares, imposibles de lograr con ejercicios convencionales, en
-            solo 30 minutos. El resultado es <strong>sinergia</strong>:{" "}
-            <strong>construcción muscular</strong> +{" "}
-            <strong>reducción de grasa</strong> en una sesión.
+            Tecnología HIFEM® que genera 25.000 contracciones musculares,
+            imposibles de lograr con ejercicios convencionales, en solo 30
+            minutos. El resultado es sinergia: construcción muscular + reducción
+            de grasa en una sesión.
           </Typography>
           <Typography>
-            <strong>Evidencia clínica</strong>: Reportes promedian{" "}
-            <strong>≈30% menos grasa</strong> y{" "}
-            <strong>≈25% más músculo</strong>, medidos con{" "}
-            <strong>MRI/US</strong> (promedios, no promesas individuales).
+            Evidencia clínica: Reportes promedian ≈30% menos grasa y ≈25% más
+            músculo, medidos con MRI/US (promedios, no promesas individuales).
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             2. Lipo Láser: contorno y piel más tensa
@@ -116,22 +108,20 @@ export default function CinturonTitan() {
           <Typography>
             El lipo láser usa una luz roja suave para "despertar" las células de
             grasa. Esto hace que abran pequeños poros por un momento y liberen
-            la grasa que tienen adentro. Así, las células se achican,{" "}
-            <strong>pero no se destruyen.</strong> Es contorneado, no “bajar
-            kilos”.
+            la grasa que tienen adentro. Así, las células se achican, pero no se
+            destruyen. Es contorneado, no “bajar kilos”.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             3. Maderoterapia + Pulido (drenaje/modelador)
           </Typography>
           <Typography>
-            <strong>Drenaje linfático manual</strong>: técnica reconocida para{" "}
-            <strong>movilizar fluidos</strong>; se usa como acompañamiento de
-            otros protocolos estéticos para potenciar los resultados.
+            Drenaje linfático manual: técnica reconocida para movilizar fluidos;
+            se usa como acompañamiento de otros protocolos estéticos para
+            potenciar los resultados.
           </Typography>
           <Typography>
-            <strong>Masaje modelador/maderoterapia</strong>: maniobras para
-            romper
-            <strong>adiposidad localizada</strong>.
+            Masaje modelador/maderoterapia: maniobras para romper adiposidad
+            localizada.
           </Typography>
         </Stack>
         <Box
@@ -146,10 +136,9 @@ export default function CinturonTitan() {
           }}
         >
           <Typography>
-            <strong>Es simple:</strong> MSculpt <strong>activa y define</strong>{" "}
-            el músculo mientras <strong>reduce grasa</strong> al mismo tiempo;
-            el Lipo Láser <strong>afina contorno</strong>; el Pulido{" "}
-            <strong>drena y perfila</strong> el acabado.
+            Es simple: MSculpt activa y define el músculo mientras reduce grasa
+            al mismo tiempo; el Lipo Láser afina contorno; el Pulido drena y
+            perfila el acabado.
           </Typography>
         </Box>
       </Container>
@@ -166,25 +155,21 @@ export default function CinturonTitan() {
           </Typography>
           <Typography align="left" sx={{ mb: 2 }}>
             <li>
-              Ya probaste dieta/ejercicio y querés{" "}
-              <strong>sacar la última grasa localizada</strong> del abdomen.
+              Ya probaste dieta/ejercicio y querés sacar la última grasa
+              localizada del abdomen.
             </li>
+            <li>Buscás definición muscular visible sin parar tu agenda.</li>
             <li>
-              Buscás <strong>definición muscular visible</strong> sin parar tu
-              agenda.
-            </li>
-            <li>
-              Querés <strong>resultados acumulativos</strong> en pocas semanas
-              (serie corta inicial).
+              Querés resultados acumulativos en pocas semanas (serie corta
+              inicial).
             </li>
           </Typography>
           <Typography align="left">
-            <strong>Contraindicaciones:</strong> embarazo/lactancia;{" "}
-            <strong>implantes metálicos o electrónicos</strong> (p. ej.,
-            marcapasos, ciertos DIU/cobre) en zonas cercanas; problemas
-            cardíacos; tumores activos; fiebre, infecciones locales, trastornos
-            hemorrágicos; músculos lesionados. Siempre evaluamos tu caso antes
-            de iniciar.
+            <strong>Contraindicaciones:</strong> embarazo/lactancia; implantes
+            metálicos o electrónicos (p. ej., marcapasos, ciertos DIU/cobre) en
+            zonas cercanas; problemas cardíacos; tumores activos; fiebre,
+            infecciones locales, trastornos hemorrágicos; músculos lesionados.
+            Siempre evaluamos tu caso antes de iniciar.
           </Typography>
         </Box>
       </Container>
@@ -198,18 +183,15 @@ export default function CinturonTitan() {
         >
           <li>
             <strong>MSculpt — 30’</strong> sobre abdomen y flancos (HIFEM).
-            Sensación: <strong>contracciones intensas</strong>; no invasivo, sin
-            reposo.
+            Sensación: contracciones intensas; no invasivo, sin reposo.
           </li>
           <li>
-            <strong>Lipo Láser</strong> (láser frío 635 nm).{" "}
-            <strong>Indoloro</strong>.
+            <strong>Lipo Láser</strong> (láser frío 635 nm). Indoloro.
           </li>
           <li>
             <strong>Maderoterapia + Pulido</strong>: combinamos maderoterapia y{" "}
-            masaje modelador según tu respuesta del día para{" "}
-            <strong>bajar retención</strong> y{" "}
-            <strong>mejorar el acabado</strong>.
+            masaje modelador según tu respuesta del día para bajar retención y{" "}
+            mejorar el acabado.
           </li>
         </Box>
         <Box
@@ -224,9 +206,9 @@ export default function CinturonTitan() {
           }}
         >
           <Typography>
-            <strong>Diferencia vs. Cinturón de Orión:</strong> Titán{" "}
-            <strong>añade MSculpt</strong> que reduce y tonifica con 25mil
-            contracciones en una sesión. Sí! 25mil contracciones musculares.
+            <strong>Diferencia vs. Cinturón de Orión:</strong> Titán añade
+            MSculpt que reduce y tonifica con 25mil contracciones en una sesión.
+            Sí! 25mil contracciones musculares.
           </Typography>
         </Box>
       </Container>
@@ -239,16 +221,13 @@ export default function CinturonTitan() {
           sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
           <li>
-            <strong>Series iniciales habituales:</strong>{" "}
-            <strong>2 o 3 sesiones</strong> por semana descansando con un día de
-            por medio, según cada caso; Los cambios siguen mejorando luego de la
-            última sesión.
+            <strong>Series iniciales habituales:</strong> 2 o 3 sesiones por
+            semana descansando con un día de por medio, según cada caso; Los
+            cambios siguen mejorando luego de la última sesión.
           </li>
           <li>
-            <strong>Objetivo realista:</strong>{" "}
-            <strong>menos contorno abdominal</strong> +{" "}
-            <strong>más definición</strong>; <strong>no</strong> es un
-            tratamiento de “bajar kilos”.
+            <strong>Objetivo realista:</strong> menos contorno abdominal + más
+            definición; no es un tratamiento de “bajar kilos”.
           </li>
         </Box>
       </Container>
@@ -406,7 +385,7 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Tiene una duración aproximada de <strong>90 minutos</strong>.
+                Tiene una duración aproximada de 90 minutos.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -416,8 +395,8 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Se sienten <strong>contracciones intensas</strong> y{" "}
-                <strong>calor tolerable</strong>; salís y seguís con tu día.
+                Se sienten contracciones intensas y calor tolerable; salís y
+                seguís con tu día.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -427,11 +406,9 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Vas notando <strong>más tono</strong> y{" "}
-                <strong>menos contorno</strong> <strong>sesión a sesión</strong>
-                ; el pico se observa <strong>semanas</strong> después al
-                completar la serie (el cuerpo sigue eliminando grasa y el
-                músculo sigue adaptándose).
+                Vas notando más tono y menos contorno sesión a sesión ; el pico
+                se observa semanas después al completar la serie (el cuerpo
+                sigue eliminando grasa y el músculo sigue adaptándose).
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -441,10 +418,9 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                <strong>Es un láser frío de baja intensidad (≈635 nm)</strong>{" "}
-                que fotoactiva adipocitos y abre poros transitorios en su
-                membrana; así <strong>liberan lípidos</strong> y{" "}
-                <strong>disminuyen de volumen</strong>.
+                Es un láser frío de baja intensidad (≈635 nm) que fotoactiva
+                adipocitos y abre poros transitorios en su membrana; así liberan
+                lípidos y disminuyen de volumen.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -456,12 +432,10 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Para abdomen combina <strong>músculo + grasa</strong> en{" "}
-                <strong>una sola sesión</strong>, con{" "}
-                <strong>evidencia de imagen</strong> (MRI/US) y{" "}
-                <strong>ensayo aleatorizado</strong>. Esa combinación simultánea{" "}
-                <strong>no la ofrecen</strong> tecnologías de “grasa sola” o
-                “músculo solo”.
+                Para abdomen combina músculo + grasa en una sola sesión, con{" "}
+                evidencia de imagen (MRI/US) y ensayo aleatorizado. Esa
+                combinación simultánea no la ofrecen tecnologías de “grasa sola”
+                o “músculo solo”.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -471,9 +445,8 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                No. Es <strong>contorneado</strong> y{" "}
-                <strong>definición muscular</strong>; el peso puede no cambiar
-                aunque baje el perímetro y suba la firmeza.
+                No. Es contorneado y definición muscular; el peso puede no
+                cambiar aunque baje el perímetro y suba la firmeza.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -483,11 +456,10 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                Embarazo/lactancia,{" "}
-                <strong>marcapasos o implantes metálicos/electrónicos</strong>{" "}
-                cercanos, problemas cardíacos, tumores activos,
-                fiebre/infecciones, músculos lesionados. Te asesoramos antes de
-                empezar.
+                Embarazo/lactancia, marcapasos o implantes
+                metálicos/electrónicos cercanos, problemas cardíacos, tumores
+                activos, fiebre/infecciones, músculos lesionados. Te asesoramos
+                antes de empezar.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -499,12 +471,9 @@ export default function CinturonTitan() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography>
-                <strong>Titán</strong>: Suma <strong>MSculpt</strong>, con
-                respaldo en <strong>estudios</strong> (músculo + grasa). La{" "}
-                <strong>maderoterapia</strong> y el Pulido son{" "}
-                <strong>personalizados</strong>. <br />
-                <strong>Orión</strong>: Es un protocolo{" "}
-                <strong>de entrada</strong>.
+                Titán: Suma MSculpt, con respaldo en estudios (músculo + grasa).
+                La maderoterapia y el Pulido son personalizados. <br />
+                Orión: Es un protocolo de entrada.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -523,8 +492,8 @@ export default function CinturonTitan() {
           ¿Listo para definir abdomen y quemar esa grasa rebelde?
         </Typography>
         <Typography sx={{ mb: 3 }}>
-          Asegurá tu <strong>Cuponera 6 — Oferta de Apertura</strong> o reservá{" "}
-          <strong>1 sesión</strong> para comenzar.
+          Asegurá tu Cuponera 6 — Oferta de Apertura o reservá 1 sesión para
+          comenzar.
         </Typography>
         <Button
           variant="contained"
@@ -541,14 +510,11 @@ export default function CinturonTitan() {
       <Container component="footer" sx={{ py: 4 }}>
         <Typography variant="body2" align="center">
           Los resultados varían según composición corporal y hábitos. Este
-          protocolo <strong>no reemplaza</strong> indicación médica,
-          entrenamiento o nutrición; <strong>los potencia</strong>. MSculpt y
-          Lipo Láser cuentan con{" "}
-          <strong>publicaciones revisadas por pares</strong> sobre{" "}
-          <strong>reducción de grasa</strong> y/o{" "}
-          <strong>aumento muscular</strong>; la <strong>maderoterapia</strong>{" "}
-          es un <strong>complemento</strong>. Siempre realizamos evaluación
-          previa. Si seguís con curiosidad podés revisar estos estudios:{" "}
+          protocolo no reemplaza indicación médica, entrenamiento o nutrición;
+          los potencia. MSculpt y Lipo Láser cuentan con publicaciones revisadas
+          por pares sobre reducción de grasa y/o aumento muscular; la
+          maderoterapia es un complemento. Siempre realizamos evaluación previa.
+          Si seguís con curiosidad podés revisar estos estudios:{" "}
           <Link
             href="https://europepmc.org/article/PMC/PMC9028295?"
             target="_blank"
