@@ -1,5 +1,4 @@
 import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
-import StatusBadge from "../components/StatusBadge.jsx";
 import { Container, Box, Typography, Link } from "@mui/material";
 import FormaUrbanaLogo from "../assets/images/FormaUrbanaLogo.svg";
 
@@ -14,13 +13,12 @@ export default function LandingLayout() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
-      <Container maxWidth="md" sx={{ py: 3 }}>
+      <Container maxWidth="lg" sx={{ pt: 3 }}>
         <Box
           component="header"
           display="flex"
           justifyContent="space-between"
           alignItems="center"
-          mb={3}
           gap={2}
         >
           <Box component="nav" display="flex" alignItems="center" gap={2}>
@@ -28,7 +26,7 @@ export default function LandingLayout() {
               component="img"
               src={FormaUrbanaLogo}
               alt="FORMA Urbana"
-              sx={{ height: { xs: 64, sm: 80, md: 96 }, display: "block" }}
+              sx={{ height: { xs: 80, sm: 100, md: 120 }, display: "block" }}
             />
             {links.map(({ to, label }) => {
               const isActive = pathname === to;
@@ -46,7 +44,6 @@ export default function LandingLayout() {
               );
             })}
           </Box>
-          <StatusBadge />
         </Box>
         <Box component="main">
           <Outlet />
