@@ -36,7 +36,7 @@ export default function CinturonTitan() {
           textAlign: "center",
           bgcolor: "success.light",
           color: "success.contrastText",
-          py: { xs: 6, md: 8 },
+          py: { xs: 2, md: 4 },
         }}
       >
         <Container>
@@ -89,7 +89,11 @@ export default function CinturonTitan() {
         />
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           ¿Por qué el Cinturón de Titán funciona?
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 800, mx: "auto" }}>
@@ -151,7 +155,11 @@ export default function CinturonTitan() {
           component="ul"
           sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
-          <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
+          <Typography
+            variant={isMobile ? "h4" : "h3"}
+            align="center"
+            gutterBottom
+          >
             ¿Es para mí?
           </Typography>
           <Typography align="left" sx={{ mb: 2 }}>
@@ -178,7 +186,11 @@ export default function CinturonTitan() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           ¿Qué incluye cada sesión?
         </Typography>
         <Box
@@ -217,7 +229,11 @@ export default function CinturonTitan() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Resultados y ritmo recomendado
         </Typography>
         <Box
@@ -236,7 +252,11 @@ export default function CinturonTitan() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Precios y cuponeras
         </Typography>
         <Grid container spacing={3} justifyContent="center">
@@ -352,7 +372,11 @@ export default function CinturonTitan() {
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Paso a paso
         </Typography>
         <Box
@@ -379,7 +403,11 @@ export default function CinturonTitan() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Preguntas frecuentes
         </Typography>
         <Box sx={{ maxWidth: 800, mx: "auto" }}>

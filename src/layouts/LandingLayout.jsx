@@ -13,7 +13,7 @@ export default function LandingLayout() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
-      <Container maxWidth="lg" sx={{ pt: 3 }}>
+      <Container maxWidth="lg" sx={{ pt: 2 }}>
         <Box
           component="header"
           display="flex"
@@ -45,6 +45,7 @@ export default function LandingLayout() {
                   sx={{
                     // Bold when selected (active route)
                     fontWeight: isActive ? 700 : 400,
+                    fontSize: { xs: 14, md: 16 },
                     // Non-selected clickable links in green
                     color: isActive ? "text.primary" : "#2e7d32",
                     // Prevent pointer events on the active item (non-clickable)
