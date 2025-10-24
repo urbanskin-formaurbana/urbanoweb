@@ -1,5 +1,6 @@
 /* eslint-disable no-irregular-whitespace */
 import SEO from "../../components/SEO.jsx";
+import RadiofrecuenciaImg from "../../assets/images/radiofrecuencia.jpg";
 import {
   Accordion,
   AccordionDetails,
@@ -73,12 +74,11 @@ export default function CinturonAcero() {
         </Typography>
         <Box
           component="img"
-          src="/landings/cinturon-acero/placeholder-extra.svg"
-          alt="Resultados del Cinturón de Acero"
+          src={RadiofrecuenciaImg}
+          alt="Radiofrecuencia + MSculpt — Cinturón de Acero"
           sx={{
             width: "100%",
-            maxWidth: 600,
-            mx: "auto",
+            display: "block",
             mt: 4,
             borderRadius: 2,
           }}

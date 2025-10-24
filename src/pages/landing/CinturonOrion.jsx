@@ -1,5 +1,6 @@
 /* eslint-disable no-irregular-whitespace */
 import SEO from "../../components/SEO.jsx";
+import LipoLaserImg from "../../assets/images/Lipo-laser.jpg";
 import {
   Accordion,
   AccordionDetails,
@@ -73,12 +74,11 @@ export default function CinturonOrion() {
         </Typography>
         <Box
           component="img"
-          src="/landings/cinturon-orion/placeholder-extra.svg"
+          src={LipoLaserImg}
           alt="Resultados del Cinturón de Orión"
           sx={{
             width: "100%",
-            maxWidth: 600,
-            mx: "auto",
+            display: "block",
             mt: 4,
             borderRadius: 2,
           }}

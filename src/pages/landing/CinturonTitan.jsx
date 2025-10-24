@@ -1,5 +1,6 @@
 /* eslint-disable no-irregular-whitespace */
 import SEO from "../../components/SEO.jsx";
+import EmsculptImg from "../../assets/images/emsculpt.jpg";
 import {
   Accordion,
   AccordionDetails,
@@ -76,12 +77,11 @@ export default function CinturonTitan() {
         </Typography>
         <Box
           component="img"
-          src="/landings/cinturon-titan/placeholder-extra.svg"
-          alt="Resultados del Cinturón de Titán"
+          src={EmsculptImg}
+          alt="MSculpt + Lipo Láser — Cinturón de Titán"
           sx={{
             width: "100%",
-            maxWidth: 600,
-            mx: "auto",
+            display: "block",
             mt: 4,
             borderRadius: 2,
           }}
