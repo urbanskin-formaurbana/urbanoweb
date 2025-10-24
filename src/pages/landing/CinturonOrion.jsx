@@ -117,6 +117,8 @@ export default function CinturonOrion() {
             bgcolor: "success.light",
             borderLeft: 4,
             borderColor: "success.main",
+            maxWidth: 800,
+            mx: "auto",
           }}
         >
           <Typography>
