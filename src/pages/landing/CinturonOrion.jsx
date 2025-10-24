@@ -265,13 +265,13 @@ export default function CinturonOrion() {
                 height: "100%",
               }}
             >
+              <Chip
+                label="Oferta de Apertura"
+                color="success"
+                size="small"
+                sx={{ position: "absolute", top: -10, right: 10 }}
+              />
               <CardContent>
-                <Chip
-                  label="Oferta de Apertura"
-                  color="success"
-                  size="small"
-                  sx={{ position: "absolute", top: -10, right: 10 }}
-                />
                 <Typography variant="h5" gutterBottom>
                   Cuponera 6
                 </Typography>
