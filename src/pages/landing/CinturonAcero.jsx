@@ -43,7 +43,7 @@ export default function CinturonAcero() {
             sx={{
               display: "block",
               mx: "auto",
-              height: { xs: 48, md: 56 },
+              height: { xs: 56, sm: 72, md: 96, lg: 112 },
               mb: 1.5,
             }}
           />
