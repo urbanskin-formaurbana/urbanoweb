@@ -92,7 +92,7 @@ export default function CinturonTitan() {
           ¿Por qué el Cinturón de Titán funciona?
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 800, mx: "auto" }}>
-          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             1. MSculpt: músculo + grasa, a la vez
           </Typography>
           <Typography>
@@ -108,7 +108,7 @@ export default function CinturonTitan() {
             <strong>≈25% más músculo</strong>, medidos con{" "}
             <strong>MRI/US</strong> (promedios, no promesas individuales).
           </Typography>
-          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             2. Lipo Láser: contorno y piel más tensa
           </Typography>
           <Typography>
@@ -118,7 +118,7 @@ export default function CinturonTitan() {
             <strong>pero no se destruyen.</strong> Es contorneado, no “bajar
             kilos”.
           </Typography>
-          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             3. Maderoterapia + Pulido (drenaje/modelador)
           </Typography>
           <Typography>
@@ -139,6 +139,8 @@ export default function CinturonTitan() {
             bgcolor: "success.light",
             borderLeft: 4,
             borderColor: "success.main",
+            maxWidth: 800,
+            mx: "auto",
           }}
         >
           <Typography>
@@ -150,36 +152,39 @@ export default function CinturonTitan() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant="h3" align="center" gutterBottom>
-          ¿Es para mí?
-        </Typography>
-        <Typography align="center" sx={{ mb: 2 }}>
-          Este protocolo es para vos si:
-        </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
-          <li>
-            Ya probaste dieta/ejercicio y querés{" "}
-            <strong>sacar la última grasa localizada</strong> del abdomen.
-          </li>
-          <li>
-            Buscás <strong>definición muscular visible</strong> sin parar tu
-            agenda.
-          </li>
-          <li>
-            Querés <strong>resultados acumulativos</strong> en pocas semanas
-            (serie corta inicial).
-          </li>
+          <Typography variant="h3" align="center" gutterBottom>
+            ¿Es para mí?
+          </Typography>
+          <Typography align="left" sx={{ mb: 2 }}>
+            Este protocolo es para vos si:
+          </Typography>
+          <Typography align="left" sx={{ mb: 2 }}>
+            <li>
+              Ya probaste dieta/ejercicio y querés{" "}
+              <strong>sacar la última grasa localizada</strong> del abdomen.
+            </li>
+            <li>
+              Buscás <strong>definición muscular visible</strong> sin parar tu
+              agenda.
+            </li>
+            <li>
+              Querés <strong>resultados acumulativos</strong> en pocas semanas
+              (serie corta inicial).
+            </li>
+          </Typography>
+          <Typography align="left">
+            <strong>Contraindicaciones:</strong> embarazo/lactancia;{" "}
+            <strong>implantes metálicos o electrónicos</strong> (p. ej.,
+            marcapasos, ciertos DIU/cobre) en zonas cercanas; problemas
+            cardíacos; tumores activos; fiebre, infecciones locales, trastornos
+            hemorrágicos; músculos lesionados. Siempre evaluamos tu caso antes
+            de iniciar.
+          </Typography>
         </Box>
-        <Typography align="center">
-          <strong>Contraindicaciones:</strong> embarazo/lactancia;{" "}
-          <strong>implantes metálicos o electrónicos</strong> (p. ej.,
-          marcapasos, ciertos DIU/cobre) en zonas cercanas; problemas cardíacos;
-          tumores activos; fiebre, infecciones locales, trastornos hemorrágicos;
-          músculos lesionados. Siempre evaluamos tu caso antes de iniciar.
-        </Typography>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
@@ -187,7 +192,7 @@ export default function CinturonTitan() {
         </Typography>
         <Box
           component="ol"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left" }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left" }}
         >
           <li>
             <strong>MSculpt — 30’</strong> sobre abdomen y flancos (HIFEM).
@@ -212,6 +217,8 @@ export default function CinturonTitan() {
             bgcolor: "success.light",
             borderLeft: 4,
             borderColor: "success.main",
+            maxWidth: 800,
+            mx: "auto",
           }}
         >
           <Typography>
@@ -227,7 +234,7 @@ export default function CinturonTitan() {
         </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
           <li>
             <strong>Series iniciales habituales:</strong>{" "}
@@ -281,8 +288,8 @@ export default function CinturonTitan() {
                 sx={{
                   position: "absolute",
                   top: 0,
-                  right: 25,
-                  transform: "translateY(-50%)",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
                   zIndex: 2,
                   boxShadow: 1,
                 }}

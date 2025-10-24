@@ -88,8 +88,8 @@ export default function CinturonAcero() {
         <Typography variant="h3" align="center" gutterBottom>
           ¿Por qué funciona?
         </Typography>
-        <Stack spacing={2} sx={{ maxWidth: 800, mx: "auto" }}>
-          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+        <Stack spacing={2} sx={{ maxWidth: 700, mx: "auto" }}>
+          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             1. MSculpt: músculo <strong>y</strong> grasa, al mismo tiempo
           </Typography>
           <Typography>
@@ -100,7 +100,7 @@ export default function CinturonAcero() {
             <strong>reducción de grasa subcutánea</strong> en{" "}
             <strong>30 minutos</strong>.
           </Typography>
-          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             2. Radiofrecuencia (RF): <strong>tensión de la piel</strong> que se
             nota
           </Typography>
@@ -114,7 +114,7 @@ export default function CinturonAcero() {
             <strong>mejor firmeza y textura</strong> en la cubierta cutánea del
             abdomen.
           </Typography>
-          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
             3. Maderoterapia + drenaje
           </Typography>
           <Typography>
@@ -133,35 +133,38 @@ export default function CinturonAcero() {
         <Typography variant="h3" align="center" gutterBottom>
           ¿Es para mí?
         </Typography>
-        <Typography align="center" sx={{ mb: 2 }}>
-          Elegí <strong>Cinturón de Acero</strong> SI:
-        </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
-          <li>
-            Querés <strong>seguir definiendo</strong> y{" "}
-            <strong>quemar la grasa rebelde</strong> del abdomen sin parar tu
-            rutina.
-          </li>
-          <li>
-            Buscás <strong>tono real</strong> (músculo) +{" "}
-            <strong>mejor piel</strong> (tensión){" "}
-            <strong>en la misma sesión</strong>.
-          </li>
-          <li>
-            Preferís <strong>resultados acumulativos</strong> en pocas semanas,
-            con protocolo claro y medible.
-          </li>
+          <Typography align="left" sx={{ mb: 2 }}>
+            Elegí <strong>Cinturón de Acero</strong> SI:
+          </Typography>
+          <Typography align="left" sx={{ mb: 2 }}>
+            <li>
+              Querés <strong>seguir definiendo</strong> y{" "}
+              <strong>quemar la grasa rebelde</strong> del abdomen sin parar tu
+              rutina.
+            </li>
+            <li>
+              Buscás <strong>tono real</strong> (músculo) +{" "}
+              <strong>mejor piel</strong> (tensión){" "}
+              <strong>en la misma sesión</strong>.
+            </li>
+            <li>
+              Preferís <strong>resultados acumulativos</strong> en pocas
+              semanas, con protocolo claro y medible.
+            </li>
+          </Typography>
+
+          <Typography align="left">
+            <strong>No recomendado</strong> si estás embarazada/lactando o tenés{" "}
+            <strong>marcapasos, implantes metálicos/electrónicos</strong>,
+            problemas cardíacos, tumores activos, fiebre/infección local o{" "}
+            <strong>músculos lesionados</strong>. Evaluamos tu caso antes de
+            iniciar.
+          </Typography>
         </Box>
-        <Typography align="center">
-          <strong>No recomendado</strong> si estás embarazada/lactando o tenés{" "}
-          <strong>marcapasos, implantes metálicos/electrónicos</strong>,
-          problemas cardíacos, tumores activos, fiebre/infección local o{" "}
-          <strong>músculos lesionados</strong>. Evaluamos tu caso antes de
-          iniciar.
-        </Typography>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
@@ -169,7 +172,7 @@ export default function CinturonAcero() {
         </Typography>
         <Box
           component="ol"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left" }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left" }}
         >
           <li>
             <strong>MSculpt — 30’ (HIFEM)</strong> Sensación:{" "}
@@ -194,6 +197,8 @@ export default function CinturonAcero() {
             bgcolor: "success.light",
             borderLeft: 4,
             borderColor: "success.main",
+            maxWidth: 800,
+            mx: "auto",
           }}
         >
           <Typography>
@@ -210,7 +215,7 @@ export default function CinturonAcero() {
         </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
           <li>
             <strong>Serie inicial típica:</strong>{" "}
@@ -253,8 +258,8 @@ export default function CinturonAcero() {
                 sx={{
                   position: "absolute",
                   top: 0,
-                  right: 25,
-                  transform: "translateY(-50%)",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
                   zIndex: 2,
                   boxShadow: 1,
                 }}

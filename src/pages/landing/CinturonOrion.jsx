@@ -130,36 +130,40 @@ export default function CinturonOrion() {
         <Typography variant="h3" align="center" gutterBottom>
           ¿Es para mí?
         </Typography>
-        <Typography align="left" sx={{ mb: 2 }}>
-          Este protocolo está <strong>diseñado para vos</strong> SI:
-        </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
-          <li>
-            Luchás con el sobrepeso y <strong>no ves cambios</strong> en el
-            abdomen pese a dieta/ejercicio.
-          </li>
-          <li>
-            Querés <strong>algo cómodo y progresivo</strong>, sin quirófano, ni
-            agujas.
-          </li>
-          <li>
-            Buscás un <strong>primer impulso visible</strong> que te anime a{" "}
-            <strong>mantener</strong> (no a empezar de cero).
-          </li>
-          <li>
-            Tenés agenda apretada y{" "}
-            <strong>no podés darte el lujo de parar</strong>.
-          </li>
+          <Typography align="left" sx={{ mb: 2 }}>
+            Este protocolo está <strong>diseñado para vos</strong> SI:
+          </Typography>
+
+          <Typography align="left" sx={{ mb: 2 }}>
+            <li>
+              Luchás con el sobrepeso y <strong>no ves cambios</strong> en el
+              abdomen pese a dieta/ejercicio.
+            </li>
+            <li>
+              Querés <strong>algo cómodo y progresivo</strong>, sin quirófano,
+              ni agujas.
+            </li>
+            <li>
+              Buscás un <strong>primer impulso visible</strong> que te anime a{" "}
+              <strong>mantener</strong> (no a empezar de cero).
+            </li>
+            <li>
+              Tenés agenda apretada y{" "}
+              <strong>no podés darte el lujo de parar</strong>.
+            </li>
+          </Typography>
+
+          <Typography align="left">
+            <strong>No lo recomendamos</strong> si estás embarazada o en
+            lactancia, usás marcapasos, tenés cáncer activo o una condición
+            médica que contraindique fototerapia o masajes profundos. Ante
+            dudas, consultá a tu médico.
+          </Typography>
         </Box>
-        <Typography align="left">
-          <strong>No lo recomendamos</strong> si estás embarazada o en
-          lactancia, usás marcapasos, tenés cáncer activo o una condición médica
-          que contraindique fototerapia o masajes profundos. Ante dudas,
-          consultá a tu médico.
-        </Typography>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
@@ -167,7 +171,7 @@ export default function CinturonOrion() {
         </Typography>
         <Box
           component="ol"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left" }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left" }}
         >
           <li>
             <strong>Lipo Láser</strong> sobre abdomen.{" "}
@@ -190,7 +194,7 @@ export default function CinturonOrion() {
         </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
         >
           <li>
             <strong>Menos contorno</strong> en la zona tratada (cintura/abdomen)
@@ -211,6 +215,8 @@ export default function CinturonOrion() {
             bgcolor: "success.light",
             borderLeft: 4,
             borderColor: "success.main",
+            maxWidth: 800,
+            mx: "auto",
           }}
         >
           <Typography>
@@ -264,8 +270,8 @@ export default function CinturonOrion() {
                 sx={{
                   position: "absolute",
                   top: 0,
-                  right: 25,
-                  transform: "translateY(-50%)",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
                   zIndex: 2,
                   boxShadow: 1,
                 }}
