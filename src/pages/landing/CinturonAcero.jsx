@@ -16,10 +16,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 const WHATSAPP_LINK = "https://wa.me/59893770785";
 
 export default function CinturonAcero() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
     <>
       <SEO
@@ -37,7 +41,7 @@ export default function CinturonAcero() {
       >
         <Container>
           <Typography
-            variant="h2"
+            variant={isMobile ? "h3" : "h2"}
             component="h1"
             sx={{ fontWeight: "bold" }}
             gutterBottom
@@ -84,7 +88,7 @@ export default function CinturonAcero() {
         />
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
           ¿Por qué funciona?
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 700, mx: "auto" }}>
@@ -120,7 +124,7 @@ export default function CinturonAcero() {
         </Stack>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
           ¿Es para mí?
         </Typography>
         <Box
@@ -154,7 +158,7 @@ export default function CinturonAcero() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
           Qué incluye cada sesión
         </Typography>
         <Box
@@ -194,7 +198,7 @@ export default function CinturonAcero() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
           Resultados y ritmo recomendado
         </Typography>
         <Box
@@ -214,7 +218,7 @@ export default function CinturonAcero() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
           Precios y cuponeras
         </Typography>
         <Grid container spacing={3} justifyContent="center">
@@ -305,7 +309,7 @@ export default function CinturonAcero() {
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
           Paso a paso
         </Typography>
         <Box
@@ -332,7 +336,7 @@ export default function CinturonAcero() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} align="center" gutterBottom>
           Preguntas frecuentes
         </Typography>
         <Box sx={{ maxWidth: 800, mx: "auto" }}>
@@ -417,7 +421,7 @@ export default function CinturonAcero() {
           color: "success.contrastText",
         }}
       >
-        <Typography variant="h3" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} gutterBottom>
           ¿Listo para esculpir y tensar en la misma sesión?
         </Typography>
         <Typography sx={{ mb: 3 }}>

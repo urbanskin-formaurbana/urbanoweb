@@ -21,7 +21,12 @@ export default function LandingLayout() {
           alignItems="center"
           gap={2}
         >
-          <Box component="nav" display="flex" alignItems="center" gap={2}>
+          <Box
+            component="nav"
+            display="flex"
+            alignItems="center"
+            gap={{ xs: 0, sm: 2 }}
+          >
             <Box
               component="img"
               src={FormaUrbanaLogo}

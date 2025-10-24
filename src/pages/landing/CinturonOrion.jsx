@@ -16,10 +16,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 const WHATSAPP_LINK = "https://wa.me/59893770785";
 
 export default function CinturonOrion() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
     <>
       <SEO
@@ -32,12 +36,12 @@ export default function CinturonOrion() {
           textAlign: "center",
           bgcolor: "success.light",
           color: "success.contrastText",
-          py: { xs: 6, md: 8 },
+          py: { xs: 2, md: 4 },
         }}
       >
         <Container>
           <Typography
-            variant="h2"
+            variant={isMobile ? "h3" : "h2"}
             component="h1"
             sx={{ fontWeight: "bold" }}
             gutterBottom
@@ -60,7 +64,7 @@ export default function CinturonOrion() {
             href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ fontWeight: "bold" }}
+            sx={{ fontWeight: "bold", mb: isMobile ? 2 : 0 }}
           >
             Escribinos por WhatsApp
           </Button>
@@ -84,7 +88,11 @@ export default function CinturonOrion() {
         />
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           ¿Por qué el Cinturón de Orión funciona?
         </Typography>
         <Stack spacing={2} sx={{ maxWidth: 800, mx: "auto" }}>
@@ -125,7 +133,11 @@ export default function CinturonOrion() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           ¿Es para mí?
         </Typography>
         <Box
@@ -158,7 +170,11 @@ export default function CinturonOrion() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Qué incluye cada sesión
         </Typography>
         <Box
@@ -181,7 +197,11 @@ export default function CinturonOrion() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Beneficios que vas a notar
         </Typography>
         <Box
@@ -221,7 +241,11 @@ export default function CinturonOrion() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Precios y cuponeras
         </Typography>
         <Grid container spacing={3} justifyContent="center">
@@ -337,7 +361,11 @@ export default function CinturonOrion() {
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Cómo es el paso a paso
         </Typography>
         <Box
@@ -363,7 +391,11 @@ export default function CinturonOrion() {
         </Box>
       </Container>
       <Container component="section" sx={{ py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography
+          variant={isMobile ? "h4" : "h3"}
+          align="center"
+          gutterBottom
+        >
           Preguntas frecuentes
         </Typography>
         <Box sx={{ maxWidth: 800, mx: "auto" }}>
@@ -458,7 +490,7 @@ export default function CinturonOrion() {
           color: "success.contrastText",
         }}
       >
-        <Typography variant="h3" gutterBottom>
+        <Typography variant={isMobile ? "h4" : "h3"} gutterBottom>
           ¿Listo para empezar?
         </Typography>
         <Typography sx={{ mb: 3 }}>
