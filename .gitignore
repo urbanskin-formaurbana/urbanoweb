@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 .env
+
+.dockerignore
+Dockerfile
+docker-compose*.yml
