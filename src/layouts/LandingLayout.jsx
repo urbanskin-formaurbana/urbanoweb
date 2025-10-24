@@ -25,17 +25,11 @@ export default function LandingLayout() {
         >
           <Box component="nav" display="flex" alignItems="center" gap={2}>
             <Box
-              component={RouterLink}
-              to="/cinturon-orion"
-              sx={{ display: "inline-flex", alignItems: "center" }}
-            >
-              <Box
-                component="img"
-                src={FormaUrbanaLogo}
-                alt="FORMA Urbana"
-                sx={{ height: { xs: 48, sm: 60, md: 72 }, display: "block" }}
-              />
-            </Box>
+              component="img"
+              src={FormaUrbanaLogo}
+              alt="FORMA Urbana"
+              sx={{ height: { xs: 64, sm: 80, md: 96 }, display: "block" }}
+            />
             {links.map(({ to, label }) => {
               const isActive = pathname === to;
               return (
