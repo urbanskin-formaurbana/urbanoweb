@@ -36,8 +36,14 @@ export default function LandingLayout() {
                   component={isActive ? "span" : RouterLink}
                   to={isActive ? undefined : to}
                   underline={isActive ? "none" : "hover"}
-                  color={isActive ? "text.primary" : "primary.main"}
-                  sx={isActive ? { pointerEvents: "none" } : undefined}
+                  sx={{
+                    // Bold when selected (active route)
+                    fontWeight: isActive ? 700 : 400,
+                    // Non-selected clickable links in green
+                    color: isActive ? "text.primary" : "#2e7d32",
+                    // Prevent pointer events on the active item (non-clickable)
+                    pointerEvents: isActive ? "none" : "auto",
+                  }}
                 >
                   {label}
                 </Link>
