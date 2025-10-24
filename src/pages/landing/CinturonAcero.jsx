@@ -69,11 +69,11 @@ export default function CinturonAcero() {
           </Button>
         </Container>
       </Box>
-      <Container sx={{ py: 4 }}>
+      <Container sx={{ py: 2 }}>
         <Typography align="center" sx={{ fontStyle: "italic" }}>
-          En Montevideo Centro. Nivel avanzado , para quienes ya vienen
-          cuidándose y quieren seguir tonificando músculo y piel. No invasivo.
-          Sin cirujías.
+          En Montevideo Centro. <strong>Nivel avanzado</strong> , para quienes
+          ya vienen cuidándose y quieren seguir tonificando músculo y piel. No
+          invasivo. Sin cirujías.
         </Typography>
         <Box
           component="img"
@@ -87,7 +87,7 @@ export default function CinturonAcero() {
           }}
         />
       </Container>
-      <Container component="section" sx={{ py: 4 }}>
+      <Container component="section" sx={{ py: 2 }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -127,7 +127,7 @@ export default function CinturonAcero() {
           </Typography>
         </Stack>
       </Container>
-      <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -165,7 +165,7 @@ export default function CinturonAcero() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4 }}>
+      <Container component="section" sx={{ py: 2 }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -209,7 +209,7 @@ export default function CinturonAcero() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -233,7 +233,7 @@ export default function CinturonAcero() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4 }}>
+      <Container component="section" sx={{ py: 2 }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -328,7 +328,7 @@ export default function CinturonAcero() {
           Mejor precio por sesión: Cuponera 6 por Oferta de Apertura.
         </Typography>
       </Container>
-      <Container component="section" sx={{ py: 4, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -359,7 +359,7 @@ export default function CinturonAcero() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 4 }}>
+      <Container component="section" sx={{ py: 2 }}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -468,7 +468,7 @@ export default function CinturonAcero() {
           Escribinos ahora
         </Button>
       </Container>
-      <Container component="footer" sx={{ py: 4 }}>
+      <Container component="footer" sx={{ py: 2 }}>
         <Typography variant="body2" align="center">
           Los resultados varían según composición corporal y hábitos. Este
           protocolo no reemplaza nutrición/entrenamiento ni indicación médica;
