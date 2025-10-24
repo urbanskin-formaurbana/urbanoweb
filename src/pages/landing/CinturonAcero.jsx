@@ -28,7 +28,7 @@ export default function CinturonAcero() {
     <>
       <SEO
         title="FORMA Urbana — Cinturón de Acero | MSculpt + Radiofrecuencia (Montevideo)"
-        description="Definí y tensá abdomen en 60’: MSculpt (HIFEM + RF) + RF de piel + Maderoterapia + Drenaje. Sesión $1.900. Cuponera 6 a $6.200 (Oferta de Apertura). Reservá por WhatsApp."
+        description="Definí y tensá abdomen en 60’: MSculpt (HIFEM + RF) + RF de piel + Maderoterapia + Drenaje. Sesión $1.900. Cuponera 6 a $6.200 (Oferta de Primavera). Reservá por WhatsApp."
       />
       <Box
         component="header"
@@ -257,7 +257,7 @@ export default function CinturonAcero() {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Box sx={{ position: "relative", height: "100%" }}>
               <Chip
-                label="Oferta de Apertura"
+                label="Oferta de Primavera"
                 color="success"
                 size="small"
                 sx={{
@@ -280,6 +280,13 @@ export default function CinturonAcero() {
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
                     Cuponera 6
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ textDecoration: "line-through", my: -1, fontSize: 12 }}
+                    color="text.secondary"
+                  >
+                    $ 7.200
                   </Typography>
                   <Typography variant="h4" color="success.main" gutterBottom>
                     $ 6.200
@@ -325,7 +332,7 @@ export default function CinturonAcero() {
         <Typography align="center" sx={{ mt: 3 }}>
           <strong>Recomendación:</strong>
           <br />
-          Mejor precio por sesión: Cuponera 6 por Oferta de Apertura.
+          Mejor precio por sesión: Cuponera 6 por Oferta de Primavera.
         </Typography>
       </Container>
       <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
@@ -453,7 +460,7 @@ export default function CinturonAcero() {
           ¿Listo para esculpir y tensar en la misma sesión?
         </Typography>
         <Typography sx={{ mb: 3 }}>
-          Asegurá tu Cuponera 6 en Oferta de Apertura o reservá 1 sesión para
+          Asegurá tu Cuponera 6 en Oferta de Primavera o reservá 1 sesión para
           arrancar.
         </Typography>
         <Button

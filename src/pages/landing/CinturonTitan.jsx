@@ -28,7 +28,7 @@ export default function CinturonTitan() {
     <>
       <SEO
         title="FORMA Urbana — Cinturón de Titán | MSculpt + Lipo Láser (Montevideo)"
-        description="Definí y reducí abdomen en la misma sesión: MSculpt (HIFEM + RF) + Lipo Láser 635 nm + Maderoterapia + Pulido. Sesión $2.000. Cuponera 6 a $6.600 (Oferta de Apertura). Reservá por WhatsApp."
+        description="Definí y reducí abdomen en la misma sesión: MSculpt (HIFEM + RF) + Lipo Láser 635 nm + Maderoterapia + Pulido. Sesión $2.000. Cuponera 6 a $6.600 (Oferta de Primavera). Reservá por WhatsApp."
       />
       <Box
         component="header"
@@ -287,7 +287,7 @@ export default function CinturonTitan() {
           >
             <Box sx={{ position: "relative", height: "100%" }}>
               <Chip
-                label="Oferta de Apertura"
+                label="Oferta de Primavera"
                 color="success"
                 size="small"
                 sx={{
@@ -310,6 +310,13 @@ export default function CinturonTitan() {
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
                     Cuponera 6
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ textDecoration: "line-through", my: -1, fontSize: 12 }}
+                    color="text.secondary"
+                  >
+                    $ 7.600
                   </Typography>
                   <Typography variant="h4" color="success.main" gutterBottom>
                     $ 6.600
@@ -367,7 +374,7 @@ export default function CinturonTitan() {
         <Typography align="center" sx={{ mt: 3 }}>
           <strong>Recomendación directa:</strong>{" "}
           <strong>Mejor precio por sesión:</strong> <strong>Cuponera 6</strong>{" "}
-          en Oferta de Apertura (ideal para completar una serie inicial y
+          en Oferta de Primavera (ideal para completar una serie inicial y
           validar resultados sin gastar de más).
         </Typography>
       </Container>
@@ -524,7 +531,7 @@ export default function CinturonTitan() {
           ¿Listo para definir abdomen y quemar esa grasa rebelde?
         </Typography>
         <Typography sx={{ mb: 3 }}>
-          Asegurá tu Cuponera 6 — Oferta de Apertura o reservá 1 sesión para
+          Asegurá tu Cuponera 6 — Oferta de Primavera o reservá 1 sesión para
           comenzar.
         </Typography>
         <Button

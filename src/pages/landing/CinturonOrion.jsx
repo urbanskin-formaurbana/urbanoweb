@@ -28,7 +28,7 @@ export default function CinturonOrion() {
     <>
       <SEO
         title="FORMA Urbana — Cinturón de Orión | Lipo Láser 635 nm + Maderoterapia + Drenaje (Montevideo)"
-        description="Reducí el contorno abdominal sin cirugía. Protocolo 3‑en‑1: Lipo Láser 635 nm + Maderoterapia + Drenaje Linfático. Sesión $1.500. Cuponera 6 a $5.500 (Oferta de Apertura)."
+        description="Reducí el contorno abdominal sin cirugía. Protocolo 3‑en‑1: Lipo Láser 635 nm + Maderoterapia + Drenaje Linfático. Sesión $1.500. Cuponera 6 a $5.500 (Oferta de Primavera)."
       />
       <Box
         component="header"
@@ -276,7 +276,7 @@ export default function CinturonOrion() {
           >
             <Box sx={{ position: "relative", height: "100%" }}>
               <Chip
-                label="Oferta de Apertura"
+                label="Oferta de Primavera"
                 color="success"
                 size="small"
                 sx={{
@@ -299,6 +299,17 @@ export default function CinturonOrion() {
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
                     Cuponera 6
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      textDecoration: "line-through",
+                      my: -1,
+                      fontSize: 12,
+                    }}
+                    color="text.secondary"
+                  >
+                    $ 7.200
                   </Typography>
                   <Typography variant="h4" color="success.main" gutterBottom>
                     $ 6.200
@@ -356,7 +367,7 @@ export default function CinturonOrion() {
         <Typography align="center" sx={{ mt: 3 }}>
           <strong>Recomendación directa:</strong> si querés máxima relación
           precio/sesión, la <strong>Cuponera 6</strong> está imbatible por la{" "}
-          Oferta de Apertura. Si tu objetivo es acompañar varias semanas y
+          Oferta de Primavera. Si tu objetivo es acompañar varias semanas y
           bloquear precio, elegí 8 o 10.
         </Typography>
       </Container>
@@ -494,7 +505,7 @@ export default function CinturonOrion() {
           ¿Listo para empezar?
         </Typography>
         <Typography sx={{ mb: 3 }}>
-          Reservá tu sesión o asegurá tu Cuponera 6 en Oferta de Apertura.
+          Reservá tu sesión o asegurá tu Cuponera 6 en Oferta de Primavera.
         </Typography>
         <Button
           variant="contained"
