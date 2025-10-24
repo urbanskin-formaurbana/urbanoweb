@@ -59,6 +59,8 @@ export default function CinturonAcero() {
             color="success"
             size="large"
             href={WHATSAPP_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
             sx={{ fontWeight: "bold" }}
           >
             Escribinos por WhatsApp
@@ -457,6 +459,8 @@ export default function CinturonAcero() {
           color="success"
           size="large"
           href={WHATSAPP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
           sx={{ fontWeight: "bold" }}
         >
           Escribinos ahora

@@ -62,6 +62,8 @@ export default function CinturonTitan() {
             color="success"
             size="large"
             href={WHATSAPP_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
             sx={{ fontWeight: "bold" }}
           >
             Escribinos por WhatsApp
@@ -529,6 +531,8 @@ export default function CinturonTitan() {
           color="success"
           size="large"
           href={WHATSAPP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
           sx={{ fontWeight: "bold" }}
         >
           Escribinos ahora
