@@ -13,7 +13,7 @@ export default function LandingLayout() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
-      <Container maxWidth="lg" sx={{ pt: 2 }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 0, sm: 2 } }}>
         <Box
           component="header"
           display="flex"
