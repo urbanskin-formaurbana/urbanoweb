@@ -11,8 +11,4 @@ export const LANDINGS = [
     path: '/cinturon-acero',
     import: () => import('./landing/CinturonAcero.jsx'),
   },
-  {
-    path: '/oferta-apertura',
-    import: () => import('./landing/OfertaApertura.jsx'),
-  },
 ]
