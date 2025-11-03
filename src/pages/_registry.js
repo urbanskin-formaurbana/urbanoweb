@@ -11,4 +11,16 @@ export const LANDINGS = [
     path: '/cinturon-acero',
     import: () => import('./landing/CinturonAcero.jsx'),
   },
+  {
+    path: '/cinturon-de-orion',
+    import: () => import('./landing/CinturonDeOrion.jsx'),
+  },
+  {
+    path: '/cinturon-de-titan',
+    import: () => import('./landing/CinturonDeTitan.jsx'),
+  },
+  {
+    path: '/cinturon-de-acero',
+    import: () => import('./landing/CinturonDeAcero.jsx'),
+  },
 ]

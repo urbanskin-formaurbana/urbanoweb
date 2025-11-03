@@ -2,14 +2,23 @@ import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
 import { Container, Box, Typography, Link } from "@mui/material";
 import FormaUrbanaLogo from "../assets/images/FormaUrbanaLogo.svg";
 
+const STANDARD_LINKS = [
+  { to: "/cinturon-orion", label: "Cinturón de Orión" },
+  { to: "/cinturon-titan", label: "Cinturón de Titán" },
+  { to: "/cinturon-acero", label: "Cinturón de Acero" },
+];
+
+const TEST_LINKS = [
+  { to: "/cinturon-de-orion", label: "Cinturón de Orión" },
+  { to: "/cinturon-de-titan", label: "Cinturón de Titán" },
+  { to: "/cinturon-de-acero", label: "Cinturón de Acero" },
+];
+
 export default function LandingLayout() {
   const { pathname } = useLocation();
-
-  const links = [
-    { to: "/cinturon-orion", label: "Cinturón de Orión" },
-    { to: "/cinturon-titan", label: "Cinturón de Titán" },
-    { to: "/cinturon-acero", label: "Cinturón de Acero" },
-  ];
+  const links = pathname.startsWith("/cinturon-de-")
+    ? TEST_LINKS
+    : STANDARD_LINKS;
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
