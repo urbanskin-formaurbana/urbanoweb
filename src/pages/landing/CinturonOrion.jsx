@@ -19,7 +19,11 @@ import {
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 
-const WHATSAPP_LINK = "https://wa.me/59893770785";
+const WHATSAPP_PHONE = "59893770785";
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  "Quiero agendar mi evaluación corporal. Me interesa el cinturón de Orión",
+);
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_PHONE}?text=${WHATSAPP_MESSAGE}`;
 
 export default function CinturonOrion() {
   const theme = useTheme();
