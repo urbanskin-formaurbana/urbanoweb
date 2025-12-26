@@ -32,7 +32,7 @@ export default function CinturonOrion() {
     <>
       <SEO
         title="FORMA Urbana — Cinturón de Orión | Lipo Láser 635 nm + Maderoterapia + Drenaje (Montevideo)"
-        description="Reducí el contorno abdominal sin cirugía. Protocolo 3‑en‑1: Lipo Láser 635 nm + Maderoterapia + Drenaje Linfático. Sesión $1.500. Cuponera 6 a $5.500 (Oferta de Primavera)."
+        description="Reducí el contorno abdominal sin cirugía. Protocolo 3‑en‑1: Lipo Láser 635 nm + Maderoterapia + Drenaje Linfático. Sesión $1.700. Cuponera 6 a $7.200."
       />
       <Box
         component="header"
@@ -471,7 +471,7 @@ export default function CinturonOrion() {
           ¿Listo para empezar?
         </Typography>
         <Typography sx={{mb: 3}}>
-          Reservá tu sesión o asegurá tu Cuponera 6 en Oferta de Primavera.
+          Reservá tu sesión o asegurá tu Cuponera.
         </Typography>
         <Button
           variant="contained"

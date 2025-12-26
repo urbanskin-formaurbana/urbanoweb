@@ -32,7 +32,7 @@ export default function CinturonTitan() {
     <>
       <SEO
         title="FORMA Urbana — Cinturón de Titán | MSculpt + Lipo Láser (Montevideo)"
-        description="Definí y reducí abdomen en la misma sesión: MSculpt (HIFEM + RF) + Lipo Láser 635 nm + Maderoterapia + Pulido. Sesión $2.000. Cuponera 6 a $6.600 (Oferta de Primavera). Reservá por WhatsApp."
+        description="Definí y reducí abdomen en la misma sesión: MSculpt (HIFEM + RF) + Lipo Láser 635 nm + Maderoterapia + Pulido. Sesión $2.000. Cuponera 6 a $8.700. Reservá por WhatsApp."
       />
       <Box
         component="header"
@@ -500,8 +500,7 @@ export default function CinturonTitan() {
           ¿Listo para definir abdomen y quemar esa grasa rebelde?
         </Typography>
         <Typography sx={{mb: 3}}>
-          Asegurá tu Cuponera 6 — Oferta de Primavera o reservá 1 sesión para
-          comenzar.
+          Asegurá tu Cuponera o reservá 1 sesión para comenzar.
         </Typography>
         <Button
           variant="contained"

@@ -32,7 +32,7 @@ export default function CinturonAcero() {
     <>
       <SEO
         title="FORMA Urbana — Cinturón de Acero | MSculpt + Radiofrecuencia (Montevideo)"
-        description="Definí y tensá abdomen en 60’: MSculpt (HIFEM + RF) + RF de piel + Maderoterapia + Drenaje. Sesión $1.900. Cuponera 6 a $6.200 (Oferta de Primavera). Reservá por WhatsApp."
+        description="Definí y tensá abdomen en 60’: MSculpt (HIFEM + RF) + RF de piel + Maderoterapia + Drenaje. Sesión $1.900. Cuponera 6 a $8.400. Reservá por WhatsApp."
       />
       <Box
         component="header"
@@ -431,8 +431,7 @@ export default function CinturonAcero() {
           ¿Listo para esculpir y tensar en la misma sesión?
         </Typography>
         <Typography sx={{mb: 3}}>
-          Asegurá tu Cuponera 6 en Oferta de Primavera o reservá 1 sesión para
-          arrancar.
+          Asegurá tu Cuponera o reservá 1 sesión para arrancar.
         </Typography>
         <Button
           variant="contained"
