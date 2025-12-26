@@ -306,7 +306,7 @@ export default function CinturonAcero() {
         <Typography align="center" sx={{mt: 3}}>
           <strong>Recomendación:</strong>
           <br />
-          Mejor precio por sesión: Cuponera 6 por Oferta de Primavera.
+          Mejor precio por sesión: Cuponera 10 al tener la sesión más económica.
         </Typography>
       </Container>
       <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>

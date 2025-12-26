@@ -346,10 +346,8 @@ export default function CinturonTitan() {
           </Grid>
         </Grid>
         <Typography align="center" sx={{mt: 3}}>
-          <strong>Recomendación directa:</strong>{" "}
-          <strong>Mejor precio por sesión:</strong> <strong>Cuponera 6</strong>{" "}
-          en Oferta de Primavera (ideal para completar una serie inicial y
-          validar resultados sin gastar de más).
+          <strong>Recomendación directa:</strong> Mejor precio por sesión:
+          Cuponera 10 al tener la sesión más económica.
         </Typography>
       </Container>
       <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>

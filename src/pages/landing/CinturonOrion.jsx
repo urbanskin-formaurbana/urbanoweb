@@ -335,10 +335,9 @@ export default function CinturonOrion() {
           </Grid>
         </Grid>
         <Typography align="center" sx={{mt: 3}}>
-          <strong>Recomendación directa:</strong> si querés máxima relación
-          precio/sesión, la <strong>Cuponera 6</strong> está imbatible por la{" "}
-          Oferta de Primavera. Si tu objetivo es acompañar varias semanas y
-          bloquear precio, elegí 8 o 10.
+          <strong>Recomendación directa:</strong>
+          <br />
+          Mejor precio por sesión: Cuponera 10 al tener la sesión más económica.
         </Typography>
       </Container>
       <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
