@@ -6,12 +6,14 @@ const STANDARD_LINKS = [
   { to: "/cinturon-orion", label: "Cinturón de Orión" },
   { to: "/cinturon-titan", label: "Cinturón de Titán" },
   { to: "/cinturon-acero", label: "Cinturón de Acero" },
+  { to: "/terminos-y-condiciones", label: "Términos y condiciones" },
 ];
 
 const TEST_LINKS = [
   { to: "/cinturon-de-orion", label: "Cinturón de Orión" },
   { to: "/cinturon-de-titan", label: "Cinturón de Titán" },
   { to: "/cinturon-de-acero", label: "Cinturón de Acero" },
+  { to: "/terminos-y-condiciones", label: "Términos y condiciones" },
 ];
 
 export default function LandingLayout() {

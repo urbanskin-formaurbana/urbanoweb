@@ -12,6 +12,10 @@ export const LANDINGS = [
     import: () => import('./landing/CinturonAcero.jsx'),
   },
   {
+    path: '/terminos-y-condiciones',
+    import: () => import('./landing/TerminosYCondiciones.jsx'),
+  },
+  {
     path: '/cinturon-de-orion',
     import: () => import('./landing/CinturonDeOrion.jsx'),
   },
