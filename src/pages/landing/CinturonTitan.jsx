@@ -17,11 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import {useTheme} from "@mui/material/styles";
 
 const WHATSAPP_PHONE = "59893770785";
 const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Quiero agendar mi evaluación corporal. Me interesa el cinturón de Titán",
+  "Quiero agendar mi evaluación corporal. Me interesa el cinturón de Titán"
 );
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_PHONE}?text=${WHATSAPP_MESSAGE}`;
 
@@ -40,14 +40,14 @@ export default function CinturonTitan() {
           textAlign: "center",
           bgcolor: "success.light",
           color: "success.contrastText",
-          py: { xs: 2, md: 4 },
+          py: {xs: 2, md: 4},
         }}
       >
         <Container>
           <Typography
             variant={isMobile ? "h3" : "h2"}
             component="h1"
-            sx={{ fontWeight: "bold" }}
+            sx={{fontWeight: "bold"}}
             gutterBottom
           >
             Cinturón de Titán
@@ -55,7 +55,7 @@ export default function CinturonTitan() {
           <Typography variant="h5" gutterBottom>
             Reduce y tonifica en la misma sesión.
           </Typography>
-          <Typography sx={{ mb: 4 }}>
+          <Typography sx={{mb: 4}}>
             Protocolo 4‑en‑1: MSculpt (HIFEM) + Lipo Láser 635 nm +
             Maderoterapia + Pulido (drenaje/modelador) . No invasivo, sin
             reposo, pensado para marcar abdomen y bajar contorno de forma
@@ -68,14 +68,14 @@ export default function CinturonTitan() {
             href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ fontWeight: "bold" }}
+            sx={{fontWeight: "bold"}}
           >
             Escribinos por WhatsApp
           </Button>
         </Container>
       </Box>
-      <Container sx={{ py: 2 }}>
-        <Typography align="center" sx={{ fontStyle: "italic" }}>
+      <Container sx={{py: 2}}>
+        <Typography align="center" sx={{fontStyle: "italic"}}>
           En Montevideo Centro. <strong>Nivel intermedio</strong> (ideal para
           quienes ya vienen cuidándose y quieren quemar la grasa rebelde del
           abdomen y flancos). Sin agujas, y sin cirugías.
@@ -92,7 +92,7 @@ export default function CinturonTitan() {
           }}
         />
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -100,8 +100,8 @@ export default function CinturonTitan() {
         >
           ¿Por qué el Cinturón de Titán funciona?
         </Typography>
-        <Stack spacing={2} sx={{ maxWidth: 800, mx: "auto" }}>
-          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
+        <Stack spacing={2} sx={{maxWidth: 800, mx: "auto"}}>
+          <Typography variant="h5" gutterBottom sx={{mt: 2}}>
             1. MSculpt: músculo + grasa, a la vez
           </Typography>
           <Typography>
@@ -114,7 +114,7 @@ export default function CinturonTitan() {
             Evidencia clínica: Reportes promedian ≈30% menos grasa y ≈25% más
             músculo, medidos con MRI/US (promedios, no promesas individuales).
           </Typography>
-          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{mt: 2}}>
             2. Lipo Láser: contorno y piel más tensa
           </Typography>
           <Typography>
@@ -123,7 +123,7 @@ export default function CinturonTitan() {
             la grasa que tienen adentro. Así, las células se achican, pero no se
             destruyen. Es contorneado, no “bajar kilos”.
           </Typography>
-          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{mt: 2}}>
             3. Maderoterapia + Pulido (drenaje/modelador)
           </Typography>
           <Typography>
@@ -154,10 +154,10 @@ export default function CinturonTitan() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Box
           component="ul"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{maxWidth: 800, mx: "auto", textAlign: "left", mb: 2}}
         >
           <Typography
             variant={isMobile ? "h4" : "h3"}
@@ -166,10 +166,10 @@ export default function CinturonTitan() {
           >
             ¿Es para mí?
           </Typography>
-          <Typography align="left" sx={{ mb: 2 }}>
+          <Typography align="left" sx={{mb: 2}}>
             Este protocolo es para vos si:
           </Typography>
-          <Typography align="left" sx={{ mb: 2 }}>
+          <Typography align="left" sx={{mb: 2}}>
             <li>
               Ya probaste dieta/ejercicio y querés sacar la última grasa
               localizada del abdomen.
@@ -189,7 +189,7 @@ export default function CinturonTitan() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -197,10 +197,7 @@ export default function CinturonTitan() {
         >
           ¿Qué incluye cada sesión?
         </Typography>
-        <Box
-          component="ol"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left" }}
-        >
+        <Box component="ol" sx={{maxWidth: 800, mx: "auto", textAlign: "left"}}>
           <li>
             <strong>MSculpt — 30’</strong> sobre abdomen y flancos (HIFEM).
             Sensación: contracciones intensas; no invasivo, sin reposo.
@@ -232,7 +229,7 @@ export default function CinturonTitan() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -242,7 +239,7 @@ export default function CinturonTitan() {
         </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{maxWidth: 800, mx: "auto", textAlign: "left", mb: 2}}
         >
           <li>
             <strong>Series iniciales habituales:</strong> 2 o 3 sesiones por
@@ -255,7 +252,7 @@ export default function CinturonTitan() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -271,7 +268,7 @@ export default function CinturonTitan() {
               md: 3,
             }}
           >
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Sesión
@@ -289,44 +286,17 @@ export default function CinturonTitan() {
               md: 3,
             }}
           >
-            <Box sx={{ position: "relative", height: "100%" }}>
-              <Chip
-                label="Oferta de Primavera"
-                color="success"
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  zIndex: 2,
-                  boxShadow: 1,
-                }}
-              />
-              <Card
-                sx={{
-                  textAlign: "center",
-                  border: 2,
-                  borderColor: "success.main",
-                  height: "100%",
-                }}
-              >
+            <Box sx={{position: "relative", height: "100%"}}>
+              <Card sx={{textAlign: "center", height: "100%"}}>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
                     Cuponera 6
                   </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ textDecoration: "line-through", my: -1, fontSize: 12 }}
-                    color="text.secondary"
-                  >
-                    $ 7.600
-                  </Typography>
                   <Typography variant="h4" color="success.main" gutterBottom>
-                    $ 6.600
+                    $ 8.700
                   </Typography>
                   <Typography variant="body2">
-                    ahorrás $ 5.400 vs 6 sueltas.
+                    ahorrás $ 3.300 vs 6 sueltas.
                   </Typography>
                 </CardContent>
               </Card>
@@ -339,16 +309,16 @@ export default function CinturonTitan() {
               md: 3,
             }}
           >
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Cuponera 8
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 9.200
+                  $ 10.400
                 </Typography>
                 <Typography variant="body2">
-                  ahorrás $ 6.800 vs 8 sueltas.
+                  ahorrás $ 5.600 vs 8 sueltas.
                 </Typography>
               </CardContent>
             </Card>
@@ -360,29 +330,29 @@ export default function CinturonTitan() {
               md: 3,
             }}
           >
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Cuponera 10
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 11.900
+                  $ 12.300
                 </Typography>
                 <Typography variant="body2">
-                  ahorrás $ 8.100 vs 10 sueltas.
+                  ahorrás $ 7.700 vs 10 sueltas.
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
-        <Typography align="center" sx={{ mt: 3 }}>
+        <Typography align="center" sx={{mt: 3}}>
           <strong>Recomendación directa:</strong>{" "}
           <strong>Mejor precio por sesión:</strong> <strong>Cuponera 6</strong>{" "}
           en Oferta de Primavera (ideal para completar una serie inicial y
           validar resultados sin gastar de más).
         </Typography>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -390,10 +360,7 @@ export default function CinturonTitan() {
         >
           Paso a paso
         </Typography>
-        <Box
-          component="ol"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left" }}
-        >
+        <Box component="ol" sx={{maxWidth: 600, mx: "auto", textAlign: "left"}}>
           <li>
             <strong>Evaluación</strong> (objetivo y zona).
           </li>
@@ -413,7 +380,7 @@ export default function CinturonTitan() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -421,7 +388,7 @@ export default function CinturonTitan() {
         >
           Preguntas frecuentes
         </Typography>
-        <Box sx={{ maxWidth: 800, mx: "auto" }}>
+        <Box sx={{maxWidth: 800, mx: "auto"}}>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
               <Typography>¿Cuál es la duración de la sesión?</Typography>
@@ -534,7 +501,7 @@ export default function CinturonTitan() {
         <Typography variant={isMobile ? "h4" : "h3"} gutterBottom>
           ¿Listo para definir abdomen y quemar esa grasa rebelde?
         </Typography>
-        <Typography sx={{ mb: 3 }}>
+        <Typography sx={{mb: 3}}>
           Asegurá tu Cuponera 6 — Oferta de Primavera o reservá 1 sesión para
           comenzar.
         </Typography>
@@ -545,12 +512,12 @@ export default function CinturonTitan() {
           href={WHATSAPP_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          sx={{ fontWeight: "bold" }}
+          sx={{fontWeight: "bold"}}
         >
           Escribinos ahora
         </Button>
       </Container>
-      <Container component="footer" sx={{ py: 2 }}>
+      <Container component="footer" sx={{py: 2}}>
         <Typography variant="body2" align="center">
           Los resultados varían según composición corporal y hábitos. Este
           protocolo no reemplaza indicación médica, entrenamiento o nutrición;

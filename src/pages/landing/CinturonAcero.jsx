@@ -17,11 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import {useTheme} from "@mui/material/styles";
 
 const WHATSAPP_PHONE = "59893770785";
 const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Quiero agendar mi evaluación corporal. Me interesa el cinturón de Acero",
+  "Quiero agendar mi evaluación corporal. Me interesa el cinturón de Acero"
 );
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_PHONE}?text=${WHATSAPP_MESSAGE}`;
 
@@ -40,14 +40,14 @@ export default function CinturonAcero() {
           textAlign: "center",
           bgcolor: "success.light",
           color: "success.contrastText",
-          py: { xs: 2, md: 4 },
+          py: {xs: 2, md: 4},
         }}
       >
         <Container>
           <Typography
             variant={isMobile ? "h3" : "h2"}
             component="h1"
-            sx={{ fontWeight: "bold" }}
+            sx={{fontWeight: "bold"}}
             gutterBottom
           >
             Cinturón de Acero
@@ -55,7 +55,7 @@ export default function CinturonAcero() {
           <Typography variant="h5" gutterBottom>
             Llevá tu abdomen a su máximo potencial.
           </Typography>
-          <Typography sx={{ mb: 4 }}>
+          <Typography sx={{mb: 4}}>
             Protocolo 4‑en‑1: 30’ MSculpt (HIFEM®) + Radiofrecuencia +
             Maderoterapia + Masaje Modelador. En una sola visita: más tono,
             menos contorno y piel más firme.
@@ -67,14 +67,14 @@ export default function CinturonAcero() {
             href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ fontWeight: "bold" }}
+            sx={{fontWeight: "bold"}}
           >
             Escribinos por WhatsApp
           </Button>
         </Container>
       </Box>
-      <Container sx={{ py: 2 }}>
-        <Typography align="center" sx={{ fontStyle: "italic" }}>
+      <Container sx={{py: 2}}>
+        <Typography align="center" sx={{fontStyle: "italic"}}>
           En Montevideo Centro. <strong>Nivel avanzado</strong> , para quienes
           ya vienen cuidándose y quieren seguir tonificando músculo y piel. No
           invasivo. Sin cirujías.
@@ -91,7 +91,7 @@ export default function CinturonAcero() {
           }}
         />
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -99,8 +99,8 @@ export default function CinturonAcero() {
         >
           ¿Por qué funciona?
         </Typography>
-        <Stack spacing={2} sx={{ maxWidth: 700, mx: "auto" }}>
-          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
+        <Stack spacing={2} sx={{maxWidth: 700, mx: "auto"}}>
+          <Typography variant="h5" gutterBottom sx={{mt: 2}}>
             1. MSculpt: músculo y grasa, al mismo tiempo
           </Typography>
           <Typography>
@@ -108,7 +108,7 @@ export default function CinturonAcero() {
             entrenamiento reproduce). La sinergia logra aumento de masa/espesor
             muscular y reducción de grasa subcutánea en 30 minutos.
           </Typography>
-          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{mt: 2}}>
             2. Radiofrecuencia (RF): tensión de la piel que se nota
           </Typography>
           <Typography>
@@ -118,7 +118,7 @@ export default function CinturonAcero() {
             Resultado: mejor firmeza y textura en la cubierta cutánea del
             abdomen.
           </Typography>
-          <Typography variant="h5" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom sx={{mt: 2}}>
             3. Maderoterapia + drenaje
           </Typography>
           <Typography>
@@ -131,7 +131,7 @@ export default function CinturonAcero() {
           </Typography>
         </Stack>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -141,12 +141,12 @@ export default function CinturonAcero() {
         </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{maxWidth: 800, mx: "auto", textAlign: "left", mb: 2}}
         >
-          <Typography align="left" sx={{ mb: 2 }}>
+          <Typography align="left" sx={{mb: 2}}>
             Elegí Cinturón de Acero SI:
           </Typography>
-          <Typography align="left" sx={{ mb: 2 }}>
+          <Typography align="left" sx={{mb: 2}}>
             <li>
               Querés seguir definiendo y quemar la grasa rebelde del abdomen sin
               parar tu rutina.
@@ -169,7 +169,7 @@ export default function CinturonAcero() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -177,10 +177,7 @@ export default function CinturonAcero() {
         >
           Qué incluye cada sesión
         </Typography>
-        <Box
-          component="ol"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left" }}
-        >
+        <Box component="ol" sx={{maxWidth: 800, mx: "auto", textAlign: "left"}}>
           <li>
             MSculpt — 30’ (HIFEM) Sensación: contracciones intensas; no
             invasivo, sin reposo.
@@ -213,7 +210,7 @@ export default function CinturonAcero() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -223,7 +220,7 @@ export default function CinturonAcero() {
         </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{maxWidth: 800, mx: "auto", textAlign: "left", mb: 2}}
         >
           <li>
             <strong>Serie inicial típica:</strong> 2 o 3 sesiones por semana,
@@ -237,7 +234,7 @@ export default function CinturonAcero() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -246,8 +243,8 @@ export default function CinturonAcero() {
           Precios y cuponeras
         </Typography>
         <Grid container spacing={3} justifyContent="center">
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+          <Grid size={{xs: 12, sm: 6, md: 3}}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Sesión
@@ -258,88 +255,61 @@ export default function CinturonAcero() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Box sx={{ position: "relative", height: "100%" }}>
-              <Chip
-                label="Oferta de Primavera"
-                color="success"
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  zIndex: 2,
-                  boxShadow: 1,
-                }}
-              />
-              <Card
-                sx={{
-                  textAlign: "center",
-                  border: 2,
-                  borderColor: "success.main",
-                  height: "100%",
-                }}
-              >
+          <Grid size={{xs: 12, sm: 6, md: 3}}>
+            <Box sx={{position: "relative", height: "100%"}}>
+              <Card sx={{textAlign: "center", height: "100%"}}>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
                     Cuponera 6
                   </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ textDecoration: "line-through", my: -1, fontSize: 12 }}
-                    color="text.secondary"
-                  >
-                    $ 7.200
-                  </Typography>
                   <Typography variant="h4" color="success.main" gutterBottom>
-                    $ 6.200
+                    $ 8.400
                   </Typography>
                   <Typography variant="body2">
-                    ahorrás $ 5.200 vs 6 sueltas.
+                    ahorrás $ 3.000 vs 6 sueltas.
                   </Typography>
                 </CardContent>
               </Card>
             </Box>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+          <Grid size={{xs: 12, sm: 6, md: 3}}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Cuponera 8
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 9.200
+                  $ 10.000
                 </Typography>
                 <Typography variant="body2">
-                  ahorrás $ 6.000 vs 8 sueltas.
+                  ahorrás $ 5.200 vs 8 sueltas.
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+          <Grid size={{xs: 12, sm: 6, md: 3}}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Cuponera 10
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 11.000
+                  $ 11.500
                 </Typography>
                 <Typography variant="body2">
-                  ahorrás $ 8.000 vs 10 sueltas.
+                  ahorrás $ 7.500 vs 10 sueltas.
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
-        <Typography align="center" sx={{ mt: 3 }}>
+        <Typography align="center" sx={{mt: 3}}>
           <strong>Recomendación:</strong>
           <br />
           Mejor precio por sesión: Cuponera 6 por Oferta de Primavera.
         </Typography>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -347,10 +317,7 @@ export default function CinturonAcero() {
         >
           Paso a paso
         </Typography>
-        <Box
-          component="ol"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left" }}
-        >
+        <Box component="ol" sx={{maxWidth: 600, mx: "auto", textAlign: "left"}}>
           <li>
             <strong>Evaluación rápida</strong> (objetivos, antecedentes,
             contraindicaciones).
@@ -370,7 +337,7 @@ export default function CinturonAcero() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -378,7 +345,7 @@ export default function CinturonAcero() {
         >
           Preguntas frecuentes
         </Typography>
-        <Box sx={{ maxWidth: 800, mx: "auto" }}>
+        <Box sx={{maxWidth: 800, mx: "auto"}}>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
               <Typography>¿Cuál es la duración de la sesión?</Typography>
@@ -463,7 +430,7 @@ export default function CinturonAcero() {
         <Typography variant={isMobile ? "h4" : "h3"} gutterBottom>
           ¿Listo para esculpir y tensar en la misma sesión?
         </Typography>
-        <Typography sx={{ mb: 3 }}>
+        <Typography sx={{mb: 3}}>
           Asegurá tu Cuponera 6 en Oferta de Primavera o reservá 1 sesión para
           arrancar.
         </Typography>
@@ -474,12 +441,12 @@ export default function CinturonAcero() {
           href={WHATSAPP_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          sx={{ fontWeight: "bold" }}
+          sx={{fontWeight: "bold"}}
         >
           Escribinos ahora
         </Button>
       </Container>
-      <Container component="footer" sx={{ py: 2 }}>
+      <Container component="footer" sx={{py: 2}}>
         <Typography variant="body2" align="center">
           Los resultados varían según composición corporal y hábitos. Este
           protocolo no reemplaza nutrición/entrenamiento ni indicación médica;

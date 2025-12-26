@@ -17,11 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import {useTheme} from "@mui/material/styles";
 
 const WHATSAPP_PHONE = "59893770785";
 const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Quiero agendar mi evaluación corporal. Me interesa el cinturón de Orión",
+  "Quiero agendar mi evaluación corporal. Me interesa el cinturón de Orión"
 );
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_PHONE}?text=${WHATSAPP_MESSAGE}`;
 
@@ -40,14 +40,14 @@ export default function CinturonOrion() {
           textAlign: "center",
           bgcolor: "success.light",
           color: "success.contrastText",
-          py: { xs: 2, md: 4 },
+          py: {xs: 2, md: 4},
         }}
       >
         <Container>
           <Typography
             variant={isMobile ? "h3" : "h2"}
             component="h1"
-            sx={{ fontWeight: "bold" }}
+            sx={{fontWeight: "bold"}}
             gutterBottom
           >
             Cinturón de Orión
@@ -55,7 +55,7 @@ export default function CinturonOrion() {
           <Typography variant="h5" gutterBottom>
             Cintura más definida, sin cirugía.
           </Typography>
-          <Typography sx={{ mb: 4 }}>
+          <Typography sx={{mb: 4}}>
             Protocolo 3‑en‑1 para reducir contorno abdominal y tensar la piel:{" "}
             Lipo Láser (635 nm) + Maderoterapia + Radiofrecuencia . Sesiones
             cómodas, sin afectar tu rutina en lo absoluto. Resultados que te
@@ -68,14 +68,14 @@ export default function CinturonOrion() {
             href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ fontWeight: "bold", mb: isMobile ? 2 : 0 }}
+            sx={{fontWeight: "bold", mb: isMobile ? 2 : 0}}
           >
             Escribinos por WhatsApp
           </Button>
         </Container>
       </Box>
-      <Container sx={{ py: 2 }}>
-        <Typography align="center" sx={{ fontStyle: "italic" }}>
+      <Container sx={{py: 2}}>
+        <Typography align="center" sx={{fontStyle: "italic"}}>
           En Montevideo Centro. No invasivo. Sin agujas. Piel intacta. Apto como{" "}
           <strong>nivel inicial</strong> para personas poco activas físicamente.
         </Typography>
@@ -91,7 +91,7 @@ export default function CinturonOrion() {
           }}
         />
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -99,7 +99,7 @@ export default function CinturonOrion() {
         >
           ¿Por qué el Cinturón de Orión funciona?
         </Typography>
-        <Stack spacing={2} sx={{ maxWidth: 800, mx: "auto" }}>
+        <Stack spacing={2} sx={{maxWidth: 800, mx: "auto"}}>
           <Typography>
             <strong>Desbloquea la grasa “resistente”</strong>: El lipo láser usa
             una luz roja suave para "despertar" las células de grasa. Esto hace
@@ -136,7 +136,7 @@ export default function CinturonOrion() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -146,13 +146,13 @@ export default function CinturonOrion() {
         </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{maxWidth: 800, mx: "auto", textAlign: "left", mb: 2}}
         >
-          <Typography align="left" sx={{ mb: 2 }}>
+          <Typography align="left" sx={{mb: 2}}>
             Este protocolo está diseñado para vos SI:
           </Typography>
 
-          <Typography align="left" sx={{ mb: 2 }}>
+          <Typography align="left" sx={{mb: 2}}>
             <li>
               Luchás con el sobrepeso y no ves cambios en el abdomen pese a
               dieta/ejercicio.
@@ -173,7 +173,7 @@ export default function CinturonOrion() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -181,10 +181,7 @@ export default function CinturonOrion() {
         >
           Qué incluye cada sesión
         </Typography>
-        <Box
-          component="ol"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left" }}
-        >
+        <Box component="ol" sx={{maxWidth: 800, mx: "auto", textAlign: "left"}}>
           <li>
             <strong>Lipo Láser</strong> sobre abdomen. Sensación: indolora, sin
             calor significativo.
@@ -200,7 +197,7 @@ export default function CinturonOrion() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -210,7 +207,7 @@ export default function CinturonOrion() {
         </Typography>
         <Box
           component="ul"
-          sx={{ maxWidth: 800, mx: "auto", textAlign: "left", mb: 2 }}
+          sx={{maxWidth: 800, mx: "auto", textAlign: "left", mb: 2}}
         >
           <li>
             <strong>Menos contorno</strong> en la zona tratada (cintura/abdomen)
@@ -244,7 +241,7 @@ export default function CinturonOrion() {
           </Typography>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -260,13 +257,13 @@ export default function CinturonOrion() {
               md: 3,
             }}
           >
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Sesión
                 </Typography>
                 <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 1.500
+                  $ 1.700
                 </Typography>
               </CardContent>
             </Card>
@@ -278,48 +275,17 @@ export default function CinturonOrion() {
               md: 3,
             }}
           >
-            <Box sx={{ position: "relative", height: "100%" }}>
-              <Chip
-                label="Oferta de Primavera"
-                color="success"
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  zIndex: 2,
-                  boxShadow: 1,
-                }}
-              />
-              <Card
-                sx={{
-                  textAlign: "center",
-                  border: 2,
-                  borderColor: "success.main",
-                  height: "100%",
-                }}
-              >
+            <Box sx={{position: "relative", height: "100%"}}>
+              <Card sx={{textAlign: "center", height: "100%"}}>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
                     Cuponera 6
                   </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      textDecoration: "line-through",
-                      my: -1,
-                      fontSize: 12,
-                    }}
-                    color="text.secondary"
-                  >
+                  <Typography variant="h4" color="success.main" gutterBottom>
                     $ 7.200
                   </Typography>
-                  <Typography variant="h4" color="success.main" gutterBottom>
-                    $ 6.200
-                  </Typography>
                   <Typography variant="body2">
-                    ahorrás $ 2.800 vs 6 sueltas.
+                    ahorrás $ 3.000 vs 6 sueltas.
                   </Typography>
                 </CardContent>
               </Card>
@@ -332,7 +298,7 @@ export default function CinturonOrion() {
               md: 3,
             }}
           >
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Cuponera 8
@@ -341,7 +307,7 @@ export default function CinturonOrion() {
                   $ 8.800
                 </Typography>
                 <Typography variant="body2">
-                  ahorrás $ 3.200 vs 8 sueltas.
+                  ahorrás $ 4.800 vs 8 sueltas.
                 </Typography>
               </CardContent>
             </Card>
@@ -353,7 +319,7 @@ export default function CinturonOrion() {
               md: 3,
             }}
           >
-            <Card sx={{ textAlign: "center", height: "100%" }}>
+            <Card sx={{textAlign: "center", height: "100%"}}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Cuponera 10
@@ -362,20 +328,20 @@ export default function CinturonOrion() {
                   $ 10.500
                 </Typography>
                 <Typography variant="body2">
-                  ahorrás $ 4.500 vs 10 sueltas.
+                  ahorrás $ 6.500 vs 10 sueltas.
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
-        <Typography align="center" sx={{ mt: 3 }}>
+        <Typography align="center" sx={{mt: 3}}>
           <strong>Recomendación directa:</strong> si querés máxima relación
           precio/sesión, la <strong>Cuponera 6</strong> está imbatible por la{" "}
           Oferta de Primavera. Si tu objetivo es acompañar varias semanas y
           bloquear precio, elegí 8 o 10.
         </Typography>
       </Container>
-      <Container component="section" sx={{ py: 2, bgcolor: "grey.50" }}>
+      <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -383,10 +349,7 @@ export default function CinturonOrion() {
         >
           Cómo es el paso a paso
         </Typography>
-        <Box
-          component="ol"
-          sx={{ maxWidth: 600, mx: "auto", textAlign: "left" }}
-        >
+        <Box component="ol" sx={{maxWidth: 600, mx: "auto", textAlign: "left"}}>
           <li>
             <strong>Evaluación rápida</strong> (zona + objetivos).
           </li>
@@ -405,7 +368,7 @@ export default function CinturonOrion() {
           </li>
         </Box>
       </Container>
-      <Container component="section" sx={{ py: 2 }}>
+      <Container component="section" sx={{py: 2}}>
         <Typography
           variant={isMobile ? "h4" : "h3"}
           align="center"
@@ -413,7 +376,7 @@ export default function CinturonOrion() {
         >
           Preguntas frecuentes
         </Typography>
-        <Box sx={{ maxWidth: 800, mx: "auto" }}>
+        <Box sx={{maxWidth: 800, mx: "auto"}}>
           <Accordion>
             <AccordionSummary expandIcon={<Box>+</Box>}>
               <Typography>¿Cuál es la duración de la sesión?</Typography>
@@ -508,7 +471,7 @@ export default function CinturonOrion() {
         <Typography variant={isMobile ? "h4" : "h3"} gutterBottom>
           ¿Listo para empezar?
         </Typography>
-        <Typography sx={{ mb: 3 }}>
+        <Typography sx={{mb: 3}}>
           Reservá tu sesión o asegurá tu Cuponera 6 en Oferta de Primavera.
         </Typography>
         <Button
@@ -518,12 +481,12 @@ export default function CinturonOrion() {
           href={WHATSAPP_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          sx={{ fontWeight: "bold" }}
+          sx={{fontWeight: "bold"}}
         >
           Escribinos ahora
         </Button>
       </Container>
-      <Container component="footer" sx={{ py: 2 }}>
+      <Container component="footer" sx={{py: 2}}>
         <Typography variant="body2" align="center">
           Los resultados individuales varían. Este protocolo no reemplaza
           indicaciones médicas, dieta o ejercicio; los potencia. Estudio tras
