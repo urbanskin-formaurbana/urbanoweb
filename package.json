@@ -9,10 +9,13 @@
     "lint": "eslint .",
     "preview": "vite preview --host 0.0.0.0 --port ${PORT:-5173}"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

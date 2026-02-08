@@ -1,5 +1,19 @@
+import { useState } from "react";
 import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
-import { Container, Box, Typography, Link } from "@mui/material";
+import {
+  Container,
+  Box,
+  Typography,
+  Link,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import MenuIcon from "@mui/icons-material/Menu";
 import FormaUrbanaLogo from "../assets/images/FormaUrbanaLogo.svg";
 
 const STANDARD_LINKS = [
@@ -21,6 +35,39 @@ export default function LandingLayout() {
   const links = pathname.startsWith("/cinturon-de-")
     ? TEST_LINKS
     : STANDARD_LINKS;
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const handleMenuClick = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLinkClick = () => {
+    setMobileMenuOpen(false);
+  };
+
+  const renderNavLinks = () =>
+    links.map(({ to, label }) => {
+      const isActive = pathname === to;
+      return (
+        <Link
+          key={to}
+          component={isActive ? "span" : RouterLink}
+          to={isActive ? undefined : to}
+          underline={isActive ? "none" : "hover"}
+          sx={{
+            fontWeight: isActive ? 700 : 400,
+            fontSize: { xs: 14, md: 16 },
+            color: isActive ? "text.primary" : "#2e7d32",
+            pointerEvents: isActive ? "none" : "auto",
+          }}
+        >
+          {label}
+        </Link>
+      );
+    });
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
@@ -44,31 +91,56 @@ export default function LandingLayout() {
               alt="FORMA Urbana"
               sx={{ height: { xs: 80, sm: 100, md: 120 }, display: "block" }}
             />
+            {!isMobile && renderNavLinks()}
+          </Box>
+          {isMobile && (
+            <IconButton
+              edge="end"
+              color="inherit"
+              onClick={handleMenuClick}
+              sx={{ mr: 0 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+        </Box>
+
+        <Drawer
+          anchor="left"
+          open={mobileMenuOpen}
+          onClose={handleMenuClick}
+          sx={{
+            "& .MuiDrawer-paper": {
+              width: 250,
+              pt: 2,
+            },
+          }}
+        >
+          <List>
             {links.map(({ to, label }) => {
               const isActive = pathname === to;
-              const mobileLabel = label.replace(/ de /i, "\nde ");
               return (
-                <Link
-                  key={to}
-                  component={isActive ? "span" : RouterLink}
-                  to={isActive ? undefined : to}
-                  underline={isActive ? "none" : "hover"}
-                  sx={{
-                    // Bold when selected (active route)
-                    fontWeight: isActive ? 700 : 400,
-                    fontSize: { xs: 14, md: 16 },
-                    // Non-selected clickable links in green
-                    color: isActive ? "text.primary" : "#2e7d32",
-                    // Prevent pointer events on the active item (non-clickable)
-                    pointerEvents: isActive ? "none" : "auto",
-                  }}
-                >
-                  {mobileLabel}
-                </Link>
+                <ListItem key={to} disablePadding>
+                  <ListItemButton
+                    component={isActive ? "div" : RouterLink}
+                    to={isActive ? undefined : to}
+                    onClick={handleLinkClick}
+                    disabled={isActive}
+                    sx={{
+                      fontWeight: isActive ? 700 : 400,
+                      color: isActive ? "text.primary" : "#2e7d32",
+                      "&.Mui-disabled": {
+                        opacity: 1,
+                      },
+                    }}
+                  >
+                    {label}
+                  </ListItemButton>
+                </ListItem>
               );
             })}
-          </Box>
-        </Box>
+          </List>
+        </Drawer>
         <Box component="main">
           <Outlet />
         </Box>
