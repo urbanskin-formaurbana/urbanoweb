@@ -1,15 +1,18 @@
 /* eslint-disable no-irregular-whitespace */
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SEO from "../../components/SEO.jsx";
 import EmsculptImg from "../../assets/images/emsculpt.jpg";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
-  Chip,
+  CircularProgress,
   Container,
   Grid,
   Link,
@@ -18,16 +21,177 @@ import {
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import {useTheme} from "@mui/material/styles";
-
-const WHATSAPP_PHONE = "59893770785";
-const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Quiero agendar mi evaluación corporal. Me interesa el cinturón de Titán"
-);
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_PHONE}?text=${WHATSAPP_MESSAGE}`;
+import treatmentService from "../../services/treatment_service.js";
+import contactService from "../../services/contact_service.js";
+import appointmentService from "../../services/appointment_service.js";
+import paymentService from "../../services/payment_service.js";
+import authService from "../../services/auth_service.js";
+import LoginModal from "../../components/LoginModal.jsx";
+import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 
 export default function CinturonTitan() {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [treatment, setTreatment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [checkingAppointment, setCheckingAppointment] = useState(false);
+  const [canPurchasePackages, setCanPurchasePackages] = useState(false);
+  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const loadTreatment = async () => {
+      try {
+        const data = await treatmentService.getTreatmentPackages("titan");
+        setTreatment(data);
+
+        // Capture lead for analytics
+        try {
+          await contactService.captureLead({
+            treatment_slug: "titan",
+            source_page: "/cinturon-titan",
+            cta_location: "header"
+          });
+        } catch (err) {
+          console.warn("Lead capture failed:", err);
+        }
+      } catch (err) {
+        console.error("Error loading treatment:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTreatment();
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.user_type === "customer") {
+      authService
+        .getPurchaseEligibility()
+        .then((data) => {
+          setCanPurchasePackages(data.can_purchase_packages);
+        })
+        .catch(() => {
+          setCanPurchasePackages(false);
+        });
+    }
+  }, [isAuthenticated, user]);
+
+  const handleBookingClick = async () => {
+    if (!isAuthenticated) {
+      setLoginModalOpen(true);
+      return;
+    }
+
+    // Redirect employees to admin panel
+    if (user?.user_type === 'employee') {
+      navigate('/admin');
+      return;
+    }
+
+    // If can purchase packages, show dialog to choose option
+    if (canPurchasePackages) {
+      setPurchaseDialogOpen(true);
+      return;
+    }
+
+    setCheckingAppointment(true);
+    try {
+      // Check for existing active appointment
+      const existingAppointment = await appointmentService.getCustomerAppointments();
+
+      if (existingAppointment) {
+        // Customer has pending or confirmed appointment
+        navigate("/existing-appointment", {
+          state: { appointment: existingAppointment }
+        });
+      } else {
+        // No existing appointment - check if customer already paid but hasn't scheduled yet
+        const unscheduledPayment = await paymentService.getUnscheduledPayment();
+        if (unscheduledPayment) {
+          // Customer paid but didn't schedule - skip payment, go directly to scheduling
+          paymentService.savePaymentId(unscheduledPayment._id);
+          navigate("/schedule", {
+            state: { treatment: { name: "Cinturón de Titán", slug: "titan" } }
+          });
+        } else {
+          // No payment or payment already has appointment - proceed to payment
+          navigate("/payment", {
+            state: { treatment: { name: "Cinturón de Titán", slug: "titan" }, isEvaluation: true }
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error checking appointments:", err);
+      // For other errors, show login modal as fallback
+      setLoginModalOpen(true);
+    } finally {
+      setCheckingAppointment(false);
+    }
+  };
+
+  const handlePurchaseConfirm = async (packageId) => {
+    setCheckingAppointment(true);
+    try {
+      const existingAppointment = await appointmentService.getCustomerAppointments();
+      if (existingAppointment) {
+        navigate("/existing-appointment", {
+          state: { appointment: existingAppointment },
+        });
+        return;
+      }
+
+      const unscheduledPayment = await paymentService.getUnscheduledPayment();
+      if (unscheduledPayment) {
+        paymentService.savePaymentId(unscheduledPayment._id);
+        navigate("/schedule", {
+          state: {
+            treatment: { name: "Cinturón de Titán", slug: "titan" },
+          },
+        });
+        return;
+      }
+
+      navigate("/payment", {
+        state: {
+          treatment: { name: "Cinturón de Titán", slug: "titan" },
+          selectedPackageId: packageId,
+        },
+      });
+    } catch (err) {
+      console.error("Error in purchase flow:", err);
+      setLoginModalOpen(true);
+    } finally {
+      setCheckingAppointment(false);
+    }
+  };
+
+  const handleLoginSuccess = async () => {
+    setLoginModalOpen(false);
+    try {
+      const { can_purchase_packages } = await authService.getPurchaseEligibility();
+      setCanPurchasePackages(can_purchase_packages);
+      if (can_purchase_packages) {
+        setPurchaseDialogOpen(true);
+      } else {
+        navigate("/payment", {
+          state: { treatment: { name: "Cinturón de Titán", slug: "titan" }, isEvaluation: true }
+        });
+      }
+    } catch {
+      navigate("/payment", {
+        state: { treatment: { name: "Cinturón de Titán", slug: "titan" }, isEvaluation: true }
+      });
+    }
+  };
+
+  // WhatsApp contact link (for footer button)
+  const whatsappLink = `https://wa.me/598912345678?text=Hola%20FORMA%20Urbana%2C%20me%20gustaría%20saber%20más%20sobre%20el%20Cinturón%20de%20Titán`;
   return (
     <>
       <SEO
@@ -61,16 +225,16 @@ export default function CinturonTitan() {
             reposo, pensado para marcar abdomen y bajar contorno de forma
             eficiente.
           </Typography>
+          {error && <Alert severity="error">{error}</Alert>}
           <Button
             variant="contained"
             color="success"
             size="large"
-            href={WHATSAPP_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={handleBookingClick}
+            disabled={loading || checkingAppointment}
             sx={{fontWeight: "bold"}}
           >
-            Escribinos por WhatsApp
+            {loading ? "Cargando..." : checkingAppointment ? "Verificando cita..." : "Agenda tu Evaluación"}
           </Button>
         </Container>
       </Box>
@@ -260,95 +424,66 @@ export default function CinturonTitan() {
         >
           Precios y cuponeras
         </Typography>
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : treatment ? (
+          <>
         <Grid container spacing={3} justifyContent="center">
-          <Grid
-            size={{
-              xs: 12,
-              sm: 6,
-              md: 3,
-            }}
-          >
-            <Card sx={{textAlign: "center", height: "100%"}}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Sesión
-                </Typography>
-                <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 2.000
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid
-            size={{
-              xs: 12,
-              sm: 6,
-              md: 3,
-            }}
-          >
-            <Box sx={{position: "relative", height: "100%"}}>
-              <Card sx={{textAlign: "center", height: "100%"}}>
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Cuponera 6
-                  </Typography>
-                  <Typography variant="h4" color="success.main" gutterBottom>
-                    $ 8.700
-                  </Typography>
-                  <Typography variant="body2">
-                    ahorrás $ 3.300 vs 6 sueltas.
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Box>
-          </Grid>
-          <Grid
-            size={{
-              xs: 12,
-              sm: 6,
-              md: 3,
-            }}
-          >
-            <Card sx={{textAlign: "center", height: "100%"}}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Cuponera 8
-                </Typography>
-                <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 10.400
-                </Typography>
-                <Typography variant="body2">
-                  ahorrás $ 5.600 vs 8 sueltas.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid
-            size={{
-              xs: 12,
-              sm: 6,
-              md: 3,
-            }}
-          >
-            <Card sx={{textAlign: "center", height: "100%"}}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Cuponera 10
-                </Typography>
-                <Typography variant="h4" color="success.main" gutterBottom>
-                  $ 12.300
-                </Typography>
-                <Typography variant="body2">
-                  ahorrás $ 7.700 vs 10 sueltas.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6,
+                  md: 3,
+                }}
+              >
+                <Card sx={{textAlign: "center", height: "100%"}}>
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      Sesión
+                    </Typography>
+                    <Typography variant="h4" color="success.main" gutterBottom>
+                      $ {treatment.single_session_price}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              {treatment.packages?.map((pkg) => (
+                <Grid
+                  key={pkg.name}
+                  size={{
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  }}
+                >
+                  <Box sx={{position: "relative", height: "100%"}}>
+                    <Card sx={{textAlign: "center", height: "100%"}}>
+                      <CardContent>
+                        <Typography variant="h5" gutterBottom>
+                          {pkg.name}
+                        </Typography>
+                        <Typography variant="h4" color="success.main" gutterBottom>
+                          $ {pkg.price}
+                        </Typography>
+                        {pkg.savings && (
+                          <Typography variant="body2">
+                            ahorrás $ {pkg.savings} vs {pkg.session_count} sueltas.
+                          </Typography>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Box>
+                </Grid>
+              ))}
         </Grid>
         <Typography align="center" sx={{mt: 3}}>
           <strong>Recomendación directa:</strong> Mejor precio por sesión:
-          Cuponera 10 al tener la sesión más económica.
+          {treatment.packages?.[treatment.packages.length - 1]?.name || "Cuponera 10"} al tener la sesión más económica.
         </Typography>
+          </>
+        ) : null}
       </Container>
       <Container component="section" sx={{py: 2, bgcolor: "grey.50"}}>
         <Typography
@@ -506,9 +641,10 @@ export default function CinturonTitan() {
           variant="contained"
           color="success"
           size="large"
-          href={WHATSAPP_LINK}
+          href={whatsappLink}
           target="_blank"
           rel="noopener noreferrer"
+          disabled={!whatsappLink}
           sx={{fontWeight: "bold"}}
         >
           Escribinos ahora
@@ -641,6 +777,17 @@ export default function CinturonTitan() {
           </Link>
         </Typography>
       </Container>
+      <LoginModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onSuccess={handleLoginSuccess}
+      />
+      <PurchaseOptionsDialog
+        open={purchaseDialogOpen}
+        onClose={() => setPurchaseDialogOpen(false)}
+        treatment={{ slug: "titan", name: "Cinturón de Titán" }}
+        onConfirm={handlePurchaseConfirm}
+      />
     </>
   );
 }

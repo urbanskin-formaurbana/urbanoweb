@@ -15,16 +15,4 @@ export const LANDINGS = [
     path: '/terminos-y-condiciones',
     import: () => import('./landing/TerminosYCondiciones.jsx'),
   },
-  {
-    path: '/cinturon-de-orion',
-    import: () => import('./landing/CinturonDeOrion.jsx'),
-  },
-  {
-    path: '/cinturon-de-titan',
-    import: () => import('./landing/CinturonDeTitan.jsx'),
-  },
-  {
-    path: '/cinturon-de-acero',
-    import: () => import('./landing/CinturonDeAcero.jsx'),
-  },
 ]

@@ -15,8 +15,13 @@
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
+    "@mercadopago/sdk-react": "^1.0.7",
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.1",
+    "@mui/x-date-pickers": "^8.27.0",
+    "@react-oauth/google": "^0.13.4",
+    "@sentry/react": "^10.39.0",
+    "dayjs": "^1.11.19",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.1"
