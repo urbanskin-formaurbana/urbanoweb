@@ -12,6 +12,14 @@ const keyPathLocal = path.join(__dirname, 'localhost+1-key.pem')
 const certPath = fs.existsSync(certPathBackend) ? certPathBackend : certPathLocal
 const keyPath = fs.existsSync(keyPathBackend) ? keyPathBackend : keyPathLocal
 
+// Only load HTTPS config if certs exist (for local dev only)
+const httpsConfig = fs.existsSync(certPath) && fs.existsSync(keyPath)
+  ? {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath),
+    }
+  : undefined
+
 // https://vite.dev/config/
 // Custom middleware to add COOP header for MercadoPago compatibility
 function coopHeaderMiddleware() {
@@ -39,10 +47,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    https: {
-      key: fs.readFileSync(keyPath),
-      cert: fs.readFileSync(certPath),
-    },
+    ...(httpsConfig && { https: httpsConfig }),
     watch: {
       usePolling: process.env.CHOKIDAR_USEPOLLING === 'true',
       interval: process.env.CHOKIDAR_INTERVAL ? Number(process.env.CHOKIDAR_INTERVAL) : undefined,
