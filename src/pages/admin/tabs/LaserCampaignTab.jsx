@@ -29,7 +29,15 @@ import {
   MenuItem,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import 'dayjs/locale/es';
 import laserCampaignService from '../../../services/laser_campaign_service';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.locale('es');
 
 export default function LaserCampaignTab() {
   // Campaign management state
@@ -188,8 +196,8 @@ export default function LaserCampaignTab() {
 
   // ========== Campaign edit ==========
   function handleEditCampaign() {
-    const start = new Date(campaign.starts_on).toISOString().slice(0, 16);
-    const end = new Date(campaign.ends_on).toISOString().slice(0, 16);
+    const start = dayjs.utc(campaign.starts_on).tz('America/Montevideo').format('YYYY-MM-DDTHH:mm');
+    const end = dayjs.utc(campaign.ends_on).tz('America/Montevideo').format('YYYY-MM-DDTHH:mm');
     setEditFormData({
       name: campaign.name,
       startsOn: start,
@@ -239,26 +247,25 @@ export default function LaserCampaignTab() {
 
   // Format date/time for display
   function formatDateTime(dateStr) {
-    return new Date(dateStr).toLocaleString('es-UY', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    });
+    return dayjs.utc(dateStr).tz('America/Montevideo').format('DD/MM/YYYY HH:mm');
   }
 
   function formatDate(dateStr) {
-    return new Date(dateStr).toLocaleDateString('es-UY');
+    return dayjs.utc(dateStr).tz('America/Montevideo').format('DD/MM/YYYY');
   }
 
   // Generate date range for day picker
   function getDateRange() {
     if (!campaign) return [];
 
-    const start = new Date(campaign.starts_on);
-    const end = new Date(campaign.ends_on);
+    const start = dayjs.utc(campaign.starts_on).tz('America/Montevideo');
+    const end = dayjs.utc(campaign.ends_on).tz('America/Montevideo');
     const dates = [];
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      dates.push(d.toISOString().split('T')[0]);
+    let d = start;
+    while (d.isBefore(end) || d.isSame(end, 'day')) {
+      dates.push(d.format('YYYY-MM-DD'));
+      d = d.add(1, 'day');
     }
 
     return dates;
@@ -569,7 +576,7 @@ export default function LaserCampaignTab() {
                     onChange={() => handleDayToggle(day)}
                   />
                 }
-                label={new Date(day).toLocaleDateString('es-UY', { weekday: 'long', month: 'short', day: 'numeric' })}
+                label={dayjs(day).format('dddd, D [de] MMM')}
               />
             ))}
           </FormGroup>
