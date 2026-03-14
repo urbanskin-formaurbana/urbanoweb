@@ -67,6 +67,8 @@ export default function TreatmentsTab() {
     route: '',
     meta_title: '',
     meta_description: '',
+    gender: '',
+    item_type: '',
     is_active: true,
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
@@ -82,6 +84,10 @@ export default function TreatmentsTab() {
     single_session_price: '',
     evaluation_price: '',
     category: '',
+    subtitle: '',
+    route: '',
+    gender: '',
+    item_type: '',
     is_active: true,
   });
   const [savingTreatment, setSavingTreatment] = useState(false);
@@ -137,6 +143,8 @@ export default function TreatmentsTab() {
       route: '',
       meta_title: '',
       meta_description: '',
+      gender: '',
+      item_type: '',
       is_active: true,
     });
     setSlugManuallyEdited(false);
@@ -170,12 +178,14 @@ export default function TreatmentsTab() {
         description: createTreatmentForm.description || null,
         duration_minutes: Number(createTreatmentForm.duration_minutes),
         single_session_price: Number(createTreatmentForm.single_session_price),
-        evaluation_price: createTreatmentForm.evaluation_price ? Number(createTreatmentForm.evaluation_price) : null,
+        evaluation_price: createTreatmentForm.category === 'body' && createTreatmentForm.evaluation_price ? Number(createTreatmentForm.evaluation_price) : null,
         category: createTreatmentForm.category,
         subtitle: createTreatmentForm.subtitle || null,
         route: createTreatmentForm.route || null,
         meta_title: createTreatmentForm.meta_title || null,
         meta_description: createTreatmentForm.meta_description || null,
+        gender: createTreatmentForm.category === 'laser' ? createTreatmentForm.gender || null : null,
+        item_type: createTreatmentForm.category === 'laser' ? createTreatmentForm.item_type || null : null,
         is_active: createTreatmentForm.is_active,
       });
       setSuccessMessage('Tratamiento creado exitosamente');
@@ -225,6 +235,10 @@ export default function TreatmentsTab() {
       single_session_price: treatment.single_session_price,
       evaluation_price: treatment.evaluation_price || '',
       category: treatment.category || '',
+      subtitle: treatment.subtitle || '',
+      route: treatment.route || '',
+      gender: treatment.gender || '',
+      item_type: treatment.item_type || '',
       is_active: treatment.is_active,
     });
     setEditTreatmentOpen(true);
@@ -242,8 +256,12 @@ export default function TreatmentsTab() {
         description: editTreatmentForm.description,
         duration_minutes: Number(editTreatmentForm.duration_minutes),
         single_session_price: Number(editTreatmentForm.single_session_price),
-        evaluation_price: editTreatmentForm.evaluation_price ? Number(editTreatmentForm.evaluation_price) : null,
+        evaluation_price: editTreatmentForm.category === 'body' && editTreatmentForm.evaluation_price ? Number(editTreatmentForm.evaluation_price) : null,
         category: editTreatmentForm.category,
+        subtitle: editTreatmentForm.subtitle || null,
+        route: editTreatmentForm.route || null,
+        gender: editTreatmentForm.category === 'laser' ? editTreatmentForm.gender || null : null,
+        item_type: editTreatmentForm.category === 'laser' ? editTreatmentForm.item_type || null : null,
         is_active: editTreatmentForm.is_active,
       });
       setSuccessMessage('Tratamiento actualizado');
@@ -383,6 +401,11 @@ export default function TreatmentsTab() {
                   <Typography variant="subtitle1" fontWeight="bold">
                     {treatment.name}
                   </Typography>
+                  {treatment.subtitle && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                      {treatment.subtitle}
+                    </Typography>
+                  )}
                   {treatment.description && (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 1 }}>
                       {treatment.description}
@@ -395,14 +418,29 @@ export default function TreatmentsTab() {
                     )}
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {treatment.category && (
                     <Chip
                       label={
                         treatment.category === 'facial' ? 'Facial' :
+                        treatment.category === 'laser' ? 'Depi Laser' :
                         treatment.category === 'complementarios' ? 'Complementarios' :
                         'Corporal'
                       }
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                  {treatment.gender && (
+                    <Chip
+                      label={treatment.gender === 'hombres' ? 'Hombres' : 'Mujeres'}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                  {treatment.item_type && (
+                    <Chip
+                      label={treatment.item_type === 'zona' ? 'Zona' : 'Paquete'}
                       size="small"
                       variant="outlined"
                     />
@@ -502,11 +540,21 @@ export default function TreatmentsTab() {
               <Select
                 value={createTreatmentForm.category}
                 label="Categoría *"
-                onChange={(e) => setCreateTreatmentForm(f => ({ ...f, category: e.target.value, evaluation_price: e.target.value === 'facial' ? '' : f.evaluation_price }))}
+                onChange={(e) => {
+                  const newCategory = e.target.value;
+                  setCreateTreatmentForm(f => ({
+                    ...f,
+                    category: newCategory,
+                    evaluation_price: newCategory === 'body' ? f.evaluation_price : '',
+                    gender: newCategory === 'laser' ? f.gender : '',
+                    item_type: newCategory === 'laser' ? f.item_type : '',
+                  }));
+                }}
               >
                 <MenuItem value="body">Corporal</MenuItem>
                 <MenuItem value="facial">Facial</MenuItem>
                 <MenuItem value="complementarios">Complementarios</MenuItem>
+                <MenuItem value="laser">Depi Laser</MenuItem>
               </Select>
             </FormControl>
             <TextField
@@ -544,7 +592,7 @@ export default function TreatmentsTab() {
               onChange={(e) => setCreateTreatmentForm(f => ({ ...f, single_session_price: e.target.value }))}
               required
             />
-            {createTreatmentForm.category !== 'facial' && (
+            {createTreatmentForm.category === 'body' && (
               <TextField
                 label="Precio sesión de evaluación ($) (opcional)"
                 size="small"
@@ -555,6 +603,32 @@ export default function TreatmentsTab() {
                 placeholder="ej. 500"
                 helperText="Precio especial para la primera sesión de evaluación"
               />
+            )}
+            {createTreatmentForm.category === 'laser' && (
+              <>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Género *</InputLabel>
+                  <Select
+                    value={createTreatmentForm.gender}
+                    label="Género *"
+                    onChange={(e) => setCreateTreatmentForm(f => ({ ...f, gender: e.target.value }))}
+                  >
+                    <MenuItem value="hombres">Hombres</MenuItem>
+                    <MenuItem value="mujeres">Mujeres</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Tipo de item *</InputLabel>
+                  <Select
+                    value={createTreatmentForm.item_type}
+                    label="Tipo de item *"
+                    onChange={(e) => setCreateTreatmentForm(f => ({ ...f, item_type: e.target.value }))}
+                  >
+                    <MenuItem value="zona">Zona</MenuItem>
+                    <MenuItem value="paquete">Paquete</MenuItem>
+                  </Select>
+                </FormControl>
+              </>
             )}
             <TextField
               label="Subtítulo"
@@ -626,11 +700,21 @@ export default function TreatmentsTab() {
               <Select
                 value={editTreatmentForm.category}
                 label="Categoría *"
-                onChange={(e) => setEditTreatmentForm(f => ({ ...f, category: e.target.value, evaluation_price: e.target.value === 'facial' ? '' : f.evaluation_price }))}
+                onChange={(e) => {
+                  const newCategory = e.target.value;
+                  setEditTreatmentForm(f => ({
+                    ...f,
+                    category: newCategory,
+                    evaluation_price: newCategory === 'body' ? f.evaluation_price : '',
+                    gender: newCategory === 'laser' ? f.gender : '',
+                    item_type: newCategory === 'laser' ? f.item_type : '',
+                  }));
+                }}
               >
                 <MenuItem value="body">Corporal</MenuItem>
                 <MenuItem value="facial">Facial</MenuItem>
                 <MenuItem value="complementarios">Complementarios</MenuItem>
+                <MenuItem value="laser">Depi Laser</MenuItem>
               </Select>
             </FormControl>
             <TextField
@@ -659,7 +743,7 @@ export default function TreatmentsTab() {
               value={editTreatmentForm.single_session_price}
               onChange={(e) => setEditTreatmentForm(f => ({ ...f, single_session_price: e.target.value }))}
             />
-            {editTreatmentForm.category !== 'facial' && (
+            {editTreatmentForm.category === 'body' && (
               <TextField
                 label="Precio sesión de evaluación ($) (opcional)"
                 size="small"
@@ -670,6 +754,48 @@ export default function TreatmentsTab() {
                 placeholder="ej. 500"
                 helperText="Precio especial para la primera sesión de evaluación"
               />
+            )}
+            <TextField
+              label="Subtítulo"
+              size="small"
+              fullWidth
+              value={editTreatmentForm.subtitle}
+              onChange={(e) => setEditTreatmentForm(f => ({ ...f, subtitle: e.target.value }))}
+              placeholder="ej. Nivel inicial"
+            />
+            <TextField
+              label="Ruta"
+              size="small"
+              fullWidth
+              value={editTreatmentForm.route}
+              onChange={(e) => setEditTreatmentForm(f => ({ ...f, route: e.target.value }))}
+              placeholder="ej. /cinturon-orion"
+            />
+            {editTreatmentForm.category === 'laser' && (
+              <>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Género *</InputLabel>
+                  <Select
+                    value={editTreatmentForm.gender}
+                    label="Género *"
+                    onChange={(e) => setEditTreatmentForm(f => ({ ...f, gender: e.target.value }))}
+                  >
+                    <MenuItem value="hombres">Hombres</MenuItem>
+                    <MenuItem value="mujeres">Mujeres</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Tipo de item *</InputLabel>
+                  <Select
+                    value={editTreatmentForm.item_type}
+                    label="Tipo de item *"
+                    onChange={(e) => setEditTreatmentForm(f => ({ ...f, item_type: e.target.value }))}
+                  >
+                    <MenuItem value="zona">Zona</MenuItem>
+                    <MenuItem value="paquete">Paquete</MenuItem>
+                  </Select>
+                </FormControl>
+              </>
             )}
             <FormControl size="small" fullWidth>
               <InputLabel>Estado</InputLabel>
