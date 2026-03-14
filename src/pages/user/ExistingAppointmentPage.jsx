@@ -305,7 +305,9 @@ export default function ExistingAppointmentPage() {
                   Servicio
                 </Typography>
                 <Typography variant="body1" sx={{fontWeight: "bold"}}>
-                  {appointmentData.treatment_name || "Servicio de estética"}
+                  {appointmentData.is_evaluation
+                    ? `Sesión de Evaluación - ${appointmentData.treatment_name || "Servicio de estética"}`
+                    : (appointmentData.treatment_name || "Servicio de estética")}
                 </Typography>
               </Box>
 

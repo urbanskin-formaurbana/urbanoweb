@@ -53,11 +53,12 @@ export default function PaymentPage() {
   const [fieldsFromDB, setFieldsFromDB] = useState(new Set()); // Track fields loaded from DB
   const [treatmentDescription, setTreatmentDescription] = useState(null);
   const [loadingDescription, setLoadingDescription] = useState(false);
-
-  const treatment = location.state?.treatment || {
-    name: "Evaluación",
-    slug: "evaluation",
-  };
+  const [treatment, setTreatment] = useState(
+    location.state?.treatment || {
+      name: "Evaluación",
+      slug: "evaluation",
+    }
+  );
   const selectedPackageId = location.state?.selectedPackageId || null;
   const isEvaluation = location.state?.isEvaluation ?? false;
 
@@ -68,7 +69,18 @@ export default function PaymentPage() {
       treatmentService
         .getTreatmentPackages(treatment.slug)
         .then((data) => {
-          if (data?.description) {
+          // Update treatment with duration from API
+          setTreatment((prev) => ({
+            ...prev,
+            duration_minutes: data?.duration_minutes || 90,
+          }));
+
+          // If evaluation, use evaluation description; otherwise use treatment description
+          if (isEvaluation) {
+            setTreatmentDescription(
+              "Nuestros especialistas necesitan evaluar tu caso particular para orientarte hacia los servicios más adecuados para ti. Esta sesión de evaluación no garantiza el inicio de un tratamiento con nosotros."
+            );
+          } else if (data?.description) {
             setTreatmentDescription(data.description);
           }
 
@@ -95,8 +107,12 @@ export default function PaymentPage() {
           // Non-fatal: description and price just won't display
         })
         .finally(() => setLoadingDescription(false));
+    } else if (treatment.slug === "evaluation") {
+      setTreatmentDescription(
+        "Nuestros especialistas necesitan evaluar tu caso particular para orientarte hacia los servicios más adecuados para ti. Esta sesión de evaluación no garantiza el inicio de un tratamiento con nosotros."
+      );
     }
-  }, [treatment.slug, selectedPackageId]);
+  }, [treatment.slug, selectedPackageId, isEvaluation]);
 
   useEffect(() => {
     if (paymentStatus === "approved") {
@@ -141,7 +157,7 @@ export default function PaymentPage() {
         .then((payment) => {
           if (payment) {
             paymentService.savePaymentId(payment._id);
-            navigate("/schedule", {state: {treatment}});
+            navigate("/schedule", {state: {treatment, isEvaluation}});
           }
         })
         .catch(() => {}); // Fail silently

@@ -134,7 +134,7 @@ export default function AppointmentConfirmedPage() {
                   Servicio
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                  {appointment.treatment}
+                  {appointment.isEvaluation ? `Sesión de Evaluación - ${appointment.treatment}` : appointment.treatment}
                 </Typography>
               </Box>
 

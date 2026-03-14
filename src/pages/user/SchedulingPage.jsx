@@ -74,6 +74,7 @@ export default function SchedulingPage() {
 
   const treatment = location.state?.treatment || { name: 'Evaluación', slug: 'evaluation' };
   const paymentId = location.state?.paymentId;
+  const isEvaluation = location.state?.isEvaluation ?? false;
 
   if (!user) {
     return (
@@ -98,9 +99,11 @@ export default function SchedulingPage() {
 
       try {
         // Fetch available slots from backend API
+        // Use 30 minutes for evaluations, otherwise use treatment duration from DB (or default to 90)
+        const slotDuration = isEvaluation ? 30 : (treatment.duration_minutes || 90);
         const slotStrings = await appointmentService.getAvailableSlots(
           selectedDate.toDate(),
-          90 // 90 minute duration
+          slotDuration
         );
         // Convert ISO strings to dayjs objects with America/Montevideo timezone
         let slots = slotStrings.map((slotStr) =>
@@ -150,6 +153,7 @@ export default function SchedulingPage() {
         treatment_id: treatment.slug,
         scheduled_at,
         payment_id: paymentId,
+        is_evaluation: isEvaluation,
       };
 
       // If we have a purchased_package_id from location state, include it
@@ -160,15 +164,18 @@ export default function SchedulingPage() {
       const result = await appointmentService.createAppointment(appointmentData);
 
       // Build appointment details for display
+      // For evaluations, always use 30 min; for regular appointments, use treatment duration
+      const appointmentDuration = isEvaluation ? 30 : (treatment.duration_minutes || SESSION_DURATION);
       const appointmentDetails = {
         id: result.appointment_id,
         date: selectedDate.format('DD/MM/YYYY'),
         time: selectedTime.format('HH:mm'),
-        duration: SESSION_DURATION,
+        duration: appointmentDuration,
         treatment: treatment.name,
         customer: user.name,
         payment_id: paymentId,
         status: result.status,
+        isEvaluation: isEvaluation,
       };
 
       setAppointmentDetails(appointmentDetails);
