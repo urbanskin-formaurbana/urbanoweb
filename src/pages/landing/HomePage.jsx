@@ -379,7 +379,7 @@ export default function HomePage() {
                           boxShadow: 3,
                         },
                       }}
-                      onClick={() => handleBodyTreatmentClick(treatment)}
+                      onClick={() => handleFacialTreatmentClick(treatment)}
                     >
                       <CardContent sx={{ flexGrow: 1 }}>
                         <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
