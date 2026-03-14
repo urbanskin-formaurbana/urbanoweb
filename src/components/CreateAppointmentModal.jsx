@@ -7,9 +7,6 @@ import {
   Button,
   Box,
   TextField,
-  Stepper,
-  Step,
-  StepLabel,
   RadioGroup,
   FormControlLabel,
   Radio,
@@ -26,6 +23,7 @@ import {
   Select,
   MenuItem,
   Divider,
+  LinearProgress,
 } from '@mui/material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -35,6 +33,7 @@ import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/locale/es';
 import adminService from '../services/admin_service';
 import appointmentService from '../services/appointment_service';
+import laserCampaignService from '../services/laser_campaign_service';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -109,6 +108,8 @@ export default function CreateAppointmentModal({
   const [scheduleTime, setScheduleTime] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [availableLaserDates, setAvailableLaserDates] = useState(null);
+  const [loadingLaserDates, setLoadingLaserDates] = useState(false);
 
   // Auto-advance to Step 2 if prefilledCustomer
   useEffect(() => {
@@ -170,12 +171,22 @@ export default function CreateAppointmentModal({
     const loadSlots = async () => {
       setLoadingSlots(true);
       try {
-        const duration =
-          paymentMode === 'evaluacion' ? 30 : selectedTreatment.duration_minutes || 90;
-        const slotStrings = await appointmentService.getAvailableSlots(
-          scheduleDate.toDate(),
-          duration
-        );
+        let slotStrings;
+
+        if (isLaserTreatment(selectedTreatment)) {
+          // For laser treatments, fetch from campaign service (same as SchedulingPage)
+          const duration = selectedTreatment.duration_minutes || 90;
+          slotStrings = await laserCampaignService.getAvailableSlots(duration);
+        } else {
+          // For regular treatments, fetch dynamic slots based on date
+          const duration =
+            paymentMode === 'evaluacion' ? 30 : selectedTreatment.duration_minutes || 90;
+          slotStrings = await appointmentService.getAvailableSlots(
+            scheduleDate.toDate(),
+            duration
+          );
+        }
+
         const filtered = filterSlotsForEmployee(slotStrings);
         setAvailableSlots(filtered);
       } catch (err) {
@@ -188,6 +199,32 @@ export default function CreateAppointmentModal({
 
     loadSlots();
   }, [scheduleDate, selectedTreatment, paymentMode]);
+
+  // Load available laser dates when entering step 4 with a laser treatment
+  useEffect(() => {
+    if (step !== 4 || !selectedTreatment || !isLaserTreatment(selectedTreatment)) {
+      setAvailableLaserDates(null);
+      return;
+    }
+
+    const loadDates = async () => {
+      setLoadingLaserDates(true);
+      try {
+        const duration = selectedTreatment.duration_minutes || 90;
+        const slots = await laserCampaignService.getAvailableSlots(duration);
+        const dates = new Set(
+          slots.map(s => dayjs.utc(s).tz('America/Montevideo').format('YYYY-MM-DD'))
+        );
+        setAvailableLaserDates(dates);
+      } catch (err) {
+        console.error('Error loading laser dates:', err);
+      } finally {
+        setLoadingLaserDates(false);
+      }
+    };
+
+    loadDates();
+  }, [step, selectedTreatment]);
 
   const loadCustomers = async () => {
     setLoadingCustomers(true);
@@ -352,14 +389,9 @@ export default function CreateAppointmentModal({
         purchasedPackageId = selectedCuponera.purchased_package_id;
       }
 
-      // Combine date and time
-      const scheduledDateTime = scheduleDate
-        .hour(parseInt(scheduleTime.split(':')[0], 10))
-        .minute(parseInt(scheduleTime.split(':')[1], 10))
-        .second(0);
-
-      // Convert to UTC
-      const scheduledAtUTC = scheduledDateTime.tz('America/Montevideo').utc().toISOString();
+      // Combine date and time in Montevideo timezone, then convert to UTC
+      const dateStr = scheduleDate.format('YYYY-MM-DD');
+      const scheduledAtUTC = dayjs.tz(`${dateStr} ${scheduleTime}`, 'America/Montevideo').utc().toISOString();
 
       // Create appointment
       const appointmentData = {
@@ -385,6 +417,7 @@ export default function CreateAppointmentModal({
       setPaymentMode(null);
       setScheduleDate(null);
       setScheduleTime(null);
+      setAvailableLaserDates(null);
     } catch (err) {
       console.error('Error creating appointment:', err);
       setError(err.detail || 'Error al crear la sesión');
@@ -404,6 +437,7 @@ export default function CreateAppointmentModal({
       setPaymentMode(null);
       setScheduleDate(null);
       setScheduleTime(null);
+      setAvailableLaserDates(null);
       onClose();
     }
   };
@@ -873,7 +907,7 @@ export default function CreateAppointmentModal({
                     <Box sx={{ ml: 4, mt: 1, mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
                       <Grid container spacing={1}>
                         {treatmentPackages.map((pkg) => (
-                          <Grid item xs={12} key={pkg.id}>
+                          <Grid size={{ xs: 12 }} key={pkg.id}>
                             <Card
                               onClick={() => setSelectedPackage(pkg)}
                               sx={{
@@ -948,6 +982,13 @@ export default function CreateAppointmentModal({
                 label="Fecha"
                 value={scheduleDate}
                 onChange={setScheduleDate}
+                minDate={dayjs()}
+                shouldDisableDate={
+                  isLaserTreatment(selectedTreatment) && availableLaserDates
+                    ? (date) => !availableLaserDates.has(date.format('YYYY-MM-DD'))
+                    : undefined
+                }
+                disabled={isLaserTreatment(selectedTreatment) && loadingLaserDates}
                 sx={{ width: '100%', mb: 2 }}
               />
             </LocalizationProvider>
@@ -955,23 +996,30 @@ export default function CreateAppointmentModal({
             {loadingSlots ? (
               <CircularProgress />
             ) : (
-              <Grid container spacing={1}>
-                {availableSlots.map((slot) => {
-                  const slotTime = dayjs.utc(slot).tz('America/Montevideo').format('HH:mm');
-                  return (
-                    <Grid item xs={4} key={slot}>
-                      <Button
-                        variant={scheduleTime === slotTime ? 'contained' : 'outlined'}
-                        onClick={() => setScheduleTime(slotTime)}
-                        fullWidth
-                        size="small"
-                      >
-                        {slotTime}
-                      </Button>
-                    </Grid>
-                  );
-                })}
-              </Grid>
+              <>
+                <Grid container spacing={1}>
+                  {availableSlots.map((slot) => {
+                    const slotTime = dayjs.utc(slot).tz('America/Montevideo').format('HH:mm');
+                    return (
+                      <Grid size={{ xs: 4 }} key={slot}>
+                        <Button
+                          variant={scheduleTime === slotTime ? 'contained' : 'outlined'}
+                          onClick={() => setScheduleTime(slotTime)}
+                          fullWidth
+                          size="small"
+                        >
+                          {slotTime}
+                        </Button>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+                {scheduleDate && availableSlots.length === 0 && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    No hay horarios disponibles para este día
+                  </Typography>
+                )}
+              </>
             )}
           </Box>
         );
@@ -1059,13 +1107,19 @@ export default function CreateAppointmentModal({
       <DialogTitle>Crear nueva sesión</DialogTitle>
       <DialogContent>
         <Box sx={{ mb: 3, mt: 1 }}>
-          <Stepper activeStep={step - 1} sx={{ mb: 3 }}>
-            {STEPS.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              Paso {step} de {STEPS.length}
+            </Typography>
+            <Typography variant="subtitle1" fontWeight="bold">
+              {STEPS[step - 1]}
+            </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={(step / STEPS.length) * 100}
+              sx={{ mt: 1, borderRadius: 1 }}
+            />
+          </Box>
 
           {error && (
             <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
