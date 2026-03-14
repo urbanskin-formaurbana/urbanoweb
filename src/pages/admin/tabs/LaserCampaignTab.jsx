@@ -25,6 +25,8 @@ import {
   FormControlLabel,
   IconButton,
   Chip,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import laserCampaignService from '../../../services/laser_campaign_service';
@@ -37,6 +39,15 @@ export default function LaserCampaignTab() {
     name: '',
     startsOn: '',
     endsOn: '',
+  });
+
+  // Campaign edit state
+  const [editMode, setEditMode] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    startsOn: '',
+    endsOn: '',
+    status: '',
   });
 
   // Slots management state
@@ -65,21 +76,28 @@ export default function LaserCampaignTab() {
       setError('');
 
       // Load active campaign
-      const activeCampaign = await laserCampaignService.getActiveCampaignAdmin();
-      setCampaign(activeCampaign);
-      setSlots(activeCampaign.slots || []);
-
-      // Load waitlist
-      const waitlistData = await laserCampaignService.getWaitlist();
-      setWaitlist(waitlistData);
-    } catch (err) {
-      if (err.response?.status === 404 || err.message === 'No active campaign') {
-        setCampaign(null);
-        setSlots([]);
-        setWaitlist([]);
-      } else {
-        setError(`Error loading campaign: ${err.message}`);
+      try {
+        const activeCampaign = await laserCampaignService.getActiveCampaignAdmin();
+        setCampaign(activeCampaign);
+        setSlots(activeCampaign.slots || []);
+      } catch (err) {
+        if (err.response?.status === 404 || err.message === 'No active campaign') {
+          setCampaign(null);
+          setSlots([]);
+        } else {
+          throw err;
+        }
       }
+
+      // Load waitlist (independent of campaign status)
+      try {
+        const waitlistData = await laserCampaignService.getWaitlist();
+        setWaitlist(waitlistData);
+      } catch (err) {
+        setError(`Error loading waitlist: ${err.message}`);
+      }
+    } catch (err) {
+      setError(`Error loading campaign: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -93,11 +111,19 @@ export default function LaserCampaignTab() {
         return;
       }
 
+      const startDate = new Date(createFormData.startsOn);
+      const endDate = new Date(createFormData.endsOn);
+
+      if (endDate <= startDate) {
+        setError('La fecha de fin debe ser posterior a la fecha de inicio');
+        return;
+      }
+
       setLoading(true);
       await laserCampaignService.createCampaign(
         createFormData.name,
-        new Date(createFormData.startsOn),
-        new Date(createFormData.endsOn)
+        startDate,
+        endDate
       );
 
       setSuccess('Campaña creada exitosamente');
@@ -160,6 +186,57 @@ export default function LaserCampaignTab() {
     }
   }
 
+  // ========== Campaign edit ==========
+  function handleEditCampaign() {
+    const start = new Date(campaign.starts_on).toISOString().slice(0, 16);
+    const end = new Date(campaign.ends_on).toISOString().slice(0, 16);
+    setEditFormData({
+      name: campaign.name,
+      startsOn: start,
+      endsOn: end,
+      status: campaign.status,
+    });
+    setEditMode(true);
+  }
+
+  async function handleUpdateCampaign() {
+    try {
+      if (!editFormData.name || !editFormData.startsOn || !editFormData.endsOn) {
+        setError('Complete todos los campos');
+        return;
+      }
+
+      const startDate = new Date(editFormData.startsOn);
+      const endDate = new Date(editFormData.endsOn);
+
+      if (endDate <= startDate) {
+        setError('La fecha de fin debe ser posterior a la fecha de inicio');
+        return;
+      }
+
+      setLoading(true);
+      await laserCampaignService.updateCampaign(campaign._id, {
+        name: editFormData.name,
+        starts_on: startDate,
+        ends_on: endDate,
+        status: editFormData.status,
+      });
+
+      setSuccess('Campaña actualizada exitosamente');
+      setEditMode(false);
+      await loadCampaignAndSlots();
+    } catch (err) {
+      setError(`Error al actualizar campaña: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleCancelEdit() {
+    setEditMode(false);
+    setEditFormData({ name: '', startsOn: '', endsOn: '', status: '' });
+  }
+
   // Format date/time for display
   function formatDateTime(dateStr) {
     return new Date(dateStr).toLocaleString('es-UY', {
@@ -217,23 +294,66 @@ export default function LaserCampaignTab() {
 
           {campaign ? (
             <Box sx={{ mb: 2 }}>
-              <Typography>
-                <strong>Nombre:</strong> {campaign.name}
-              </Typography>
-              <Typography>
-                <strong>Período:</strong> {formatDate(campaign.starts_on)} - {formatDate(campaign.ends_on)}
-              </Typography>
-              <Typography>
-                <strong>Total de turnos:</strong> {campaign.total_slots}
-              </Typography>
-              <Typography>
-                <strong>Turnos reservados:</strong> {campaign.booked_slots}
-              </Typography>
-              <Chip
-                label={campaign.status === 'active' ? 'Activa' : 'Cerrada'}
-                color={campaign.status === 'active' ? 'success' : 'default'}
-                sx={{ mt: 1 }}
-              />
+              {!editMode ? (
+                <>
+                  <Typography>
+                    <strong>Nombre:</strong> {campaign.name}
+                  </Typography>
+                  <Typography>
+                    <strong>Período:</strong> {formatDate(campaign.starts_on)} - {formatDate(campaign.ends_on)}
+                  </Typography>
+                  <Typography>
+                    <strong>Total de turnos:</strong> {campaign.total_slots}
+                  </Typography>
+                  <Typography>
+                    <strong>Turnos reservados:</strong> {campaign.booked_slots}
+                  </Typography>
+                  <Chip
+                    label={campaign.status === 'active' ? 'Activa' : 'Cerrada'}
+                    color={campaign.status === 'active' ? 'success' : 'default'}
+                    sx={{ mt: 1 }}
+                  />
+                </>
+              ) : (
+                <>
+                  <TextField
+                    label="Nombre de la campaña"
+                    fullWidth
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    label="Fecha de inicio"
+                    type="datetime-local"
+                    fullWidth
+                    value={editFormData.startsOn}
+                    onChange={(e) => setEditFormData({ ...editFormData, startsOn: e.target.value })}
+                    slotProps={{ inputBase: { shrink: true } }}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    label="Fecha de fin"
+                    type="datetime-local"
+                    fullWidth
+                    value={editFormData.endsOn}
+                    onChange={(e) => setEditFormData({ ...editFormData, endsOn: e.target.value })}
+                    slotProps={{ inputBase: { shrink: true } }}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    select
+                    label="Estado"
+                    fullWidth
+                    value={editFormData.status}
+                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                  >
+                    <MenuItem value="draft">Borrador</MenuItem>
+                    <MenuItem value="active">Activa</MenuItem>
+                    <MenuItem value="closed">Cerrada</MenuItem>
+                  </TextField>
+                </>
+              )}
             </Box>
           ) : (
             <Alert severity="info" sx={{ mb: 2 }}>
@@ -241,131 +361,159 @@ export default function LaserCampaignTab() {
             </Alert>
           )}
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            {campaign ? 'Crear Nueva Campaña' : 'Crear Campaña'}
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {campaign && !editMode && (
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleEditCampaign}
+              >
+                Editar
+              </Button>
+            )}
+            {editMode && (
+              <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleUpdateCampaign}
+                >
+                  Guardar cambios
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={handleCancelEdit}
+                >
+                  Cancelar
+                </Button>
+              </>
+            )}
+            {!editMode && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                {campaign ? 'Crear Nueva Campaña' : 'Crear Campaña'}
+              </Button>
+            )}
+          </Box>
         </CardContent>
       </Card>
 
       {/* Slots Management Section */}
       {campaign && (
-        <>
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Generar Turnos
-              </Typography>
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Generar Turnos
+            </Typography>
 
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => setBulkSlotsOpen(true)}
-                sx={{ mb: 2 }}
-              >
-                Generar Turnos por Rango
-              </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => setBulkSlotsOpen(true)}
+              sx={{ mb: 2 }}
+            >
+              Generar Turnos por Rango
+            </Button>
 
-              {/* Slots table */}
-              <TableContainer component={Paper}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell>Fecha y Hora</TableCell>
-                      <TableCell>Estado</TableCell>
-                      <TableCell>Cliente / Tratamiento</TableCell>
-                      <TableCell>Acción</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {slots.length > 0 ? (
-                      slots.map((slot) => (
-                        <TableRow key={slot._id}>
-                          <TableCell>{formatDateTime(slot.starts_at)}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={slot.is_booked ? 'Reservado' : 'Disponible'}
-                              color={slot.is_booked ? 'warning' : 'success'}
+            {/* Slots table */}
+            <TableContainer component={Paper}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                    <TableCell>Fecha y Hora</TableCell>
+                    <TableCell>Estado</TableCell>
+                    <TableCell>Cliente / Tratamiento</TableCell>
+                    <TableCell>Acción</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {slots.length > 0 ? (
+                    slots.map((slot) => (
+                      <TableRow key={slot._id}>
+                        <TableCell>{formatDateTime(slot.starts_at)}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={slot.is_booked ? 'Reservado' : 'Disponible'}
+                            color={slot.is_booked ? 'warning' : 'success'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {slot.is_booked
+                            ? `${slot.customer_name} - ${slot.treatment_name}`
+                            : '-'}
+                        </TableCell>
+                        <TableCell>
+                          {!slot.is_booked && (
+                            <IconButton
                               size="small"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {slot.is_booked
-                              ? `${slot.customer_name} - ${slot.treatment_name}`
-                              : '-'}
-                          </TableCell>
-                          <TableCell>
-                            {!slot.is_booked && (
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleDeleteSlot(slot._id)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={4} align="center">
-                          No hay turnos. Crea algunos para comenzar.
+                              color="error"
+                              onClick={() => handleDeleteSlot(slot._id)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          )}
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-
-          {/* Waitlist Section */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Lista de Espera ({waitlist.length})
-              </Typography>
-
-              <TableContainer component={Paper}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell>Cliente</TableCell>
-                      <TableCell>Teléfono</TableCell>
-                      <TableCell>Fecha de registro</TableCell>
-                      <TableCell>Notificado</TableCell>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        No hay turnos. Crea algunos para comenzar.
+                      </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {waitlist.length > 0 ? (
-                      waitlist.map((entry) => (
-                        <TableRow key={entry._id}>
-                          <TableCell>{entry.customer_name}</TableCell>
-                          <TableCell>{entry.customer_phone}</TableCell>
-                          <TableCell>{formatDate(entry.created_at)}</TableCell>
-                          <TableCell>
-                            {entry.notified_at ? '✓' : '✗'}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={4} align="center">
-                          No hay clientes en lista de espera
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-        </>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
       )}
+
+      {/* Waitlist Section - Always visible */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Lista de Espera ({waitlist.length})
+          </Typography>
+
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                  <TableCell>Cliente</TableCell>
+                  <TableCell>Teléfono</TableCell>
+                  <TableCell>Fecha de registro</TableCell>
+                  <TableCell>Notificado</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {waitlist.length > 0 ? (
+                  waitlist.map((entry) => (
+                    <TableRow key={entry._id}>
+                      <TableCell>{entry.customer_name}</TableCell>
+                      <TableCell>{entry.customer_phone}</TableCell>
+                      <TableCell>{formatDate(entry.created_at)}</TableCell>
+                      <TableCell>
+                        {entry.notified_at ? '✓' : '✗'}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center">
+                      No hay clientes en lista de espera
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
 
       {/* Create Campaign Dialog */}
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
