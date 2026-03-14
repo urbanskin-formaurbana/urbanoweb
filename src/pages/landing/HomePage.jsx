@@ -33,6 +33,7 @@ export default function HomePage() {
   const [checkingAppointment, setCheckingAppointment] = useState(false);
   const [bodyTreatments, setBodyTreatments] = useState([]);
   const [facialTreatments, setFacialTreatments] = useState([]);
+  const [complementaryTreatments, setComplementaryTreatments] = useState([]);
   const [treatmentsLoading, setTreatmentsLoading] = useState(true);
   const [treatmentsError, setTreatmentsError] = useState(null);
   const [canPurchasePackages, setCanPurchasePackages] = useState(false);
@@ -45,6 +46,7 @@ export default function HomePage() {
       .then((data) => {
         setBodyTreatments(data.filter((t) => t.category === "body"));
         setFacialTreatments(data.filter((t) => t.category === "facial"));
+        setComplementaryTreatments(data.filter((t) => t.category === "complementarios"));
       })
       .catch((err) => {
         console.error("Error loading treatments:", err);
@@ -343,6 +345,61 @@ export default function HomePage() {
               </Grid>
             </Container>
           </Box>
+
+          {/* Complementarios Section - only show if treatments exist */}
+          {complementaryTreatments.length > 0 && (
+            <Container component="section" sx={{ py: { xs: 3, md: 4 } }}>
+              <Typography
+                variant={isMobile ? "h4" : "h3"}
+                align="center"
+                gutterBottom
+                sx={{ mb: 3 }}
+              >
+                Complementarios
+              </Typography>
+              <Typography
+                align="center"
+                sx={{ mb: 3, color: "text.secondary" }}
+              >
+                Otros servicios que no encajan completamente en las categorías anteriores
+              </Typography>
+
+              <Grid container spacing={3} justifyContent="center">
+                {complementaryTreatments.map((treatment) => (
+                  <Grid key={treatment.slug} size={{ xs: 12, sm: 6, md: 4 }}>
+                    <Card
+                      sx={{
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        cursor: "pointer",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: 3,
+                        },
+                      }}
+                      onClick={() => handleBodyTreatmentClick(treatment)}
+                    >
+                      <CardContent sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                          {treatment.name}
+                        </Typography>
+                        {treatment.subtitle && (
+                          <Typography variant="body2" color="success.main" gutterBottom>
+                            {treatment.subtitle}
+                          </Typography>
+                        )}
+                        <Typography variant="body2" color="text.secondary">
+                          {treatment.description}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Container>
+          )}
         </>
       )}
 

@@ -398,7 +398,11 @@ export default function TreatmentsTab() {
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   {treatment.category && (
                     <Chip
-                      label={treatment.category === 'facial' ? 'Facial' : 'Corporal'}
+                      label={
+                        treatment.category === 'facial' ? 'Facial' :
+                        treatment.category === 'complementarios' ? 'Complementarios' :
+                        'Corporal'
+                      }
                       size="small"
                       variant="outlined"
                     />
@@ -502,6 +506,7 @@ export default function TreatmentsTab() {
               >
                 <MenuItem value="body">Corporal</MenuItem>
                 <MenuItem value="facial">Facial</MenuItem>
+                <MenuItem value="complementarios">Complementarios</MenuItem>
               </Select>
             </FormControl>
             <TextField
@@ -625,6 +630,7 @@ export default function TreatmentsTab() {
               >
                 <MenuItem value="body">Corporal</MenuItem>
                 <MenuItem value="facial">Facial</MenuItem>
+                <MenuItem value="complementarios">Complementarios</MenuItem>
               </Select>
             </FormControl>
             <TextField
