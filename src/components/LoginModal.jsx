@@ -44,16 +44,16 @@ export default function LoginModal({open, onClose, onSuccess}) {
 
   const handlePostLogin = async () => {
     onClose();
-    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
-    if (storedUser?.user_type === 'employee') return;
+    const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+    if (storedUser?.user_type === "employee") return;
     try {
       const appointment = await appointmentService.getCustomerAppointments();
       if (appointment) {
-        navigate('/existing-appointment', { state: { appointment } });
+        navigate("/existing-appointment", {state: {appointment}});
         return;
       }
     } catch (err) {
-      console.error('Failed to check appointments:', err);
+      console.error("Failed to check appointments:", err);
     }
     onSuccess?.();
   };
@@ -153,140 +153,24 @@ export default function LoginModal({open, onClose, onSuccess}) {
             {successMessage}
           </Alert>
         )}
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{mb: 3, textAlign: "center"}}
-        >
-          Elige tu método de inicio de sesión
-        </Typography>
-
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          variant="fullWidth"
-          sx={{mb: 3}}
-        >
-          <Tab label="Google" icon={<GoogleIcon />} iconPosition="start" />
-          <Tab label="WhatsApp" icon={<PhoneIcon />} iconPosition="start" />
-        </Tabs>
-
-        {/* Google Login Tab */}
-        {tabValue === 0 && (
-          <Stack spacing={2} sx={{alignItems: "center"}}>
-            <Typography variant="body2" sx={{color: "text.secondary"}}>
-              Inicia sesión con tu cuenta de Google para una experiencia rápida
-              y segura.
-            </Typography>
-            <Box sx={{width: "100%", display: "flex", justifyContent: "center"}}>
-              <GoogleLogin
-                onSuccess={handleGoogleLoginSuccess}
-                onError={handleGoogleLoginError}
-                useOneTap={false}
-                theme="outline"
-                size="large"
-                text="continue_with"
-                locale="es"
-                auto_select={false}
-                popup_ux_mode="iframe"
-              />
-            </Box>
-          </Stack>
-        )}
-
-        {/* WhatsApp Login Tab */}
-        {tabValue === 1 && (
-          <Stack spacing={2}>
-            <Typography variant="body2" sx={{color: "text.secondary"}}>
-              Inicia sesión con tu número de WhatsApp. Recibirás un código para
-              verificar tu identidad.
-            </Typography>
-
-            {!otpSent ? (
-              <>
-                <TextField
-                  fullWidth
-                  label="Número de WhatsApp"
-                  placeholder="598912345678"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={loading}
-                  helperText="Formato: 598 + tu número sin el 0 inicial"
-                />
-                <Button
-                  fullWidth
-                  variant="contained"
-                  startIcon={<PhoneIcon />}
-                  onClick={handleSendOTP}
-                  disabled={loading || !phone}
-                  sx={{py: 1.5}}
-                >
-                  {loading ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Enviar código por WhatsApp"
-                  )}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Typography
-                  variant="body2"
-                  color="success.main"
-                  sx={{textAlign: "center"}}
-                >
-                  ✓ Código enviado a {phone}
-                </Typography>
-                <TextField
-                  fullWidth
-                  label="Código de verificación"
-                  placeholder="000000"
-                  value={otp}
-                  onChange={(e) =>
-                    setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
-                  }
-                  disabled={loading}
-                  inputProps={{
-                    maxLength: 6,
-                    style: {
-                      textAlign: "center",
-                      fontSize: "24px",
-                      letterSpacing: "8px",
-                    },
-                  }}
-                />
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={handleVerifyOTP}
-                  disabled={loading || otp.length < 6}
-                  sx={{py: 1.5}}
-                >
-                  {loading ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Verificar código"
-                  )}
-                </Button>
-                <Button
-                  fullWidth
-                  variant="text"
-                  size="small"
-                  onClick={() => {
-                    setOtpSent(false);
-                    setPhone("");
-                    setOtp("");
-                    setError("");
-                  }}
-                  disabled={loading}
-                >
-                  Usar otro número
-                </Button>
-              </>
-            )}
-          </Stack>
-        )}
+        <Stack spacing={2} sx={{alignItems: "center"}}>
+          <Typography variant="body2" sx={{color: "text.secondary"}}>
+            Inicia sesión con tu cuenta de Google.
+          </Typography>
+          <Box sx={{width: "100%", display: "flex", justifyContent: "center"}}>
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={handleGoogleLoginError}
+              useOneTap={false}
+              theme="outline"
+              size="large"
+              text="continue_with"
+              locale="es"
+              auto_select={false}
+              popup_ux_mode="iframe"
+            />
+          </Box>
+        </Stack>
       </DialogContent>
 
       <DialogActions sx={{p: 2}}>
