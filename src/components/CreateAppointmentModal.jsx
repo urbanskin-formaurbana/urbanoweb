@@ -55,6 +55,10 @@ function formatAppointmentTime(isoString) {
   return dayjs.utc(isoString).tz('America/Montevideo').format('HH:mm');
 }
 
+function isLaserTreatment(treatment) {
+  return treatment.gender != null || treatment.category === 'laser';
+}
+
 export default function CreateAppointmentModal({
   open,
   onClose,
@@ -81,6 +85,9 @@ export default function CreateAppointmentModal({
   // Step 2: Treatment
   const [treatments, setTreatments] = useState([]);
   const [selectedTreatment, setSelectedTreatment] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [laserGender, setLaserGender] = useState(null);
+  const [laserItemType, setLaserItemType] = useState(null);
   const [loadingTreatments, setLoadingTreatments] = useState(false);
 
   // Step 3: Payment
@@ -89,12 +96,13 @@ export default function CreateAppointmentModal({
   const [selectedCuponera, setSelectedCuponera] = useState(null);
   const [treatmentPackages, setTreatmentPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [customerCanPurchasePackages, setCustomerCanPurchasePackages] = useState(null);
   const [newPurchase, setNewPurchase] = useState({
     total_sessions: '',
     amount_paid: '',
     payment_method: 'efectivo',
   });
-  const [loadingPackages, setLoadingPackages] = useState(false);
+  const [loadingStep3, setLoadingStep3] = useState(false);
 
   // Step 4: Schedule
   const [scheduleDate, setScheduleDate] = useState(null);
@@ -123,24 +131,12 @@ export default function CreateAppointmentModal({
     }
   }, [open, step]);
 
-  // Load cuponeras when entering step 3 or selecting "cuponera existente"
+  // Load all step 3 data when entering step 3
   useEffect(() => {
-    if (open && step === 3 && selectedCustomer && paymentMode === 'existing_cuponera') {
-      loadCustomerCuponeras();
+    if (open && step === 3 && selectedCustomer && selectedTreatment) {
+      loadStep3Data();
     }
-  }, [open, step, selectedCustomer, paymentMode]);
-
-  // Load packages when selecting a treatment in step 3 "new_package" mode
-  useEffect(() => {
-    if (
-      open &&
-      step === 3 &&
-      paymentMode === 'new_package' &&
-      selectedTreatment
-    ) {
-      loadTreatmentPackages();
-    }
-  }, [open, step, paymentMode, selectedTreatment]);
+  }, [open, step, selectedCustomer, selectedTreatment]);
 
   // Update amount when package is selected
   useEffect(() => {
@@ -219,36 +215,45 @@ export default function CreateAppointmentModal({
     }
   };
 
-  const loadCustomerCuponeras = async () => {
+  const loadStep3Data = async () => {
+    setLoadingStep3(true);
     try {
+      // Load customer history (cuponeras + can_purchase_packages status)
       const history = await adminService.getCustomerHistory(selectedCustomer.id || selectedCustomer._id);
-      const active = (history.timeline || [])
+      const activeCuponeras = (history.timeline || [])
         .filter(
           (item) =>
             item.kind === 'cuponera' &&
             item.sessions_used < item.total_sessions &&
             item.treatment_name === selectedTreatment.name
         );
-      setCustomerCuponeras(active);
-    } catch (err) {
-      console.error('Error loading cuponeras:', err);
-      setError('Error al cargar cuponeras');
-    }
-  };
+      setCustomerCuponeras(activeCuponeras);
+      setCustomerCanPurchasePackages(history.can_purchase_packages ?? false);
 
-  const loadTreatmentPackages = async () => {
-    setLoadingPackages(true);
-    try {
+      // Load treatment packages
       const response = await fetch(`/api/v1/${selectedTreatment.slug}/packages`);
       if (!response.ok) throw new Error('Failed to load packages');
       const data = await response.json();
       const packages = (data.packages || []).filter((p) => p.is_active !== false);
       setTreatmentPackages(packages);
+
+      // Auto-reset paymentMode if the selected mode is now unavailable
+      if (paymentMode) {
+        const validModes = [
+          ...(activeCuponeras.length > 0 ? ['existing_cuponera'] : []),
+          'single_session',
+          ...(packages.length > 0 ? ['new_package'] : []),
+          ...(selectedTreatment?.category === 'body' && !(history.can_purchase_packages ?? false) ? ['evaluacion'] : []),
+        ];
+        if (!validModes.includes(paymentMode)) {
+          setPaymentMode(null);
+        }
+      }
     } catch (err) {
-      console.error('Error loading packages:', err);
-      setError('Error al cargar paquetes');
+      console.error('Error loading step 3 data:', err);
+      setError('Error al cargar datos de la sesión');
     } finally {
-      setLoadingPackages(false);
+      setLoadingStep3(false);
     }
   };
 
@@ -297,7 +302,20 @@ export default function CreateAppointmentModal({
 
   const handlePrevStep = () => {
     setError(null);
-    setStep(step - 1);
+    // Handle sub-steps within step 2
+    if (step === 2) {
+      if (selectedCategory === 'laser' && laserItemType) {
+        setLaserItemType(null);
+      } else if (selectedCategory === 'laser' && laserGender) {
+        setLaserGender(null);
+      } else if (selectedCategory) {
+        setSelectedCategory(null);
+      } else {
+        setStep(step - 1);
+      }
+    } else {
+      setStep(step - 1);
+    }
   };
 
   const handleSubmit = async () => {
@@ -363,6 +381,9 @@ export default function CreateAppointmentModal({
       setStep(prefilledCustomer ? 2 : 1);
       setSelectedCustomer(prefilledCustomer || null);
       setSelectedTreatment(null);
+      setSelectedCategory(null);
+      setLaserGender(null);
+      setLaserItemType(null);
       setPaymentMode(null);
       setScheduleDate(null);
       setScheduleTime(null);
@@ -379,6 +400,9 @@ export default function CreateAppointmentModal({
       setError(null);
       setSelectedCustomer(prefilledCustomer || null);
       setSelectedTreatment(null);
+      setSelectedCategory(null);
+      setLaserGender(null);
+      setLaserItemType(null);
       setPaymentMode(null);
       setScheduleDate(null);
       setScheduleTime(null);
@@ -485,42 +509,281 @@ export default function CreateAppointmentModal({
           </Box>
         );
 
-      case 2:
-        return (
-          <Box sx={{ py: 2 }}>
-            {loadingTreatments ? (
+      case 2: {
+        // Determine current sub-step
+        let subStep = 'category';
+        if (selectedCategory === 'laser' && !laserGender) {
+          subStep = 'laser_gender';
+        } else if (selectedCategory === 'laser' && !laserItemType) {
+          subStep = 'laser_item_type';
+        } else if (selectedCategory) {
+          subStep = 'treatments';
+        }
+
+        // Helper to get available categories
+        const getAvailableCategories = () => {
+          const isLaser = (t) => t.gender != null || t.category === 'laser';
+          const categories = [
+            {
+              key: 'body',
+              label: 'Corporal',
+              check: (t) => t.category === 'body' && !isLaser(t),
+            },
+            {
+              key: 'facial',
+              label: 'Facial',
+              check: (t) => t.category === 'facial' && !isLaser(t),
+            },
+            {
+              key: 'laser',
+              label: 'Depilación Láser',
+              check: (t) => isLaser(t),
+            },
+            {
+              key: 'complementarios',
+              label: 'Complementarios',
+              check: (t) => t.category === 'complementarios' && !isLaser(t),
+            },
+          ];
+          return categories.filter((cat) => treatments.some(cat.check));
+        };
+
+        // Helper to get filtered treatments for display
+        const getFilteredTreatments = () => {
+          const isLaser = (t) => t.gender != null || t.category === 'laser';
+          let filtered = treatments;
+
+          if (selectedCategory === 'laser') {
+            filtered = filtered.filter((t) => isLaser(t));
+            if (laserGender) {
+              filtered = filtered.filter((t) => t.gender === laserGender);
+            }
+            if (laserItemType) {
+              filtered = filtered.filter((t) => t.item_type === laserItemType);
+            }
+          } else if (selectedCategory) {
+            filtered = filtered.filter((t) => {
+              const isLaserT = isLaser(t);
+              if (selectedCategory === 'body') return t.category === 'body' && !isLaserT;
+              if (selectedCategory === 'facial') return t.category === 'facial' && !isLaserT;
+              if (selectedCategory === 'complementarios')
+                return t.category === 'complementarios' && !isLaserT;
+              return false;
+            });
+          }
+
+          return filtered;
+        };
+
+        // Helper to build breadcrumb path
+        const getBreadcrumb = () => {
+          const parts = [];
+          if (selectedCategory === 'laser') {
+            parts.push('Depilación Láser');
+          } else if (selectedCategory) {
+            const cat = getAvailableCategories().find((c) => c.key === selectedCategory);
+            if (cat) parts.push(cat.label);
+          }
+          if (laserGender) {
+            parts.push(laserGender === 'mujeres' ? 'Mujeres' : 'Hombres');
+          }
+          if (laserItemType) {
+            parts.push(laserItemType === 'zona' ? 'Zona' : 'Paquete');
+          }
+          return parts;
+        };
+
+        if (loadingTreatments) {
+          return (
+            <Box sx={{ py: 2 }}>
               <CircularProgress />
-            ) : (
-              <Grid container spacing={2}>
-                {treatments.map((treatment) => (
-                  <Grid item xs={12} sm={6} key={treatment.id}>
+            </Box>
+          );
+        }
+
+        // Sub-step: category selection
+        if (subStep === 'category') {
+          const categories = getAvailableCategories();
+          return (
+            <Box sx={{ py: 2 }}>
+              <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 1 }}>
+                {categories.map((cat) => {
+                  const count = treatments.filter(cat.check).length;
+                  return (
                     <Card
-                      onClick={() => setSelectedTreatment(treatment)}
+                      key={cat.key}
+                      onClick={() => {
+                        setSelectedCategory(cat.key);
+                        setLaserGender(null);
+                        setLaserItemType(null);
+                      }}
                       sx={{
+                        mb: 1.5,
                         cursor: 'pointer',
                         border:
-                          selectedTreatment?.id === treatment.id ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                          selectedCategory === cat.key ? '2px solid #1976d2' : '1px solid #e0e0e0',
                         backgroundColor:
-                          selectedTreatment?.id === treatment.id ? '#f5f5f5' : 'white',
+                          selectedCategory === cat.key ? '#f5f5f5' : 'white',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          boxShadow: 2,
+                        },
                       }}
                     >
                       <CardContent>
                         <Typography variant="subtitle1" fontWeight="bold">
-                          {treatment.name}
+                          {cat.label}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Duración: {treatment.duration_minutes} min
+                          {count} tratamiento{count !== 1 ? 's' : ''}
                         </Typography>
                       </CardContent>
                     </Card>
-                  </Grid>
+                  );
+                })}
+              </Box>
+            </Box>
+          );
+        }
+
+        // Sub-step: laser gender selection
+        if (subStep === 'laser_gender') {
+          return (
+            <Box sx={{ py: 2 }}>
+              <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Chip label="Depilación Láser ›" variant="outlined" size="small" />
+              </Box>
+              <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 1 }}>
+                {['mujeres', 'hombres'].map((gender) => (
+                  <Card
+                    key={gender}
+                    onClick={() => {
+                      setLaserGender(gender);
+                      setLaserItemType(null);
+                    }}
+                    sx={{
+                      mb: 1.5,
+                      cursor: 'pointer',
+                      border: laserGender === gender ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                      backgroundColor: laserGender === gender ? '#f5f5f5' : 'white',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        boxShadow: 2,
+                      },
+                    }}
+                  >
+                    <CardContent>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {gender === 'mujeres' ? 'Mujeres' : 'Hombres'}
+                      </Typography>
+                    </CardContent>
+                  </Card>
                 ))}
-              </Grid>
+              </Box>
+            </Box>
+          );
+        }
+
+        // Sub-step: laser item type selection
+        if (subStep === 'laser_item_type') {
+          return (
+            <Box sx={{ py: 2 }}>
+              <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Chip label="Depilación Láser ›" variant="outlined" size="small" />
+                <Chip
+                  label={`${laserGender === 'mujeres' ? 'Mujeres' : 'Hombres'} ›`}
+                  variant="outlined"
+                  size="small"
+                />
+              </Box>
+              <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 1 }}>
+                {['zona', 'paquete'].map((itemType) => (
+                  <Card
+                    key={itemType}
+                    onClick={() => setLaserItemType(itemType)}
+                    sx={{
+                      mb: 1.5,
+                      cursor: 'pointer',
+                      border:
+                        laserItemType === itemType ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                      backgroundColor: laserItemType === itemType ? '#f5f5f5' : 'white',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        boxShadow: 2,
+                      },
+                    }}
+                  >
+                    <CardContent>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {itemType === 'zona' ? 'Zona' : 'Paquete'}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            </Box>
+          );
+        }
+
+        // Sub-step: treatments list
+        const filteredTreatments = getFilteredTreatments();
+        const breadcrumb = getBreadcrumb();
+
+        return (
+          <Box sx={{ py: 2 }}>
+            {breadcrumb.length > 0 && (
+              <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {breadcrumb.map((part, idx) => (
+                  <Chip
+                    key={idx}
+                    label={`${part} ${idx < breadcrumb.length - 1 ? '›' : ''}`}
+                    variant="outlined"
+                    size="small"
+                  />
+                ))}
+              </Box>
             )}
+            <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 1 }}>
+              {filteredTreatments.map((treatment) => (
+                <Card
+                  key={treatment.id}
+                  onClick={() => setSelectedTreatment(treatment)}
+                  sx={{
+                    mb: 1.5,
+                    cursor: 'pointer',
+                    border:
+                      selectedTreatment?.id === treatment.id ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                    backgroundColor: selectedTreatment?.id === treatment.id ? '#f5f5f5' : 'white',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      boxShadow: 2,
+                    },
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {treatment.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Duración: {treatment.duration_minutes} min
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
           </Box>
         );
+      }
 
       case 3:
+        if (loadingStep3) {
+          return (
+            <Box sx={{ py: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+              <CircularProgress />
+            </Box>
+          );
+        }
+
         return (
           <Box sx={{ py: 2 }}>
             <RadioGroup
@@ -531,38 +794,36 @@ export default function CreateAppointmentModal({
                 setSelectedPackage(null);
               }}
             >
-              <FormControlLabel
-                value="existing_cuponera"
-                control={<Radio />}
-                label="Usar cuponera existente"
-              />
-              {paymentMode === 'existing_cuponera' && (
-                <Box sx={{ ml: 4, mt: 1, mb: 2 }}>
-                  {customerCuponeras.length > 0 ? (
-                    customerCuponeras.map((cuponera) => (
-                      <Card key={cuponera.purchased_package_id} sx={{ mb: 1 }}>
-                        <CardContent sx={{ pb: 1 }}>
-                          <FormControlLabel
-                            control={
-                              <Radio
-                                checked={
-                                  selectedCuponera?.purchased_package_id ===
-                                  cuponera.purchased_package_id
-                                }
-                                onChange={() => setSelectedCuponera(cuponera)}
-                              />
-                            }
-                            label={`${cuponera.package_name} - ${cuponera.sessions_used}/${cuponera.total_sessions} usadas`}
-                          />
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      No hay cuponeras disponibles para este tratamiento
-                    </Typography>
+              {customerCuponeras.length > 0 && (
+                <>
+                  <FormControlLabel
+                    value="existing_cuponera"
+                    control={<Radio />}
+                    label="Usar cuponera existente"
+                  />
+                  {paymentMode === 'existing_cuponera' && (
+                    <Box sx={{ ml: 4, mt: 1, mb: 2 }}>
+                      {customerCuponeras.map((cuponera) => (
+                        <Card key={cuponera.purchased_package_id} sx={{ mb: 1 }}>
+                          <CardContent sx={{ pb: 1 }}>
+                            <FormControlLabel
+                              control={
+                                <Radio
+                                  checked={
+                                    selectedCuponera?.purchased_package_id ===
+                                    cuponera.purchased_package_id
+                                  }
+                                  onChange={() => setSelectedCuponera(cuponera)}
+                                />
+                              }
+                              label={`${cuponera.package_name} - ${cuponera.sessions_used}/${cuponera.total_sessions} usadas`}
+                            />
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </Box>
                   )}
-                </Box>
+                </>
               )}
 
               <FormControlLabel
@@ -603,78 +864,80 @@ export default function CreateAppointmentModal({
                 </Box>
               )}
 
-              <FormControlLabel
-                value="new_package"
-                control={<Radio />}
-                label="Comprar cuponera"
-              />
-              {paymentMode === 'new_package' && (
-                <Box sx={{ ml: 4, mt: 1, mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {loadingPackages ? (
-                    <CircularProgress />
-                  ) : (
-                    <Grid container spacing={1}>
-                      {treatmentPackages.map((pkg) => (
-                        <Grid item xs={12} key={pkg.id}>
-                          <Card
-                            onClick={() => setSelectedPackage(pkg)}
-                            sx={{
-                              cursor: 'pointer',
-                              border:
-                                selectedPackage?.id === pkg.id
-                                  ? '2px solid #1976d2'
-                                  : '1px solid #e0e0e0',
-                            }}
-                          >
-                            <CardContent sx={{ py: 1 }}>
-                              <Typography variant="subtitle2" fontWeight="bold">
-                                {pkg.name} - ${pkg.price}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {pkg.session_count} sesiones
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  )}
-                  <TextField
-                    label="Monto"
-                    type="number"
-                    value={newPurchase.amount_paid}
-                    onChange={(e) =>
-                      setNewPurchase((prev) => ({
-                        ...prev,
-                        amount_paid: e.target.value,
-                      }))
-                    }
+              {treatmentPackages.length > 0 && (
+                <>
+                  <FormControlLabel
+                    value="new_package"
+                    control={<Radio />}
+                    label="Comprar cuponera"
                   />
-                  <FormControl>
-                    <InputLabel>Método de pago</InputLabel>
-                    <Select
-                      value={newPurchase.payment_method}
-                      onChange={(e) =>
-                        setNewPurchase((prev) => ({
-                          ...prev,
-                          payment_method: e.target.value,
-                        }))
-                      }
-                      label="Método de pago"
-                    >
-                      <MenuItem value="efectivo">Efectivo</MenuItem>
-                      <MenuItem value="transferencia">Transferencia</MenuItem>
-                      <MenuItem value="posnet">POSNet</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
+                  {paymentMode === 'new_package' && (
+                    <Box sx={{ ml: 4, mt: 1, mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      <Grid container spacing={1}>
+                        {treatmentPackages.map((pkg) => (
+                          <Grid item xs={12} key={pkg.id}>
+                            <Card
+                              onClick={() => setSelectedPackage(pkg)}
+                              sx={{
+                                cursor: 'pointer',
+                                border:
+                                  selectedPackage?.id === pkg.id
+                                    ? '2px solid #1976d2'
+                                    : '1px solid #e0e0e0',
+                              }}
+                            >
+                              <CardContent sx={{ py: 1 }}>
+                                <Typography variant="subtitle2" fontWeight="bold">
+                                  {pkg.name} - ${pkg.price}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {pkg.session_count} sesiones
+                                </Typography>
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        ))}
+                      </Grid>
+                      <TextField
+                        label="Monto"
+                        type="number"
+                        value={newPurchase.amount_paid}
+                        onChange={(e) =>
+                          setNewPurchase((prev) => ({
+                            ...prev,
+                            amount_paid: e.target.value,
+                          }))
+                        }
+                      />
+                      <FormControl>
+                        <InputLabel>Método de pago</InputLabel>
+                        <Select
+                          value={newPurchase.payment_method}
+                          onChange={(e) =>
+                            setNewPurchase((prev) => ({
+                              ...prev,
+                              payment_method: e.target.value,
+                            }))
+                          }
+                          label="Método de pago"
+                        >
+                          <MenuItem value="efectivo">Efectivo</MenuItem>
+                          <MenuItem value="transferencia">Transferencia</MenuItem>
+                          <MenuItem value="posnet">POSNet</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  )}
+                </>
               )}
 
-              <FormControlLabel
-                value="evaluacion"
-                control={<Radio />}
-                label="Sesión de evaluación"
-              />
+              {selectedTreatment?.category === 'body' && customerCanPurchasePackages === false && (
+                <FormControlLabel
+                  value="evaluacion"
+                  control={<Radio />}
+                  label="Sesión de evaluación"
+                />
+              )}
             </RadioGroup>
           </Box>
         );
@@ -825,7 +1088,11 @@ export default function CreateAppointmentModal({
           </Button>
         )}
         {step < 5 ? (
-          <Button variant="contained" onClick={handleNextStep} disabled={submitting}>
+          <Button
+            variant="contained"
+            onClick={handleNextStep}
+            disabled={submitting || (step === 2 && !selectedTreatment)}
+          >
             Siguiente
           </Button>
         ) : (
