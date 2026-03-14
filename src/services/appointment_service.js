@@ -129,6 +129,15 @@ export const appointmentService = {
       throw err;
     }
   },
+
+  /**
+   * Get available packages for a treatment
+   * @param {string} slug - Treatment slug
+   * @returns {Promise<object>} - { packages: [...] }
+   */
+  async getTreatmentPackages(slug) {
+    return apiCall(`/treatments/${slug}/packages`);
+  },
 };
 
 export default appointmentService;

@@ -231,9 +231,7 @@ export default function CreateAppointmentModal({
       setCustomerCanPurchasePackages(history.can_purchase_packages ?? false);
 
       // Load treatment packages
-      const response = await fetch(`/api/v1/${selectedTreatment.slug}/packages`);
-      if (!response.ok) throw new Error('Failed to load packages');
-      const data = await response.json();
+      const data = await appointmentService.getTreatmentPackages(selectedTreatment.slug);
       const packages = (data.packages || []).filter((p) => p.is_active !== false);
       setTreatmentPackages(packages);
 
