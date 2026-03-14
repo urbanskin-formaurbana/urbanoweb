@@ -210,7 +210,7 @@ export default function CreateAppointmentModal({
     setLoadingTreatments(true);
     try {
       const result = await adminService.getTreatments();
-      setTreatments((result || []).filter((t) => t.is_active !== false));
+      setTreatments((result?.treatments || []).filter((t) => t.is_active !== false));
     } catch (err) {
       console.error('Error loading treatments:', err);
       setError('Error al cargar tratamientos');
