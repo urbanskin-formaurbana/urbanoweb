@@ -1,7 +1,7 @@
 // Laser campaign management service
-import axiosInstance from "./axios_config";
+import { apiCall } from './api.js';
 
-const BASE_URL = "/api/v1/laser-campaigns";
+const BASE_URL = "/laser-campaigns";
 
 const laserCampaignService = {
   // ========== Admin endpoints ==========
@@ -10,49 +10,46 @@ const laserCampaignService = {
    * Create a new laser campaign (closes previous if active)
    */
   async createCampaign(name, startsOn, endsOn) {
-    const response = await axiosInstance.post(`${BASE_URL}/admin/laser-campaigns`, {
-      name,
-      starts_on: startsOn,
-      ends_on: endsOn,
+    return await apiCall(`${BASE_URL}/admin/laser-campaigns`, {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        starts_on: startsOn,
+        ends_on: endsOn,
+      }),
     });
-    return response.data;
   },
 
   /**
    * List all campaigns
    */
   async listCampaigns(limit = 10, skip = 0) {
-    const response = await axiosInstance.get(`${BASE_URL}/admin/laser-campaigns`, {
-      params: { limit, skip },
-    });
-    return response.data;
+    const params = new URLSearchParams({ limit, skip });
+    return await apiCall(`${BASE_URL}/admin/laser-campaigns?${params}`);
   },
 
   /**
    * Get active campaign with all slots and booking details (admin view)
    */
   async getActiveCampaignAdmin() {
-    const response = await axiosInstance.get(`${BASE_URL}/admin/laser-campaigns/active`);
-    return response.data;
+    return await apiCall(`${BASE_URL}/admin/laser-campaigns/active`);
   },
 
   /**
    * Get specific campaign with slots
    */
   async getCampaignDetail(campaignId) {
-    const response = await axiosInstance.get(`${BASE_URL}/admin/laser-campaigns/${campaignId}`);
-    return response.data;
+    return await apiCall(`${BASE_URL}/admin/laser-campaigns/${campaignId}`);
   },
 
   /**
    * Update campaign
    */
   async updateCampaign(campaignId, updates) {
-    const response = await axiosInstance.patch(
-      `${BASE_URL}/admin/laser-campaigns/${campaignId}`,
-      updates
-    );
-    return response.data;
+    return await apiCall(`${BASE_URL}/admin/laser-campaigns/${campaignId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
   },
 
   /**
@@ -63,50 +60,43 @@ const laserCampaignService = {
    * @param {string} endTime - HH:MM format
    */
   async addBulkSlots(campaignId, days, startTime, endTime) {
-    const response = await axiosInstance.post(
-      `${BASE_URL}/admin/laser-campaigns/${campaignId}/slots/bulk`,
-      {
+    return await apiCall(`${BASE_URL}/admin/laser-campaigns/${campaignId}/slots/bulk`, {
+      method: 'POST',
+      body: JSON.stringify({
         days,
         start_time: startTime,
         end_time: endTime,
-      }
-    );
-    return response.data;
+      }),
+    });
   },
 
   /**
    * Delete a slot (only if unbooked)
    */
   async deleteSlot(campaignId, slotId) {
-    const response = await axiosInstance.delete(
-      `${BASE_URL}/admin/laser-campaigns/${campaignId}/slots/${slotId}`
-    );
-    return response.data;
+    return await apiCall(`${BASE_URL}/admin/laser-campaigns/${campaignId}/slots/${slotId}`, {
+      method: 'DELETE',
+    });
   },
 
   /**
    * Get all waitlisted customers
    */
   async getWaitlist() {
-    const response = await axiosInstance.get(`${BASE_URL}/admin/laser-campaigns/waitlist`);
-    return response.data;
+    return await apiCall(`${BASE_URL}/admin/laser-campaigns/waitlist`);
   },
 
   // ========== Public/Customer endpoints ==========
 
   /**
    * Get basic info about active campaign (no slot details) - for customers before payment
-   * Throws 404 if no active campaign
+   * Returns null if no active campaign
    */
   async getActiveCampaign() {
     try {
-      const response = await axiosInstance.get(`${BASE_URL}/active`);
-      return response.data;
+      return await apiCall(`${BASE_URL}/active`);
     } catch (error) {
-      if (error.response?.status === 404) {
-        return null; // No active campaign
-      }
-      throw error;
+      return null; // No active campaign
     }
   },
 
@@ -116,18 +106,19 @@ const laserCampaignService = {
    * @returns {datetime[]} list of available start times
    */
   async getAvailableSlots(durationMinutes) {
-    const response = await axiosInstance.get(`${BASE_URL}/active/slots`, {
-      params: { duration_minutes: durationMinutes },
-    });
-    return response.data.slots;
+    const params = new URLSearchParams({ duration_minutes: durationMinutes });
+    const response = await apiCall(`${BASE_URL}/active/slots?${params}`);
+    return response.slots;
   },
 
   /**
    * Join the waitlist (auth required)
    */
   async joinWaitlist() {
-    const response = await axiosInstance.post(`${BASE_URL}/waitlist`, {});
-    return response.data;
+    return await apiCall(`${BASE_URL}/waitlist`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
   },
 
   /**
@@ -135,13 +126,9 @@ const laserCampaignService = {
    */
   async checkWaitlistStatus() {
     try {
-      const response = await axiosInstance.get(`${BASE_URL}/waitlist/me`);
-      return response.data;
+      return await apiCall(`${BASE_URL}/waitlist/me`);
     } catch (error) {
-      if (error.response?.status === 401) {
-        return null; // Not authenticated
-      }
-      throw error;
+      return null; // Not authenticated or not on waitlist
     }
   },
 };
