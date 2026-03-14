@@ -72,7 +72,7 @@ export default function HomePage() {
 
   const handleBodyTreatmentClick = (treatment) => {
     if (!isAuthenticated) {
-      setLoginModalOpen(true);
+      navigate(treatment.route);
       return;
     }
 
