@@ -19,12 +19,17 @@ import CinturonOrion from '../pages/landing/CinturonOrion.jsx'
 import CinturonTitan from '../pages/landing/CinturonTitan.jsx'
 import CinturonAcero from '../pages/landing/CinturonAcero.jsx'
 
+// Module-scope lazy declarations - stable references across renders
+const HomePage = React.lazy(() => import('../pages/landing/HomePage.jsx'))
+
+const promoPath = '/oferta-apertura'
+const promoLanding = LANDINGS.find((l) => l.path === promoPath)
+const PromoPage = promoLanding ? React.lazy(promoLanding.import) : null
+const regularLandings = LANDINGS.filter((l) => l.path !== promoPath).map(
+  ({ path, import: importer }) => ({ path, Page: React.lazy(importer) })
+)
+
 export default function AppRoutes() {
-  const promoPath = '/oferta-apertura'
-  const promoLanding = LANDINGS.find((l) => l.path === promoPath)
-  const regularLandings = LANDINGS.filter((l) => l.path !== promoPath)
-  const PromoPage = promoLanding ? React.lazy(promoLanding.import) : null
-  const HomePage = React.lazy(() => import('../pages/landing/HomePage.jsx'))
 
   return (
     <Routes>
@@ -34,26 +39,23 @@ export default function AppRoutes() {
         <Route path="/cinturon-orion" element={<CinturonOrion />} />
         <Route path="/cinturon-titan" element={<CinturonTitan />} />
         <Route path="/cinturon-acero" element={<CinturonAcero />} />
-        {regularLandings.map(({ path, import: importer }, idx) => {
-          const Page = React.lazy(importer)
-          return (
-            <Route
-              key={idx}
-              path={path}
-              element={
-                <React.Suspense
-                  fallback={
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                      <CircularProgress />
-                    </Box>
-                  }
-                >
-                  <Page />
-                </React.Suspense>
-              }
-            />
-          )
-        })}
+        {regularLandings.map(({ path, Page }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <React.Suspense
+                fallback={
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <CircularProgress />
+                  </Box>
+                }
+              >
+                <Page />
+              </React.Suspense>
+            }
+          />
+        ))}
         {/* Booking Flow Routes */}
         <Route path="/payment" element={<ProtectedUserRoute><PaymentPage /></ProtectedUserRoute>} />
         <Route path="/schedule" element={<ProtectedUserRoute><SchedulingPage /></ProtectedUserRoute>} />
