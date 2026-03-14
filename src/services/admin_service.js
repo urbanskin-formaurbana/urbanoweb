@@ -124,6 +124,29 @@ const adminService = {
   async getMonthlyReports(months = 6) {
     return apiCall(`/admin/reports/monthly?months=${months}`, { method: 'GET' });
   },
+
+  // ── Admin Create Appointment ────────────────────────────────────────
+
+  async createCustomer(data) {
+    return apiCall('/admin/customers', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async createManualPayment(data) {
+    return apiCall('/admin/manual-payment', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async createAdminAppointment(data) {
+    return apiCall('/admin/appointments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
 };
 
 export default adminService;

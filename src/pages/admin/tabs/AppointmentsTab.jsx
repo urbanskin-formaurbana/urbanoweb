@@ -30,6 +30,7 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import adminService from '../../../services/admin_service';
 import appointmentService from '../../../services/appointment_service';
+import CreateAppointmentModal from '../../../components/CreateAppointmentModal';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -365,6 +366,9 @@ export default function AppointmentsTab({ activeTab }) {
   const [completionFeedback, setCompletionFeedback] = useState('');
   const [completing, setCompleting] = useState(false);
 
+  // Create appointment modal state
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
   const tabStatuses = [STATUS_FILTERS.pending, STATUS_FILTERS.confirmed, STATUS_FILTERS.all];
   const currentStatus = tabStatuses[activeTab];
 
@@ -576,6 +580,12 @@ export default function AppointmentsTab({ activeTab }) {
         </Alert>
       )}
 
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button variant="contained" onClick={() => setCreateModalOpen(true)}>
+          + Nueva sesión
+        </Button>
+      </Box>
+
       <Stack spacing={2}>
         {appointments.length === 0 && !loading && (
           <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
@@ -765,6 +775,14 @@ export default function AppointmentsTab({ activeTab }) {
       <Snackbar open={!!successMessage} autoHideDuration={3000} onClose={() => setSuccessMessage('')}>
         <Alert severity="success">{successMessage}</Alert>
       </Snackbar>
+
+      {/* Create Appointment Modal */}
+      <CreateAppointmentModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreated={loadAppointments}
+        prefilledCustomer={null}
+      />
     </>
   );
 }

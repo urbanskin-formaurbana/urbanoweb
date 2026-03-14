@@ -19,6 +19,7 @@ import TemplatesTab from './tabs/TemplatesTab';
 import TreatmentsTab from './tabs/TreatmentsTab';
 import SociosTab from './tabs/SociosTab';
 import ReportesTab from './tabs/ReportesTab';
+import LaserCampaignTab from './tabs/LaserCampaignTab';
 
 export default function AdminPage() {
   const { user, logout } = useAuth();
@@ -26,7 +27,7 @@ export default function AdminPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [activeTab, setActiveTab] = useState(0);
 
-  const tabLabels = ['Pendientes', 'Confirmadas', 'Todas', 'Plantillas', 'Tratamientos', 'Socios', 'Reportes'];
+  const tabLabels = ['Pendientes', 'Confirmadas', 'Todas', 'Plantillas', 'Tratamientos', 'Socios', 'Reportes', 'Depilación Láser'];
 
   const handleLogout = () => {
     logout();
@@ -83,6 +84,7 @@ export default function AdminPage() {
       {activeTab === 4 && <TreatmentsTab />}
       {activeTab === 5 && <SociosTab />}
       {activeTab === 6 && <ReportesTab />}
+      {activeTab === 7 && <LaserCampaignTab />}
     </Container>
   );
 }

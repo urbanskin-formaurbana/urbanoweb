@@ -304,11 +304,25 @@ export default function ExistingAppointmentPage() {
                 <Typography variant="caption" color="text.secondary">
                   Servicio
                 </Typography>
-                <Typography variant="body1" sx={{fontWeight: "bold"}}>
-                  {appointmentData.is_evaluation
-                    ? `Sesión de Evaluación - ${appointmentData.treatment_name || "Servicio de estética"}`
-                    : (appointmentData.treatment_name || "Servicio de estética")}
-                </Typography>
+                {appointmentData.treatment_slug?.includes("laser") ? (
+                  <Box sx={{mt: 0.5}}>
+                    <Typography variant="body2" color="text.secondary">
+                      Depilación Láser
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {appointmentData.purchased_package_id ? "Paquete" : "Zona"}
+                    </Typography>
+                    <Typography variant="body1" sx={{fontWeight: "bold"}}>
+                      {appointmentData.treatment_name || "Servicio de estética"}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Typography variant="body1" sx={{fontWeight: "bold"}}>
+                    {appointmentData.is_evaluation
+                      ? `Sesión de evaluación — ${appointmentData.treatment_name || "Servicio de estética"}`
+                      : (appointmentData.treatment_name || "Servicio de estética")}
+                  </Typography>
+                )}
               </Box>
 
               <Divider />

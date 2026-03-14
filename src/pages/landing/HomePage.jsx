@@ -22,6 +22,7 @@ import treatmentService from "../../services/treatment_service.js";
 import authService from "../../services/auth_service.js";
 import LoginModal from "../../components/LoginModal.jsx";
 import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
+import LaserDepilationModal from "../../components/LaserDepilationModal.jsx";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 
 export default function HomePage() {
@@ -39,6 +40,10 @@ export default function HomePage() {
   const [canPurchasePackages, setCanPurchasePackages] = useState(false);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [selectedTreatmentForPurchase, setSelectedTreatmentForPurchase] = useState(null);
+  const [laserModalOpen, setLaserModalOpen] = useState(false);
+  const [laserGender, setLaserGender] = useState('hombres');
+
+  const [laserTreatments, setLaserTreatments] = useState([]);
 
   useEffect(() => {
     treatmentService
@@ -47,6 +52,7 @@ export default function HomePage() {
         setBodyTreatments(data.filter((t) => t.category === "body"));
         setFacialTreatments(data.filter((t) => t.category === "facial"));
         setComplementaryTreatments(data.filter((t) => t.category === "complementarios"));
+        setLaserTreatments(data.filter((t) => t.category === "laser"));
       })
       .catch((err) => {
         console.error("Error loading treatments:", err);
@@ -54,6 +60,10 @@ export default function HomePage() {
       })
       .finally(() => setTreatmentsLoading(false));
   }, []);
+
+  // Get laser treatments by gender
+  const laserHombres = laserTreatments.filter((t) => t.gender === "hombres");
+  const laserMujeres = laserTreatments.filter((t) => t.gender === "mujeres");
 
   // Check purchase eligibility when authenticated (only for customers)
   useEffect(() => {
@@ -346,6 +356,64 @@ export default function HomePage() {
             </Container>
           </Box>
 
+          {/* Laser Depilation Section - only show if treatments exist */}
+          {laserTreatments.length > 0 && (
+            <Box sx={{ py: { xs: 3, md: 4 } }}>
+              <Container component="section">
+                <Typography
+                  variant={isMobile ? "h4" : "h3"}
+                  align="center"
+                  gutterBottom
+                  sx={{ mb: 3 }}
+                >
+                  Depilación Láser
+                </Typography>
+                <Typography
+                  align="center"
+                  sx={{ mb: 3, color: "text.secondary" }}
+                >
+                  Depilación definitiva sin dolor. Zonas y paquetes personalizados
+                </Typography>
+
+                <Grid container spacing={3} justifyContent="center">
+                  {[
+                    { gender: "hombres", label: "Hombres" },
+                    { gender: "mujeres", label: "Mujeres" },
+                  ].map(({ gender, label }) => (
+                    <Grid key={gender} size={{ xs: 12, sm: 6, md: 4 }}>
+                      <Card
+                        sx={{
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          cursor: "pointer",
+                          transition: "transform 0.2s, box-shadow 0.2s",
+                          "&:hover": {
+                            transform: "translateY(-4px)",
+                            boxShadow: 3,
+                          },
+                        }}
+                        onClick={() => {
+                          setLaserGender(gender);
+                          setLaserModalOpen(true);
+                        }}
+                      >
+                        <CardContent sx={{ flexGrow: 1 }}>
+                          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
+                            {label}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center" }}>
+                            Ver zonas y paquetes disponibles
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Container>
+            </Box>
+          )}
+
           {/* Complementarios Section - only show if treatments exist */}
           {complementaryTreatments.length > 0 && (
             <Container component="section" sx={{ py: { xs: 3, md: 4 } }}>
@@ -436,6 +504,18 @@ export default function HomePage() {
         onClose={() => setPurchaseDialogOpen(false)}
         treatment={selectedTreatmentForPurchase}
         onConfirm={handlePurchaseConfirm}
+      />
+
+      <LaserDepilationModal
+        open={laserModalOpen}
+        onClose={() => setLaserModalOpen(false)}
+        gender={laserGender}
+        treatments={laserGender === "hombres" ? laserHombres : laserMujeres}
+        isAuthenticated={isAuthenticated}
+        onLoginRequired={() => {
+          setLaserModalOpen(false);
+          setLoginModalOpen(true);
+        }}
       />
     </>
   );

@@ -19,6 +19,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import paymentService from '../../services/payment_service';
 import appointmentService from '../../services/appointment_service';
+import laserCampaignService from '../../services/laser_campaign_service';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -98,21 +99,33 @@ export default function SchedulingPage() {
       setError('');
 
       try {
-        // Fetch available slots from backend API
-        // Use 30 minutes for evaluations, otherwise use treatment duration from DB (or default to 90)
-        const slotDuration = isEvaluation ? 30 : (treatment.duration_minutes || 90);
-        const slotStrings = await appointmentService.getAvailableSlots(
-          selectedDate.toDate(),
-          slotDuration
-        );
-        // Convert ISO strings to dayjs objects with America/Montevideo timezone
-        let slots = slotStrings.map((slotStr) =>
-          dayjs.utc(slotStr).tz("America/Montevideo")
-        );
+        let slots = [];
+
+        // Check if this is a laser treatment
+        if (treatment.category === 'laser') {
+          // For laser treatments, fetch from campaign
+          const slotDuration = treatment.duration_minutes || 90;
+          const laserSlots = await laserCampaignService.getAvailableSlots(slotDuration);
+          slots = laserSlots.map((slotStr) =>
+            dayjs.utc(slotStr).tz("America/Montevideo")
+          );
+        } else {
+          // For regular treatments, fetch dynamic slots
+          const slotDuration = isEvaluation ? 30 : (treatment.duration_minutes || 90);
+          const slotStrings = await appointmentService.getAvailableSlots(
+            selectedDate.toDate(),
+            slotDuration
+          );
+          slots = slotStrings.map((slotStr) =>
+            dayjs.utc(slotStr).tz("America/Montevideo")
+          );
+        }
+
         // Apply customer slot filtering (24-hour advance booking rule)
         slots = filterSlotsForCustomer(slots);
         setAvailableSlots(slots);
       } catch (err) {
+        console.error('Error loading available slots:', err);
         setError('Error loading available slots');
       } finally {
         setLoadingSlots(false);

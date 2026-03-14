@@ -61,6 +61,7 @@ export default function PaymentPage() {
   );
   const selectedPackageId = location.state?.selectedPackageId || null;
   const isEvaluation = location.state?.isEvaluation ?? false;
+  const laserItemType = location.state?.laserItemType || null;
 
   // Load treatment description and price from DB
   useEffect(() => {
@@ -69,10 +70,11 @@ export default function PaymentPage() {
       treatmentService
         .getTreatmentPackages(treatment.slug)
         .then((data) => {
-          // Update treatment with duration from API
+          // Update treatment with duration and category from API
           setTreatment((prev) => ({
             ...prev,
             duration_minutes: data?.duration_minutes || 90,
+            category: data?.category,
           }));
 
           // If evaluation, use evaluation description; otherwise use treatment description
@@ -117,7 +119,7 @@ export default function PaymentPage() {
   useEffect(() => {
     if (paymentStatus === "approved") {
       const timer = setTimeout(() => {
-        navigate("/schedule", {state: {treatment}});
+        navigate("/schedule", {state: {treatment, laserItemType}});
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -157,7 +159,7 @@ export default function PaymentPage() {
         .then((payment) => {
           if (payment) {
             paymentService.savePaymentId(payment._id);
-            navigate("/schedule", {state: {treatment, isEvaluation}});
+            navigate("/schedule", {state: {treatment, isEvaluation, laserItemType}});
           }
         })
         .catch(() => {}); // Fail silently
@@ -393,10 +395,20 @@ export default function PaymentPage() {
               Resumen de pago
             </Typography>
             <Stack spacing={1} sx={{mt: 1}}>
-              <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                <Typography variant="body1">
-                  {isEvaluation ? `Sesión de evaluación — ${treatment.name}` : treatment.name}
-                </Typography>
+              <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "flex-start"}}>
+                {laserItemType ? (
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">Depilación Láser</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {laserItemType === "zona" ? "Zona" : "Paquete"}
+                    </Typography>
+                    <Typography variant="body1">{treatment.name}</Typography>
+                  </Box>
+                ) : (
+                  <Typography variant="body1">
+                    {isEvaluation ? `Sesión de evaluación — ${treatment.name}` : treatment.name}
+                  </Typography>
+                )}
                 <Typography variant="body1" sx={{whiteSpace: "nowrap"}}>
                   {basePrice != null ? `$${basePrice}` : "..."}
                 </Typography>
@@ -714,7 +726,7 @@ export default function PaymentPage() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate("/schedule", {state: {treatment}})}
+                onClick={() => navigate("/schedule", {state: {treatment, laserItemType}})}
               >
                 Continuar para agendar cita
               </Button>

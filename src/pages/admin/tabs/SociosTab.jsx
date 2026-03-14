@@ -25,6 +25,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.locale("es");
 import adminService from "../../../services/admin_service";
+import CreateAppointmentModal from "../../../components/CreateAppointmentModal";
 
 export default function SociosTab() {
   const [customers, setCustomers] = useState([]);
@@ -38,6 +39,10 @@ export default function SociosTab() {
   const [feedbackText, setFeedbackText] = useState("");
   const [savingFeedback, setSavingFeedback] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
+
+  // Create appointment modal state
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createModalCustomer, setCreateModalCustomer] = useState(null);
 
   useEffect(() => {
     loadCustomers();
@@ -225,11 +230,13 @@ export default function SociosTab() {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      cursor: "pointer",
                     }}
-                    onClick={() => handleExpandCustomer(customer.id)}
                   >
-                    <Box flex={1}>
+                    <Box
+                      flex={1}
+                      onClick={() => handleExpandCustomer(customer.id)}
+                      sx={{ cursor: "pointer" }}
+                    >
                       <Typography variant="subtitle1" fontWeight="bold">
                         {customer.name}
                       </Typography>
@@ -237,7 +244,27 @@ export default function SociosTab() {
                         {customer.phone} | {customer.email}
                       </Typography>
                     </Box>
-                    <IconButton size="small">
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      sx={{ mr: 1 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCreateModalCustomer({
+                          id: customer.id,
+                          name: customer.name,
+                          phone: customer.phone,
+                          email: customer.email,
+                        });
+                        setCreateModalOpen(true);
+                      }}
+                    >
+                      Nueva sesión
+                    </Button>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleExpandCustomer(customer.id)}
+                    >
                       <ExpandMoreIcon
                         sx={{
                           transform:
@@ -513,6 +540,20 @@ export default function SociosTab() {
         autoHideDuration={3000}
         onClose={() => setSnackbarMsg("")}
         message={snackbarMsg}
+      />
+
+      {/* Create Appointment Modal */}
+      <CreateAppointmentModal
+        open={createModalOpen}
+        onClose={() => {
+          setCreateModalOpen(false);
+          setCreateModalCustomer(null);
+        }}
+        onCreated={() => {
+          setCreateModalOpen(false);
+          setCreateModalCustomer(null);
+        }}
+        prefilledCustomer={createModalCustomer}
       />
     </Box>
   );
