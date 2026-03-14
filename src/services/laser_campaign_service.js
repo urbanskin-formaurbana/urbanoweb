@@ -10,7 +10,7 @@ const laserCampaignService = {
    * Create a new laser campaign (closes previous if active)
    */
   async createCampaign(name, startsOn, endsOn) {
-    return await apiCall(`${BASE_URL}/admin/laser-campaigns`, {
+    return await apiCall(`${BASE_URL}/admin`, {
       method: 'POST',
       body: JSON.stringify({
         name,
@@ -25,28 +25,28 @@ const laserCampaignService = {
    */
   async listCampaigns(limit = 10, skip = 0) {
     const params = new URLSearchParams({ limit, skip });
-    return await apiCall(`${BASE_URL}/admin/laser-campaigns?${params}`);
+    return await apiCall(`${BASE_URL}/admin?${params}`);
   },
 
   /**
    * Get active campaign with all slots and booking details (admin view)
    */
   async getActiveCampaignAdmin() {
-    return await apiCall(`${BASE_URL}/admin/laser-campaigns/active`);
+    return await apiCall(`${BASE_URL}/admin/active`);
   },
 
   /**
    * Get specific campaign with slots
    */
   async getCampaignDetail(campaignId) {
-    return await apiCall(`${BASE_URL}/admin/laser-campaigns/${campaignId}`);
+    return await apiCall(`${BASE_URL}/admin/${campaignId}`);
   },
 
   /**
    * Update campaign
    */
   async updateCampaign(campaignId, updates) {
-    return await apiCall(`${BASE_URL}/admin/laser-campaigns/${campaignId}`, {
+    return await apiCall(`${BASE_URL}/admin/${campaignId}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
     });
@@ -60,7 +60,7 @@ const laserCampaignService = {
    * @param {string} endTime - HH:MM format
    */
   async addBulkSlots(campaignId, days, startTime, endTime) {
-    return await apiCall(`${BASE_URL}/admin/laser-campaigns/${campaignId}/slots/bulk`, {
+    return await apiCall(`${BASE_URL}/admin/${campaignId}/slots/bulk`, {
       method: 'POST',
       body: JSON.stringify({
         days,
@@ -74,7 +74,7 @@ const laserCampaignService = {
    * Delete a slot (only if unbooked)
    */
   async deleteSlot(campaignId, slotId) {
-    return await apiCall(`${BASE_URL}/admin/laser-campaigns/${campaignId}/slots/${slotId}`, {
+    return await apiCall(`${BASE_URL}/admin/${campaignId}/slots/${slotId}`, {
       method: 'DELETE',
     });
   },
@@ -83,7 +83,7 @@ const laserCampaignService = {
    * Get all waitlisted customers
    */
   async getWaitlist() {
-    return await apiCall(`${BASE_URL}/admin/laser-campaigns/waitlist`);
+    return await apiCall(`${BASE_URL}/admin/waitlist`);
   },
 
   // ========== Public/Customer endpoints ==========

@@ -73,7 +73,7 @@ export default function LaserCampaignTab() {
       const waitlistData = await laserCampaignService.getWaitlist();
       setWaitlist(waitlistData);
     } catch (err) {
-      if (err.response?.status === 404) {
+      if (err.response?.status === 404 || err.message === 'No active campaign') {
         setCampaign(null);
         setSlots([]);
         setWaitlist([]);
