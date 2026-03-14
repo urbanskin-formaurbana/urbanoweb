@@ -244,23 +244,6 @@ export default function SociosTab() {
                         {customer.phone} | {customer.email}
                       </Typography>
                     </Box>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      sx={{ mr: 1 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCreateModalCustomer({
-                          id: customer.id,
-                          name: customer.name,
-                          phone: customer.phone,
-                          email: customer.email,
-                        });
-                        setCreateModalOpen(true);
-                      }}
-                    >
-                      Nueva sesión
-                    </Button>
                     <IconButton
                       size="small"
                       onClick={() => handleExpandCustomer(customer.id)}
@@ -326,9 +309,26 @@ export default function SociosTab() {
 
                           {/* Historial de Sesiones */}
                           <Box>
-                            <Typography variant="subtitle2" fontWeight="bold" sx={{mb: 2}}>
-                              Historial de Sesiones
-                            </Typography>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+                              <Typography variant="subtitle2" fontWeight="bold">
+                                Historial de Sesiones
+                              </Typography>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => {
+                                  setCreateModalCustomer({
+                                    id: customer.id,
+                                    name: customer.name,
+                                    phone: customer.phone,
+                                    email: customer.email,
+                                  });
+                                  setCreateModalOpen(true);
+                                }}
+                              >
+                                Nueva sesión
+                              </Button>
+                            </Box>
                             {(() => {
                               const { cuponeras, upcoming, past } = organizeTimeline(customerHistory.timeline);
                               return (
