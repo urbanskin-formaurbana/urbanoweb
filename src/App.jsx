@@ -10,12 +10,9 @@ mpScript.src = `https://sdk.mercadopago.com/js/v2?publicKey=${mpPublicKey}`
 mpScript.async = true
 
 mpScript.onload = () => {
-  console.log('MercadoPago SDK loaded')
   // Instantiate MercadoPago - it's a class!
   if (window.MercadoPago) {
     window.mp = new window.MercadoPago(mpPublicKey, { locale: 'es-UY' })
-    console.log('MercadoPago instance created:', window.mp)
-    console.log('Instance keys:', Object.keys(window.mp))
   }
 }
 
