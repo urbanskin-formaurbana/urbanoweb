@@ -18,8 +18,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import paymentService from '../../services/payment_service';
-import appointmentService from '../../services/appointment_service';
-import laserCampaignService from '../../services/laser_campaign_service';
+import { filterSlotsForCustomer, fetchAvailableSlots } from '../../utils/slotUtils';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -36,30 +35,6 @@ dayjs.locale('es');
 
 const SESSION_DURATION = 30; // minutes
 
-/**
- * Filter available slots for customers to enforce 24-hour advance booking rule:
- * - Same day is already blocked by DatePicker minDate
- * - Next day: only slots at or after current time of day
- * - All other days: no restrictions
- */
-function filterSlotsForCustomer(slots) {
-  const now = dayjs().tz('America/Montevideo');
-  const tomorrow = now.add(1, 'day');
-
-  return slots.filter(slot => {
-    const slotTime = dayjs.utc(slot).tz('America/Montevideo');
-    if (slotTime.isSame(tomorrow, 'day')) {
-      // For tomorrow, only allow slots at or after current time of day
-      return (
-        slotTime.hour() > now.hour() ||
-        (slotTime.hour() === now.hour() && slotTime.minute() >= now.minute())
-      );
-    }
-    // All other days (day after tomorrow and beyond) have no restrictions
-    return true;
-  });
-}
-
 export default function SchedulingPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,7 +50,10 @@ export default function SchedulingPage() {
 
   const treatment = location.state?.treatment || { name: 'Evaluación', slug: 'evaluation' };
   const paymentId = location.state?.paymentId;
+  const purchasedPackageId = location.state?.purchased_package_id;
+  const sessionInfo = location.state?.sessionInfo; // { sessionNumber, remainingSessions, totalSessions }
   const isEvaluation = location.state?.isEvaluation ?? false;
+  const isPackageMode = !!purchasedPackageId && !paymentId; // subsequent session scheduling
 
   if (!user) {
     return (
@@ -99,30 +77,18 @@ export default function SchedulingPage() {
       setError('');
 
       try {
-        let slots = [];
-
-        // Check if this is a laser treatment
-        if (treatment.category === 'laser') {
-          // For laser treatments, fetch from campaign
-          const slotDuration = treatment.duration_minutes || 90;
-          const laserSlots = await laserCampaignService.getAvailableSlots(slotDuration);
-          slots = laserSlots.map((slotStr) =>
-            dayjs.utc(slotStr).tz("America/Montevideo")
-          );
-        } else {
-          // For regular treatments, fetch dynamic slots
-          const slotDuration = isEvaluation ? 30 : (treatment.duration_minutes || 90);
-          const slotStrings = await appointmentService.getAvailableSlots(
-            selectedDate.toDate(),
-            slotDuration
-          );
-          slots = slotStrings.map((slotStr) =>
-            dayjs.utc(slotStr).tz("America/Montevideo")
-          );
-        }
+        // Fetch slots using shared utility
+        const paymentMode = isEvaluation ? 'evaluacion' : null;
+        const slotStrings = await fetchAvailableSlots(selectedDate.toDate(), treatment, paymentMode);
 
         // Apply customer slot filtering (24-hour advance booking rule)
-        slots = filterSlotsForCustomer(slots);
+        const filteredSlots = filterSlotsForCustomer(slotStrings);
+
+        // Convert to dayjs objects for rendering
+        const slots = filteredSlots.map((slotStr) =>
+          dayjs.utc(slotStr).tz('America/Montevideo')
+        );
+
         setAvailableSlots(slots);
       } catch (err) {
         console.error('Error loading available slots:', err);
@@ -133,7 +99,7 @@ export default function SchedulingPage() {
     };
 
     loadAvailableSlots();
-  }, [selectedDate]);
+  }, [selectedDate, treatment, isEvaluation]);
 
   const handleCreateAppointment = async () => {
     if (!selectedDate || !selectedTime) {
@@ -141,9 +107,9 @@ export default function SchedulingPage() {
       return;
     }
 
-    // Check if payment was completed
-    const paymentId = paymentService.getPaymentId();
-    if (!paymentId) {
+    // Check if payment was completed (not required for package mode)
+    let paymentIdToUse = paymentService.getPaymentId();
+    if (!paymentIdToUse && !isPackageMode) {
       setError('Payment ID not found. Please complete the payment first.');
       navigate('/payment', { state: { treatment } });
       return;
@@ -165,13 +131,17 @@ export default function SchedulingPage() {
       const appointmentData = {
         treatment_id: treatment.slug,
         scheduled_at,
-        payment_id: paymentId,
         is_evaluation: isEvaluation,
       };
 
+      // Add payment_id if available (not required for package mode)
+      if (paymentIdToUse) {
+        appointmentData.payment_id = paymentIdToUse;
+      }
+
       // If we have a purchased_package_id from location state, include it
-      if (location.state?.purchased_package_id) {
-        appointmentData.purchased_package_id = location.state.purchased_package_id;
+      if (purchasedPackageId) {
+        appointmentData.purchased_package_id = purchasedPackageId;
       }
 
       const result = await appointmentService.createAppointment(appointmentData);
@@ -186,16 +156,20 @@ export default function SchedulingPage() {
         duration: appointmentDuration,
         treatment: treatment.name,
         customer: user.name,
-        payment_id: paymentId,
+        payment_id: paymentIdToUse,
         status: result.status,
         isEvaluation: isEvaluation,
+        session_number: result.session_number,
+        remaining_sessions: result.remaining_sessions,
       };
 
       setAppointmentDetails(appointmentDetails);
       setAppointmentCreated(true);
 
-      // Clear payment ID from storage after successful appointment creation
-      paymentService.clearPaymentId();
+      // Clear payment ID from storage after successful appointment creation (only for online flow)
+      if (!isPackageMode) {
+        paymentService.clearPaymentId();
+      }
     } catch (err) {
       setError(err.message || 'Error creating appointment');
     } finally {
@@ -250,6 +224,11 @@ export default function SchedulingPage() {
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                     {treatment.name}
                   </Typography>
+                  {sessionInfo && (
+                    <Typography variant="subtitle2" color="success.main" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      Sesión {sessionInfo.sessionNumber} de {sessionInfo.totalSessions}
+                    </Typography>
+                  )}
                   <Typography variant="body2" color="text.secondary">
                     Duración: {SESSION_DURATION} minutos
                   </Typography>
@@ -423,6 +402,14 @@ export default function SchedulingPage() {
                       <Typography variant="caption" color="text.secondary">Tratamiento</Typography>
                       <Typography variant="body1">{appointmentDetails.treatment}</Typography>
                     </Box>
+                    {appointmentDetails.session_number && (
+                      <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                        <Typography variant="caption" color="text.secondary">Sesión</Typography>
+                        <Typography variant="body1">
+                          Sesión {appointmentDetails.session_number} {appointmentDetails.remaining_sessions !== undefined && `de ${appointmentDetails.session_number + appointmentDetails.remaining_sessions}`}
+                        </Typography>
+                      </Box>
+                    )}
                     <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
                       <Typography variant="caption" color="text.secondary">Fecha y hora</Typography>
                       <Typography variant="body1">
@@ -438,6 +425,22 @@ export default function SchedulingPage() {
                   </Stack>
                 </CardContent>
               </Card>
+
+              {/* Remaining Sessions Chip (for cuponera) */}
+              {appointmentDetails.remaining_sessions !== undefined && appointmentDetails.remaining_sessions > 0 && (
+                <Card sx={{ mb: 4, bgcolor: 'success.light', border: '2px solid', borderColor: 'success.main' }}>
+                  <CardContent>
+                    <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                        ✓ Tienes {appointmentDetails.remaining_sessions} sesione{appointmentDetails.remaining_sessions === 1 ? '' : 's'} restante{appointmentDetails.remaining_sessions === 1 ? '' : 's'} en tu cuponera
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Puedes agendar la próxima sesión en cualquier momento
+                      </Typography>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Next Steps */}
               <Card sx={{ mb: 4, bgcolor: 'grey.50' }}>
@@ -456,17 +459,44 @@ export default function SchedulingPage() {
                 </CardContent>
               </Card>
 
-              {/* Action Button */}
-              <Button
-                fullWidth
-                variant="contained"
-                color="success"
-                size="large"
-                onClick={handleConfirmAndContinue}
-                sx={{ py: 2 }}
-              >
-                Ir a inicio
-              </Button>
+              {/* Action Buttons */}
+              <Stack direction="column" spacing={2}>
+                {appointmentDetails.remaining_sessions !== undefined && appointmentDetails.remaining_sessions > 0 && (
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="success"
+                    size="large"
+                    onClick={() => {
+                      const totalSessions = appointmentDetails.session_number + appointmentDetails.remaining_sessions;
+                      navigate('/schedule', {
+                        state: {
+                          treatment,
+                          purchased_package_id: purchasedPackageId,
+                          sessionInfo: {
+                            sessionNumber: appointmentDetails.session_number + 1,
+                            remainingSessions: appointmentDetails.remaining_sessions - 1,
+                            totalSessions
+                          }
+                        }
+                      });
+                    }}
+                    sx={{ py: 2 }}
+                  >
+                    Agendar próxima sesión
+                  </Button>
+                )}
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  color="success"
+                  size="large"
+                  onClick={handleConfirmAndContinue}
+                  sx={{ py: 2 }}
+                >
+                  Ir a inicio
+                </Button>
+              </Stack>
             </>
           )}
         </Container>

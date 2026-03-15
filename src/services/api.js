@@ -49,7 +49,10 @@ export async function apiCall(endpoint, options = {}) {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: response.statusText }));
-      throw new Error(error.detail || `API Error: ${response.status}`);
+      const detail = Array.isArray(error.detail)
+        ? error.detail.map(e => `${e.loc?.slice(-1)[0] ?? 'field'}: ${e.msg}`).join('; ')
+        : error.detail;
+      throw new Error(detail || `API Error: ${response.status}`);
     }
 
     return await response.json();

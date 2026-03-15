@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from "react";
 import {
   Dialog,
   DialogTitle,
@@ -24,38 +24,30 @@ import {
   MenuItem,
   Divider,
   LinearProgress,
-} from '@mui/material';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import 'dayjs/locale/es';
-import adminService from '../services/admin_service';
-import appointmentService from '../services/appointment_service';
-import laserCampaignService from '../services/laser_campaign_service';
+} from "@mui/material";
+import {LocalizationProvider, DatePicker} from "@mui/x-date-pickers";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import "dayjs/locale/es";
+import adminService from "../services/admin_service";
+import appointmentService from "../services/appointment_service";
+import {
+  isLaserTreatment,
+  filterSlotsForEmployee,
+  fetchAvailableSlots,
+} from "../utils/slotUtils";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.locale('es');
-
-function filterSlotsForEmployee(slots) {
-  const now = dayjs().tz('America/Montevideo');
-  return slots.filter(slot =>
-    dayjs.utc(slot).tz('America/Montevideo').isAfter(now)
-  );
-}
+dayjs.locale("es");
 
 function formatAppointmentDate(isoString) {
-  return dayjs.utc(isoString).tz('America/Montevideo').format('dddd, D [de] MMMM');
-}
-
-function formatAppointmentTime(isoString) {
-  return dayjs.utc(isoString).tz('America/Montevideo').format('HH:mm');
-}
-
-function isLaserTreatment(treatment) {
-  return treatment.gender != null || treatment.category === 'laser';
+  return dayjs
+    .utc(isoString)
+    .tz("America/Montevideo")
+    .format("dddd, D [de] MMMM");
 }
 
 export default function CreateAppointmentModal({
@@ -64,20 +56,31 @@ export default function CreateAppointmentModal({
   onCreated,
   prefilledCustomer,
 }) {
-  const STEPS = ['Cliente', 'Tratamiento', 'Sesión y Pago', 'Fecha y Hora', 'Confirmar'];
+  const STEPS = [
+    "Cliente",
+    "Tratamiento",
+    "Sesión y Pago",
+    "Fecha y Hora",
+    "Confirmar",
+  ];
   const [step, setStep] = useState(1);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [successState, setSuccessState] = useState(null); // { appointment_id, session_number, remaining_sessions, total_sessions, treatment_name, customer_name }
 
   // Step 1: Customer
-  const [customerMode, setCustomerMode] = useState(prefilledCustomer ? 'search' : 'search');
-  const [customerSearch, setCustomerSearch] = useState('');
+  const [customerMode, setCustomerMode] = useState(
+    prefilledCustomer ? "search" : "search",
+  );
+  const [customerSearch, setCustomerSearch] = useState("");
   const [customerOptions, setCustomerOptions] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState(prefilledCustomer || null);
+  const [selectedCustomer, setSelectedCustomer] = useState(
+    prefilledCustomer || null,
+  );
   const [newCustomerForm, setNewCustomerForm] = useState({
-    full_name: '',
-    whatsapp_phone: '',
-    email: '',
+    full_name: "",
+    whatsapp_phone: "",
+    email: "",
   });
   const [loadingCustomers, setLoadingCustomers] = useState(false);
 
@@ -95,11 +98,12 @@ export default function CreateAppointmentModal({
   const [selectedCuponera, setSelectedCuponera] = useState(null);
   const [treatmentPackages, setTreatmentPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const [customerCanPurchasePackages, setCustomerCanPurchasePackages] = useState(null);
+  const [customerCanPurchasePackages, setCustomerCanPurchasePackages] =
+    useState(null);
   const [newPurchase, setNewPurchase] = useState({
-    total_sessions: '',
-    amount_paid: '',
-    payment_method: 'efectivo',
+    total_sessions: "",
+    amount_paid: "",
+    payment_method: "efectivo",
   });
   const [loadingStep3, setLoadingStep3] = useState(false);
 
@@ -127,7 +131,7 @@ export default function CreateAppointmentModal({
 
   // Load customers on mount
   useEffect(() => {
-    if (open && customerMode === 'search' && customerOptions.length === 0) {
+    if (open && customerMode === "search" && customerOptions.length === 0) {
       loadCustomers();
     }
   }, [open, customerMode]);
@@ -151,16 +155,16 @@ export default function CreateAppointmentModal({
     if (selectedPackage) {
       setNewPurchase((prev) => ({
         ...prev,
-        amount_paid: selectedPackage.price || '',
-        total_sessions: selectedPackage.session_count || '',
+        amount_paid: selectedPackage.price || "",
+        total_sessions: selectedPackage.session_count || "",
       }));
     }
   }, [selectedPackage]);
 
   // Update amount for single session
   useEffect(() => {
-    if (paymentMode === 'single_session' && selectedTreatment) {
-      const price = selectedTreatment.single_session_price || '';
+    if (paymentMode === "single_session" && selectedTreatment) {
+      const price = selectedTreatment.single_session_price || "";
       setNewPurchase((prev) => ({
         ...prev,
         amount_paid: price,
@@ -178,27 +182,26 @@ export default function CreateAppointmentModal({
     const loadSlots = async () => {
       setLoadingSlots(true);
       try {
-        let slotStrings;
-
-        if (isLaserTreatment(selectedTreatment)) {
-          // For laser treatments, fetch from campaign service (same as SchedulingPage)
-          const duration = selectedTreatment.duration_minutes || 90;
-          slotStrings = await laserCampaignService.getAvailableSlots(duration);
-        } else {
-          // For regular treatments, fetch dynamic slots based on date
-          const duration =
-            paymentMode === 'evaluacion' ? 30 : selectedTreatment.duration_minutes || 90;
-          slotStrings = await appointmentService.getAvailableSlots(
-            scheduleDate.toDate(),
-            duration
-          );
-        }
-
+        const slotStrings = await fetchAvailableSlots(
+          scheduleDate.toDate(),
+          selectedTreatment,
+          paymentMode,
+        );
+        console.log(
+          "[CreateAppointmentModal] Raw slots from API:",
+          slotStrings?.length,
+          slotStrings?.slice(0, 3),
+        );
         const filtered = filterSlotsForEmployee(slotStrings);
+        console.log(
+          "[CreateAppointmentModal] After filterSlotsForEmployee:",
+          filtered?.length,
+          filtered?.slice(0, 3),
+        );
         setAvailableSlots(filtered);
       } catch (err) {
-        console.error('Error loading slots:', err);
-        setError('Error al cargar los horarios disponibles');
+        console.error("Error loading slots:", err);
+        setError("Error al cargar los horarios disponibles");
       } finally {
         setLoadingSlots(false);
       }
@@ -209,7 +212,11 @@ export default function CreateAppointmentModal({
 
   // Load available laser dates when entering step 4 with a laser treatment
   useEffect(() => {
-    if (step !== 4 || !selectedTreatment || !isLaserTreatment(selectedTreatment)) {
+    if (
+      step !== 4 ||
+      !selectedTreatment ||
+      !isLaserTreatment(selectedTreatment)
+    ) {
       setAvailableLaserDates(null);
       return;
     }
@@ -217,14 +224,15 @@ export default function CreateAppointmentModal({
     const loadDates = async () => {
       setLoadingLaserDates(true);
       try {
-        const duration = selectedTreatment.duration_minutes || 90;
-        const slots = await laserCampaignService.getAvailableSlots(duration);
+        const slots = await fetchAvailableSlots(null, selectedTreatment, null);
         const dates = new Set(
-          slots.map(s => dayjs.utc(s).tz('America/Montevideo').format('YYYY-MM-DD'))
+          slots.map((s) =>
+            dayjs.utc(s).tz("America/Montevideo").format("YYYY-MM-DD"),
+          ),
         );
         setAvailableLaserDates(dates);
       } catch (err) {
-        console.error('Error loading laser dates:', err);
+        console.error("Error loading laser dates:", err);
       } finally {
         setLoadingLaserDates(false);
       }
@@ -236,11 +244,11 @@ export default function CreateAppointmentModal({
   const loadCustomers = async () => {
     setLoadingCustomers(true);
     try {
-      const { customers } = await adminService.getCustomers(null, 0, 500);
+      const {customers} = await adminService.getCustomers(null, 0, 500);
       setCustomerOptions(customers || []);
     } catch (err) {
-      console.error('Error loading customers:', err);
-      setError('Error al cargar clientes');
+      console.error("Error loading customers:", err);
+      setError("Error al cargar clientes");
     } finally {
       setLoadingCustomers(false);
     }
@@ -250,10 +258,12 @@ export default function CreateAppointmentModal({
     setLoadingTreatments(true);
     try {
       const result = await adminService.getTreatments();
-      setTreatments((result?.treatments || []).filter((t) => t.is_active !== false));
+      setTreatments(
+        (result?.treatments || []).filter((t) => t.is_active !== false),
+      );
     } catch (err) {
-      console.error('Error loading treatments:', err);
-      setError('Error al cargar tratamientos');
+      console.error("Error loading treatments:", err);
+      setError("Error al cargar tratamientos");
     } finally {
       setLoadingTreatments(false);
     }
@@ -263,37 +273,45 @@ export default function CreateAppointmentModal({
     setLoadingStep3(true);
     try {
       // Load customer history (cuponeras + can_purchase_packages status)
-      const history = await adminService.getCustomerHistory(selectedCustomer.id || selectedCustomer._id);
-      const activeCuponeras = (history.timeline || [])
-        .filter(
-          (item) =>
-            item.kind === 'cuponera' &&
-            item.sessions_used < item.total_sessions &&
-            item.treatment_name === selectedTreatment.name
-        );
+      const history = await adminService.getCustomerHistory(
+        selectedCustomer.id || selectedCustomer._id,
+      );
+      const activeCuponeras = (history.timeline || []).filter(
+        (item) =>
+          item.kind === "cuponera" &&
+          item.sessions_used < item.total_sessions &&
+          item.treatment_name === selectedTreatment.name,
+      );
       setCustomerCuponeras(activeCuponeras);
       setCustomerCanPurchasePackages(history.can_purchase_packages ?? false);
 
       // Load treatment packages
-      const data = await appointmentService.getTreatmentPackages(selectedTreatment.slug);
-      const packages = (data.packages || []).filter((p) => p.is_active !== false);
+      const data = await appointmentService.getTreatmentPackages(
+        selectedTreatment.slug,
+      );
+      const packages = (data.packages || []).filter(
+        (p) => p.is_active !== false,
+      );
       setTreatmentPackages(packages);
 
       // Auto-reset paymentMode if the selected mode is now unavailable
       if (paymentMode) {
         const validModes = [
-          ...(activeCuponeras.length > 0 ? ['existing_cuponera'] : []),
-          'single_session',
-          ...(packages.length > 0 ? ['new_package'] : []),
-          ...(selectedTreatment?.category === 'body' && !(history.can_purchase_packages ?? false) ? ['evaluacion'] : []),
+          ...(activeCuponeras.length > 0 ? ["existing_cuponera"] : []),
+          "single_session",
+          ...(packages.length > 0 ? ["new_package"] : []),
+          ...(selectedTreatment?.category === "body" &&
+          !(history.can_purchase_packages ?? false)
+            ? ["evaluacion"]
+            : []),
         ];
         if (!validModes.includes(paymentMode)) {
           setPaymentMode(null);
         }
       }
     } catch (err) {
-      console.error('Error loading step 3 data:', err);
-      setError('Error al cargar datos de la sesión');
+      console.error("Error loading step 3 data:", err);
+      setError("Error al cargar datos de la sesión");
     } finally {
       setLoadingStep3(false);
     }
@@ -303,37 +321,37 @@ export default function CreateAppointmentModal({
     // Validate current step
     if (step === 1) {
       if (!selectedCustomer) {
-        setError('Selecciona un cliente');
+        setError("Selecciona un cliente");
         return;
       }
     } else if (step === 2) {
       if (!selectedTreatment) {
-        setError('Selecciona un tratamiento');
+        setError("Selecciona un tratamiento");
         return;
       }
     } else if (step === 3) {
       if (!paymentMode) {
-        setError('Selecciona un tipo de sesión');
+        setError("Selecciona un tipo de sesión");
         return;
       }
-      if (paymentMode === 'existing_cuponera' && !selectedCuponera) {
-        setError('Selecciona una cuponera');
+      if (paymentMode === "existing_cuponera" && !selectedCuponera) {
+        setError("Selecciona una cuponera");
         return;
       }
-      if (paymentMode === 'new_package' && !selectedPackage) {
-        setError('Selecciona un paquete');
+      if (paymentMode === "new_package" && !selectedPackage) {
+        setError("Selecciona un paquete");
         return;
       }
       if (
-        (paymentMode === 'single_session' || paymentMode === 'new_package') &&
-        (!newPurchase.amount_paid || !newPurchase.payment_method)
+        (paymentMode === "single_session" || paymentMode === "new_package") &&
+        (newPurchase.amount_paid === "" || isNaN(parseFloat(newPurchase.amount_paid)) || !newPurchase.payment_method)
       ) {
-        setError('Completa el monto y método de pago');
+        setError("Completa el monto y método de pago");
         return;
       }
     } else if (step === 4) {
       if (!scheduleDate || !scheduleTime) {
-        setError('Selecciona una fecha y hora');
+        setError("Selecciona una fecha y hora");
         return;
       }
     }
@@ -346,9 +364,9 @@ export default function CreateAppointmentModal({
     setError(null);
     // Handle sub-steps within step 2
     if (step === 2) {
-      if (selectedCategory === 'laser' && laserItemType) {
+      if (selectedCategory === "laser" && laserItemType) {
         setLaserItemType(null);
-      } else if (selectedCategory === 'laser' && laserGender) {
+      } else if (selectedCategory === "laser" && laserGender) {
         setLaserGender(null);
       } else if (selectedCategory) {
         setSelectedCategory(null);
@@ -370,21 +388,22 @@ export default function CreateAppointmentModal({
       let paymentId = null;
 
       // Create new customer if needed
-      if (customerMode === 'new') {
+      if (customerMode === "new") {
         const created = await adminService.createCustomer(newCustomerForm);
         customerId = created.id;
       }
 
       // Create payment/package if needed
-      if (paymentMode === 'single_session' || paymentMode === 'new_package') {
+      if (paymentMode === "single_session" || paymentMode === "new_package") {
         const paymentData = {
           customer_id: customerId,
           treatment_id: selectedTreatment.id,
           amount: parseFloat(newPurchase.amount_paid),
           payment_method: newPurchase.payment_method,
           item_type:
-            paymentMode === 'single_session' ? 'single_session' : 'package',
-          package_id: paymentMode === 'new_package' ? selectedPackage.id : undefined,
+            paymentMode === "single_session" ? "single_session" : "package",
+          package_id:
+            paymentMode === "new_package" ? selectedPackage.id : undefined,
         };
 
         const payment = await adminService.createManualPayment(paymentData);
@@ -392,13 +411,16 @@ export default function CreateAppointmentModal({
         if (payment.purchased_package_id) {
           purchasedPackageId = payment.purchased_package_id;
         }
-      } else if (paymentMode === 'existing_cuponera') {
+      } else if (paymentMode === "existing_cuponera") {
         purchasedPackageId = selectedCuponera.purchased_package_id;
       }
 
       // Combine date and time in Montevideo timezone, then convert to UTC
-      const dateStr = scheduleDate.format('YYYY-MM-DD');
-      const scheduledAtUTC = dayjs.tz(`${dateStr} ${scheduleTime}`, 'America/Montevideo').utc().toISOString();
+      const dateStr = scheduleDate.format("YYYY-MM-DD");
+      const scheduledAtUTC = dayjs
+        .tz(`${dateStr} ${scheduleTime}`, "America/Montevideo")
+        .utc()
+        .toISOString();
 
       // Create appointment
       const appointmentData = {
@@ -406,34 +428,25 @@ export default function CreateAppointmentModal({
         treatment_id: selectedTreatment.id,
         scheduled_at: scheduledAtUTC,
         purchased_package_id: purchasedPackageId,
-        is_evaluation: paymentMode === 'evaluacion',
+        is_evaluation: paymentMode === "evaluacion",
       };
 
-      await adminService.createAdminAppointment(appointmentData);
+      const appointmentResult = await adminService.createAdminAppointment(appointmentData);
 
-      // Reset state BEFORE notifying parent (while prefilledCustomer prop still has its value)
-      setStep(prefilledCustomer ? 2 : 1);
-      setSelectedCustomer(prefilledCustomer || null);
-      setSelectedTreatment(null);
-      setSelectedCategory(null);
-      setLaserGender(null);
-      setLaserItemType(null);
-      setPaymentMode(null);
-      setScheduleDate(null);
-      setScheduleTime(null);
-      setAvailableLaserDates(null);
-      setCustomerCuponeras([]);
-      setSelectedCuponera(null);
-      setCustomerCanPurchasePackages(null);
-      setTreatmentPackages([]);
-      setSelectedPackage(null);
-      setNewPurchase({ total_sessions: '', amount_paid: '', payment_method: 'efectivo' });
+      // Show success screen with multi-session option if there are remaining sessions
+      setSuccessState({
+        appointment_id: appointmentResult.id,
+        session_number: appointmentResult.session_number,
+        remaining_sessions: appointmentResult.remaining_sessions,
+        total_sessions: appointmentResult.session_number + (appointmentResult.remaining_sessions || 0),
+        treatment_name: selectedTreatment.name,
+        customer_name: selectedCustomer.full_name || selectedCustomer.name,
+      });
 
       setSubmitting(false);
-      onCreated();
     } catch (err) {
-      console.error('Error creating appointment:', err);
-      setError(err.detail || 'Error al crear la sesión');
+      console.error("Error creating appointment:", err);
+      setError(err.detail || "Error al crear la sesión");
       setSubmitting(false);
     }
   };
@@ -456,7 +469,11 @@ export default function CreateAppointmentModal({
       setCustomerCanPurchasePackages(null);
       setTreatmentPackages([]);
       setSelectedPackage(null);
-      setNewPurchase({ total_sessions: '', amount_paid: '', payment_method: 'efectivo' });
+      setNewPurchase({
+        total_sessions: "",
+        amount_paid: "",
+        payment_method: "efectivo",
+      });
       onClose();
     }
   };
@@ -465,16 +482,18 @@ export default function CreateAppointmentModal({
     switch (step) {
       case 1:
         return (
-          <Box sx={{ py: 2 }}>
+          <Box sx={{py: 2}}>
             {prefilledCustomer ? (
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{mb: 3}}>
                 <Card>
                   <CardContent>
-                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    <Typography variant="subtitle2" sx={{mb: 1}}>
                       Cliente seleccionado
                     </Typography>
                     <Chip
-                      label={prefilledCustomer.name || prefilledCustomer.full_name}
+                      label={
+                        prefilledCustomer.name || prefilledCustomer.full_name
+                      }
                       onDelete={() => {
                         setSelectedCustomer(null);
                         setStep(1);
@@ -490,8 +509,8 @@ export default function CreateAppointmentModal({
                 <FormControlLabel
                   control={
                     <Radio
-                      checked={customerMode === 'search'}
-                      onChange={() => setCustomerMode('search')}
+                      checked={customerMode === "search"}
+                      onChange={() => setCustomerMode("search")}
                     />
                   }
                   label="Buscar cliente existente"
@@ -499,27 +518,40 @@ export default function CreateAppointmentModal({
                 <FormControlLabel
                   control={
                     <Radio
-                      checked={customerMode === 'new'}
-                      onChange={() => setCustomerMode('new')}
+                      checked={customerMode === "new"}
+                      onChange={() => setCustomerMode("new")}
                     />
                   }
                   label="Crear nuevo cliente"
                 />
 
-                {customerMode === 'search' ? (
+                {customerMode === "search" ? (
                   <Autocomplete
                     options={customerOptions}
-                    getOptionLabel={(opt) => `${opt.full_name} (${opt.whatsapp_phone || opt.email})`}
+                    getOptionLabel={(opt) =>
+                      `${opt.full_name} (${opt.whatsapp_phone || opt.email})`
+                    }
                     value={selectedCustomer}
                     onChange={(e, val) => setSelectedCustomer(val)}
                     loading={loadingCustomers}
-                    sx={{ mt: 2 }}
+                    sx={{mt: 2}}
                     renderInput={(params) => (
-                      <TextField {...params} label="Cliente" placeholder="Buscar por nombre o teléfono" />
+                      <TextField
+                        {...params}
+                        label="Cliente"
+                        placeholder="Buscar por nombre o teléfono"
+                      />
                     )}
                   />
                 ) : (
-                  <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      mt: 2,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1.5,
+                    }}
+                  >
                     <TextField
                       label="Nombre completo"
                       value={newCustomerForm.full_name}
@@ -562,38 +594,38 @@ export default function CreateAppointmentModal({
 
       case 2: {
         // Determine current sub-step
-        let subStep = 'category';
-        if (selectedCategory === 'laser' && !laserGender) {
-          subStep = 'laser_gender';
-        } else if (selectedCategory === 'laser' && !laserItemType) {
-          subStep = 'laser_item_type';
+        let subStep = "category";
+        if (selectedCategory === "laser" && !laserGender) {
+          subStep = "laser_gender";
+        } else if (selectedCategory === "laser" && !laserItemType) {
+          subStep = "laser_item_type";
         } else if (selectedCategory) {
-          subStep = 'treatments';
+          subStep = "treatments";
         }
 
         // Helper to get available categories
         const getAvailableCategories = () => {
-          const isLaser = (t) => t.gender != null || t.category === 'laser';
+          const isLaser = (t) => t.gender != null || t.category === "laser";
           const categories = [
             {
-              key: 'body',
-              label: 'Corporal',
-              check: (t) => t.category === 'body' && !isLaser(t),
+              key: "body",
+              label: "Corporal",
+              check: (t) => t.category === "body" && !isLaser(t),
             },
             {
-              key: 'facial',
-              label: 'Facial',
-              check: (t) => t.category === 'facial' && !isLaser(t),
+              key: "facial",
+              label: "Facial",
+              check: (t) => t.category === "facial" && !isLaser(t),
             },
             {
-              key: 'laser',
-              label: 'Depilación Láser',
+              key: "laser",
+              label: "Depilación Láser",
               check: (t) => isLaser(t),
             },
             {
-              key: 'complementarios',
-              label: 'Complementarios',
-              check: (t) => t.category === 'complementarios' && !isLaser(t),
+              key: "complementarios",
+              label: "Complementarios",
+              check: (t) => t.category === "complementarios" && !isLaser(t),
             },
           ];
           return categories.filter((cat) => treatments.some(cat.check));
@@ -601,10 +633,10 @@ export default function CreateAppointmentModal({
 
         // Helper to get filtered treatments for display
         const getFilteredTreatments = () => {
-          const isLaser = (t) => t.gender != null || t.category === 'laser';
+          const isLaser = (t) => t.gender != null || t.category === "laser";
           let filtered = treatments;
 
-          if (selectedCategory === 'laser') {
+          if (selectedCategory === "laser") {
             filtered = filtered.filter((t) => isLaser(t));
             if (laserGender) {
               filtered = filtered.filter((t) => t.gender === laserGender);
@@ -615,10 +647,12 @@ export default function CreateAppointmentModal({
           } else if (selectedCategory) {
             filtered = filtered.filter((t) => {
               const isLaserT = isLaser(t);
-              if (selectedCategory === 'body') return t.category === 'body' && !isLaserT;
-              if (selectedCategory === 'facial') return t.category === 'facial' && !isLaserT;
-              if (selectedCategory === 'complementarios')
-                return t.category === 'complementarios' && !isLaserT;
+              if (selectedCategory === "body")
+                return t.category === "body" && !isLaserT;
+              if (selectedCategory === "facial")
+                return t.category === "facial" && !isLaserT;
+              if (selectedCategory === "complementarios")
+                return t.category === "complementarios" && !isLaserT;
               return false;
             });
           }
@@ -629,35 +663,37 @@ export default function CreateAppointmentModal({
         // Helper to build breadcrumb path
         const getBreadcrumb = () => {
           const parts = [];
-          if (selectedCategory === 'laser') {
-            parts.push('Depilación Láser');
+          if (selectedCategory === "laser") {
+            parts.push("Depilación Láser");
           } else if (selectedCategory) {
-            const cat = getAvailableCategories().find((c) => c.key === selectedCategory);
+            const cat = getAvailableCategories().find(
+              (c) => c.key === selectedCategory,
+            );
             if (cat) parts.push(cat.label);
           }
           if (laserGender) {
-            parts.push(laserGender === 'mujeres' ? 'Mujeres' : 'Hombres');
+            parts.push(laserGender === "mujeres" ? "Mujeres" : "Hombres");
           }
           if (laserItemType) {
-            parts.push(laserItemType === 'zona' ? 'Zona' : 'Paquete');
+            parts.push(laserItemType === "zona" ? "Zona" : "Paquete");
           }
           return parts;
         };
 
         if (loadingTreatments) {
           return (
-            <Box sx={{ py: 2 }}>
+            <Box sx={{py: 2}}>
               <CircularProgress />
             </Box>
           );
         }
 
         // Sub-step: category selection
-        if (subStep === 'category') {
+        if (subStep === "category") {
           const categories = getAvailableCategories();
           return (
-            <Box sx={{ py: 2 }}>
-              <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 1 }}>
+            <Box sx={{py: 2}}>
+              <Box sx={{maxHeight: 360, overflowY: "auto", pr: 1}}>
                 {categories.map((cat) => {
                   const count = treatments.filter(cat.check).length;
                   return (
@@ -670,13 +706,15 @@ export default function CreateAppointmentModal({
                       }}
                       sx={{
                         mb: 1.5,
-                        cursor: 'pointer',
+                        cursor: "pointer",
                         border:
-                          selectedCategory === cat.key ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                          selectedCategory === cat.key
+                            ? "2px solid #1976d2"
+                            : "1px solid #e0e0e0",
                         backgroundColor:
-                          selectedCategory === cat.key ? '#f5f5f5' : 'white',
-                        transition: 'all 0.2s',
-                        '&:hover': {
+                          selectedCategory === cat.key ? "#f5f5f5" : "white",
+                        transition: "all 0.2s",
+                        "&:hover": {
                           boxShadow: 2,
                         },
                       }}
@@ -686,7 +724,7 @@ export default function CreateAppointmentModal({
                           {cat.label}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {count} tratamiento{count !== 1 ? 's' : ''}
+                          {count} tratamiento{count !== 1 ? "s" : ""}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -698,14 +736,18 @@ export default function CreateAppointmentModal({
         }
 
         // Sub-step: laser gender selection
-        if (subStep === 'laser_gender') {
+        if (subStep === "laser_gender") {
           return (
-            <Box sx={{ py: 2 }}>
-              <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                <Chip label="Depilación Láser ›" variant="outlined" size="small" />
+            <Box sx={{py: 2}}>
+              <Box sx={{mb: 2, display: "flex", gap: 1, flexWrap: "wrap"}}>
+                <Chip
+                  label="Depilación Láser ›"
+                  variant="outlined"
+                  size="small"
+                />
               </Box>
-              <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 1 }}>
-                {['mujeres', 'hombres'].map((gender) => (
+              <Box sx={{maxHeight: 360, overflowY: "auto", pr: 1}}>
+                {["mujeres", "hombres"].map((gender) => (
                   <Card
                     key={gender}
                     onClick={() => {
@@ -714,18 +756,22 @@ export default function CreateAppointmentModal({
                     }}
                     sx={{
                       mb: 1.5,
-                      cursor: 'pointer',
-                      border: laserGender === gender ? '2px solid #1976d2' : '1px solid #e0e0e0',
-                      backgroundColor: laserGender === gender ? '#f5f5f5' : 'white',
-                      transition: 'all 0.2s',
-                      '&:hover': {
+                      cursor: "pointer",
+                      border:
+                        laserGender === gender
+                          ? "2px solid #1976d2"
+                          : "1px solid #e0e0e0",
+                      backgroundColor:
+                        laserGender === gender ? "#f5f5f5" : "white",
+                      transition: "all 0.2s",
+                      "&:hover": {
                         boxShadow: 2,
                       },
                     }}
                   >
                     <CardContent>
                       <Typography variant="subtitle1" fontWeight="bold">
-                        {gender === 'mujeres' ? 'Mujeres' : 'Hombres'}
+                        {gender === "mujeres" ? "Mujeres" : "Hombres"}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -736,37 +782,44 @@ export default function CreateAppointmentModal({
         }
 
         // Sub-step: laser item type selection
-        if (subStep === 'laser_item_type') {
+        if (subStep === "laser_item_type") {
           return (
-            <Box sx={{ py: 2 }}>
-              <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                <Chip label="Depilación Láser ›" variant="outlined" size="small" />
+            <Box sx={{py: 2}}>
+              <Box sx={{mb: 2, display: "flex", gap: 1, flexWrap: "wrap"}}>
                 <Chip
-                  label={`${laserGender === 'mujeres' ? 'Mujeres' : 'Hombres'} ›`}
+                  label="Depilación Láser ›"
+                  variant="outlined"
+                  size="small"
+                />
+                <Chip
+                  label={`${laserGender === "mujeres" ? "Mujeres" : "Hombres"} ›`}
                   variant="outlined"
                   size="small"
                 />
               </Box>
-              <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 1 }}>
-                {['zona', 'paquete'].map((itemType) => (
+              <Box sx={{maxHeight: 360, overflowY: "auto", pr: 1}}>
+                {["zona", "paquete"].map((itemType) => (
                   <Card
                     key={itemType}
                     onClick={() => setLaserItemType(itemType)}
                     sx={{
                       mb: 1.5,
-                      cursor: 'pointer',
+                      cursor: "pointer",
                       border:
-                        laserItemType === itemType ? '2px solid #1976d2' : '1px solid #e0e0e0',
-                      backgroundColor: laserItemType === itemType ? '#f5f5f5' : 'white',
-                      transition: 'all 0.2s',
-                      '&:hover': {
+                        laserItemType === itemType
+                          ? "2px solid #1976d2"
+                          : "1px solid #e0e0e0",
+                      backgroundColor:
+                        laserItemType === itemType ? "#f5f5f5" : "white",
+                      transition: "all 0.2s",
+                      "&:hover": {
                         boxShadow: 2,
                       },
                     }}
                   >
                     <CardContent>
                       <Typography variant="subtitle1" fontWeight="bold">
-                        {itemType === 'zona' ? 'Zona' : 'Paquete'}
+                        {itemType === "zona" ? "Zona" : "Paquete"}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -781,32 +834,37 @@ export default function CreateAppointmentModal({
         const breadcrumb = getBreadcrumb();
 
         return (
-          <Box sx={{ py: 2 }}>
+          <Box sx={{py: 2}}>
             {breadcrumb.length > 0 && (
-              <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Box sx={{mb: 2, display: "flex", gap: 1, flexWrap: "wrap"}}>
                 {breadcrumb.map((part, idx) => (
                   <Chip
                     key={idx}
-                    label={`${part} ${idx < breadcrumb.length - 1 ? '›' : ''}`}
+                    label={`${part} ${idx < breadcrumb.length - 1 ? "›" : ""}`}
                     variant="outlined"
                     size="small"
                   />
                 ))}
               </Box>
             )}
-            <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 1 }}>
+            <Box sx={{maxHeight: 360, overflowY: "auto", pr: 1}}>
               {filteredTreatments.map((treatment) => (
                 <Card
                   key={treatment.id}
                   onClick={() => setSelectedTreatment(treatment)}
                   sx={{
                     mb: 1.5,
-                    cursor: 'pointer',
+                    cursor: "pointer",
                     border:
-                      selectedTreatment?.id === treatment.id ? '2px solid #1976d2' : '1px solid #e0e0e0',
-                    backgroundColor: selectedTreatment?.id === treatment.id ? '#f5f5f5' : 'white',
-                    transition: 'all 0.2s',
-                    '&:hover': {
+                      selectedTreatment?.id === treatment.id
+                        ? "2px solid #1976d2"
+                        : "1px solid #e0e0e0",
+                    backgroundColor:
+                      selectedTreatment?.id === treatment.id
+                        ? "#f5f5f5"
+                        : "white",
+                    transition: "all 0.2s",
+                    "&:hover": {
                       boxShadow: 2,
                     },
                   }}
@@ -829,16 +887,24 @@ export default function CreateAppointmentModal({
       case 3:
         if (loadingStep3) {
           return (
-            <Box sx={{ py: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+            <Box
+              sx={{
+                py: 2,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 200,
+              }}
+            >
               <CircularProgress />
             </Box>
           );
         }
 
         return (
-          <Box sx={{ py: 2 }}>
+          <Box sx={{py: 2}}>
             <RadioGroup
-              value={paymentMode || ''}
+              value={paymentMode || ""}
               onChange={(e) => {
                 setPaymentMode(e.target.value);
                 setSelectedCuponera(null);
@@ -852,11 +918,11 @@ export default function CreateAppointmentModal({
                     control={<Radio />}
                     label="Usar cuponera existente"
                   />
-                  {paymentMode === 'existing_cuponera' && (
-                    <Box sx={{ ml: 4, mt: 1, mb: 2 }}>
+                  {paymentMode === "existing_cuponera" && (
+                    <Box sx={{ml: 4, mt: 1, mb: 2}}>
                       {customerCuponeras.map((cuponera) => (
-                        <Card key={cuponera.purchased_package_id} sx={{ mb: 1 }}>
-                          <CardContent sx={{ pb: 1 }}>
+                        <Card key={cuponera.purchased_package_id} sx={{mb: 1}}>
+                          <CardContent sx={{pb: 1}}>
                             <FormControlLabel
                               control={
                                 <Radio
@@ -882,8 +948,17 @@ export default function CreateAppointmentModal({
                 control={<Radio />}
                 label="Sesión individual"
               />
-              {paymentMode === 'single_session' && (
-                <Box sx={{ ml: 4, mt: 1, mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {paymentMode === "single_session" && (
+                <Box
+                  sx={{
+                    ml: 4,
+                    mt: 1,
+                    mb: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
+                  }}
+                >
                   <TextField
                     label="Monto"
                     type="number"
@@ -922,26 +997,41 @@ export default function CreateAppointmentModal({
                     control={<Radio />}
                     label="Comprar cuponera"
                   />
-                  {paymentMode === 'new_package' && (
-                    <Box sx={{ ml: 4, mt: 1, mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {paymentMode === "new_package" && (
+                    <Box
+                      sx={{
+                        ml: 4,
+                        mt: 1,
+                        mb: 2,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                      }}
+                    >
                       <Grid container spacing={1}>
                         {treatmentPackages.map((pkg) => (
-                          <Grid size={{ xs: 12 }} key={pkg.id}>
+                          <Grid size={{xs: 12}} key={pkg.id}>
                             <Card
                               onClick={() => setSelectedPackage(pkg)}
                               sx={{
-                                cursor: 'pointer',
+                                cursor: "pointer",
                                 border:
                                   selectedPackage?.id === pkg.id
-                                    ? '2px solid #1976d2'
-                                    : '1px solid #e0e0e0',
+                                    ? "2px solid #1976d2"
+                                    : "1px solid #e0e0e0",
                               }}
                             >
-                              <CardContent sx={{ py: 1 }}>
-                                <Typography variant="subtitle2" fontWeight="bold">
+                              <CardContent sx={{py: 1}}>
+                                <Typography
+                                  variant="subtitle2"
+                                  fontWeight="bold"
+                                >
                                   {pkg.name} - ${pkg.price}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
                                   {pkg.session_count} sesiones
                                 </Typography>
                               </CardContent>
@@ -973,7 +1063,9 @@ export default function CreateAppointmentModal({
                           label="Método de pago"
                         >
                           <MenuItem value="efectivo">Efectivo</MenuItem>
-                          <MenuItem value="transferencia">Transferencia</MenuItem>
+                          <MenuItem value="transferencia">
+                            Transferencia
+                          </MenuItem>
                           <MenuItem value="posnet">POSNet</MenuItem>
                         </Select>
                       </FormControl>
@@ -982,20 +1074,21 @@ export default function CreateAppointmentModal({
                 </>
               )}
 
-              {selectedTreatment?.category === 'body' && customerCanPurchasePackages === false && (
-                <FormControlLabel
-                  value="evaluacion"
-                  control={<Radio />}
-                  label="Sesión de evaluación"
-                />
-              )}
+              {selectedTreatment?.category === "body" &&
+                customerCanPurchasePackages === false && (
+                  <FormControlLabel
+                    value="evaluacion"
+                    control={<Radio />}
+                    label="Sesión de evaluación"
+                  />
+                )}
             </RadioGroup>
           </Box>
         );
 
       case 4:
         return (
-          <Box sx={{ py: 2 }}>
+          <Box sx={{py: 2}}>
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
               <DatePicker
                 label="Fecha"
@@ -1004,11 +1097,14 @@ export default function CreateAppointmentModal({
                 minDate={dayjs()}
                 shouldDisableDate={
                   isLaserTreatment(selectedTreatment) && availableLaserDates
-                    ? (date) => !availableLaserDates.has(date.format('YYYY-MM-DD'))
+                    ? (date) =>
+                        !availableLaserDates.has(date.format("YYYY-MM-DD"))
                     : undefined
                 }
-                disabled={isLaserTreatment(selectedTreatment) && loadingLaserDates}
-                sx={{ width: '100%', mb: 2 }}
+                disabled={
+                  isLaserTreatment(selectedTreatment) && loadingLaserDates
+                }
+                sx={{width: "100%", mb: 2}}
               />
             </LocalizationProvider>
 
@@ -1018,11 +1114,16 @@ export default function CreateAppointmentModal({
               <>
                 <Grid container spacing={1}>
                   {availableSlots.map((slot) => {
-                    const slotTime = dayjs.utc(slot).tz('America/Montevideo').format('HH:mm');
+                    const slotTime = dayjs
+                      .utc(slot)
+                      .tz("America/Montevideo")
+                      .format("HH:mm");
                     return (
-                      <Grid size={{ xs: 4 }} key={slot}>
+                      <Grid size={{xs: 4}} key={slot}>
                         <Button
-                          variant={scheduleTime === slotTime ? 'contained' : 'outlined'}
+                          variant={
+                            scheduleTime === slotTime ? "contained" : "outlined"
+                          }
                           onClick={() => setScheduleTime(slotTime)}
                           fullWidth
                           size="small"
@@ -1034,7 +1135,11 @@ export default function CreateAppointmentModal({
                   })}
                 </Grid>
                 {scheduleDate && availableSlots.length === 0 && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{mt: 1}}
+                  >
                     No hay horarios disponibles para este día
                   </Typography>
                 )}
@@ -1045,34 +1150,36 @@ export default function CreateAppointmentModal({
 
       case 5:
         return (
-          <Box sx={{ py: 2 }}>
+          <Box sx={{py: 2}}>
             <Card>
               <CardContent>
-                <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" fontWeight="bold" sx={{mb: 2}}>
                   Resumen de la sesión
                 </Typography>
 
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{mb: 2}}>
                   <Typography variant="body2">
-                    <strong>Cliente:</strong>{' '}
+                    <strong>Cliente:</strong>{" "}
                     {selectedCustomer?.full_name || selectedCustomer?.name}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Tratamiento:</strong> {selectedTreatment?.name}
                   </Typography>
-                  <Divider sx={{ my: 1 }} />
-                  {paymentMode === 'existing_cuponera' && (
+                  <Divider sx={{my: 1}} />
+                  {paymentMode === "existing_cuponera" && (
                     <>
                       <Typography variant="body2">
-                        <strong>Cuponera:</strong> {selectedCuponera?.package_name}
+                        <strong>Cuponera:</strong>{" "}
+                        {selectedCuponera?.package_name}
                       </Typography>
                       <Typography variant="body2">
-                        <strong>Sesiones disponibles:</strong>{' '}
-                        {selectedCuponera?.total_sessions - selectedCuponera?.sessions_used}
+                        <strong>Sesiones disponibles:</strong>{" "}
+                        {selectedCuponera?.total_sessions -
+                          selectedCuponera?.sessions_used}
                       </Typography>
                     </>
                   )}
-                  {paymentMode === 'single_session' && (
+                  {paymentMode === "single_session" && (
                     <>
                       <Typography variant="body2">
                         <strong>Tipo:</strong> Sesión individual
@@ -1085,7 +1192,7 @@ export default function CreateAppointmentModal({
                       </Typography>
                     </>
                   )}
-                  {paymentMode === 'new_package' && (
+                  {paymentMode === "new_package" && (
                     <>
                       <Typography variant="body2">
                         <strong>Paquete:</strong> {selectedPackage?.name}
@@ -1098,14 +1205,15 @@ export default function CreateAppointmentModal({
                       </Typography>
                     </>
                   )}
-                  {paymentMode === 'evaluacion' && (
+                  {paymentMode === "evaluacion" && (
                     <Typography variant="body2">
                       <strong>Tipo:</strong> Evaluación (30 min)
                     </Typography>
                   )}
-                  <Divider sx={{ my: 1 }} />
+                  <Divider sx={{my: 1}} />
                   <Typography variant="body2">
-                    <strong>Fecha:</strong> {formatAppointmentDate(scheduleDate.toISOString())}
+                    <strong>Fecha:</strong>{" "}
+                    {formatAppointmentDate(scheduleDate.toISOString())}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Hora:</strong> {scheduleTime}
@@ -1121,59 +1229,166 @@ export default function CreateAppointmentModal({
     }
   };
 
+  // Success screen after appointment creation
+  const getSuccessContent = () => {
+    if (!successState) return null;
+
+    const hasRemainingSessionsImport = successState.remaining_sessions > 0;
+
+    return (
+      <Box sx={{ py: 2, textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'success.main', mb: 2 }}>
+          ✓ Sesión creada exitosamente
+        </Typography>
+
+        <Card sx={{ mb: 3, bgcolor: 'success.light' }}>
+          <CardContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Sesión {successState.session_number} de {successState.total_sessions}
+            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+              {successState.treatment_name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Cliente: {successState.customer_name}
+            </Typography>
+          </CardContent>
+        </Card>
+
+        {hasRemainingSessionsImport && (
+          <Card sx={{ mb: 3, bgcolor: 'info.light', border: '2px solid', borderColor: 'info.main' }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'info.main' }}>
+                {successState.remaining_sessions} sesione{successState.remaining_sessions === 1 ? '' : 's'} restante{successState.remaining_sessions === 1 ? '' : 's'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                ¿Deseas agendar la próxima sesión?
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Crear nueva sesión</DialogTitle>
       <DialogContent>
-        <Box sx={{ mb: 3, mt: 1 }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Paso {step} de {STEPS.length}
-            </Typography>
-            <Typography variant="subtitle1" fontWeight="bold">
-              {STEPS[step - 1]}
-            </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={(step / STEPS.length) * 100}
-              sx={{ mt: 1, borderRadius: 1 }}
-            />
-          </Box>
+        <Box sx={{mb: 3, mt: 1}}>
+          {!successState ? (
+            <>
+              <Box sx={{mb: 3}}>
+                <Typography variant="body2" color="text.secondary">
+                  Paso {step} de {STEPS.length}
+                </Typography>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  {STEPS[step - 1]}
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={(step / STEPS.length) * 100}
+                  sx={{mt: 1, borderRadius: 1}}
+                />
+              </Box>
 
-          {error && (
-            <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
-              {error}
-            </Alert>
+              {error && (
+                <Alert severity="error" onClose={() => setError(null)} sx={{mb: 2}}>
+                  {error}
+                </Alert>
+              )}
+
+              {getStepContent()}
+            </>
+          ) : (
+            getSuccessContent()
           )}
-
-          {getStepContent()}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} disabled={submitting}>
-          Cancelar
-        </Button>
-        {step > 1 && (
-          <Button onClick={handlePrevStep} disabled={submitting}>
-            Atrás
-          </Button>
-        )}
-        {step < 5 ? (
-          <Button
-            variant="contained"
-            onClick={handleNextStep}
-            disabled={submitting || (step === 2 && !selectedTreatment)}
-          >
-            Siguiente
-          </Button>
+        {!successState ? (
+          <>
+            <Button onClick={handleClose} disabled={submitting}>
+              Cancelar
+            </Button>
+            {step > 1 && (
+              <Button onClick={handlePrevStep} disabled={submitting}>
+                Atrás
+              </Button>
+            )}
+            {step < 5 ? (
+              <Button
+                variant="contained"
+                onClick={handleNextStep}
+                disabled={submitting || (step === 2 && !selectedTreatment)}
+              >
+                Siguiente
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
+                {submitting ? <CircularProgress size={24} /> : "Crear"}
+              </Button>
+            )}
+          </>
         ) : (
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={submitting}
-          >
-            {submitting ? <CircularProgress size={24} /> : 'Crear sesión'}
-          </Button>
+          <>
+            <Button
+              onClick={() => {
+                // Reset and close
+                setSuccessState(null);
+                setStep(prefilledCustomer ? 2 : 1);
+                setSelectedCustomer(prefilledCustomer || null);
+                setSelectedTreatment(null);
+                setSelectedCategory(null);
+                setLaserGender(null);
+                setLaserItemType(null);
+                setPaymentMode(null);
+                setScheduleDate(null);
+                setScheduleTime(null);
+                setAvailableLaserDates(null);
+                setCustomerCuponeras([]);
+                setSelectedCuponera(null);
+                setCustomerCanPurchasePackages(null);
+                setTreatmentPackages([]);
+                setSelectedPackage(null);
+                setNewPurchase({
+                  total_sessions: "",
+                  amount_paid: "",
+                  payment_method: "efectivo",
+                });
+                onCreated();
+                handleClose();
+              }}
+            >
+              Cerrar
+            </Button>
+            {successState.remaining_sessions > 0 && (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => {
+                  // Reset for next session
+                  setSuccessState(null);
+                  setStep(3); // Go to "Sesión y Pago" for next session
+                  setSelectedTreatment({
+                    id: selectedTreatment.id,
+                    name: selectedTreatment.name,
+                    duration_minutes: selectedTreatment.duration_minutes,
+                  });
+                  setPaymentMode(null);
+                  setScheduleDate(null);
+                  setScheduleTime(null);
+                  setAvailableSlots([]);
+                }}
+              >
+                Agendar próxima sesión
+              </Button>
+            )}
+          </>
         )}
       </DialogActions>
     </Dialog>
