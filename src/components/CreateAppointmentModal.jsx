@@ -118,6 +118,13 @@ export default function CreateAppointmentModal({
     }
   }, [prefilledCustomer, open]);
 
+  // Sync selectedCustomer when prefilledCustomer prop changes
+  useEffect(() => {
+    if (prefilledCustomer) {
+      setSelectedCustomer(prefilledCustomer);
+    }
+  }, [prefilledCustomer]);
+
   // Load customers on mount
   useEffect(() => {
     if (open && customerMode === 'search' && customerOptions.length === 0) {
@@ -404,10 +411,7 @@ export default function CreateAppointmentModal({
 
       await adminService.createAdminAppointment(appointmentData);
 
-      setSubmitting(false);
-      onCreated();
-      onClose();
-      // Reset state
+      // Reset state BEFORE notifying parent (while prefilledCustomer prop still has its value)
       setStep(prefilledCustomer ? 2 : 1);
       setSelectedCustomer(prefilledCustomer || null);
       setSelectedTreatment(null);
@@ -418,6 +422,15 @@ export default function CreateAppointmentModal({
       setScheduleDate(null);
       setScheduleTime(null);
       setAvailableLaserDates(null);
+      setCustomerCuponeras([]);
+      setSelectedCuponera(null);
+      setCustomerCanPurchasePackages(null);
+      setTreatmentPackages([]);
+      setSelectedPackage(null);
+      setNewPurchase({ total_sessions: '', amount_paid: '', payment_method: 'efectivo' });
+
+      setSubmitting(false);
+      onCreated();
     } catch (err) {
       console.error('Error creating appointment:', err);
       setError(err.detail || 'Error al crear la sesión');
@@ -438,6 +451,12 @@ export default function CreateAppointmentModal({
       setScheduleDate(null);
       setScheduleTime(null);
       setAvailableLaserDates(null);
+      setCustomerCuponeras([]);
+      setSelectedCuponera(null);
+      setCustomerCanPurchasePackages(null);
+      setTreatmentPackages([]);
+      setSelectedPackage(null);
+      setNewPurchase({ total_sessions: '', amount_paid: '', payment_method: 'efectivo' });
       onClose();
     }
   };
