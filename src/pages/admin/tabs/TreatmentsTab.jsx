@@ -21,6 +21,10 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
+  Tabs,
+  Tab,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import adminService from '../../../services/admin_service';
 
@@ -52,6 +56,9 @@ export default function TreatmentsTab() {
   const [loadingTreatments, setLoadingTreatments] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('body');
+  const [laserGender, setLaserGender] = useState('hombres');
+  const [laserItemType, setLaserItemType] = useState('zona');
 
   // Create treatment dialog state
   const [createTreatmentOpen, setCreateTreatmentOpen] = useState(false);
@@ -388,12 +395,59 @@ export default function TreatmentsTab() {
         >
           + Nuevo Tratamiento
         </Button>
+        <Tabs
+          value={selectedCategory}
+          onChange={(_, val) => {
+            setSelectedCategory(val);
+            if (val !== 'laser') {
+              setLaserGender('hombres');
+              setLaserItemType('zona');
+            }
+          }}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
+        >
+          <Tab label="CORPORAL" value="body" />
+          <Tab label="FACIAL" value="facial" />
+          <Tab label="DEPI LASER" value="laser" />
+          <Tab label="COMPLEMENTARIOS" value="complementarios" />
+        </Tabs>
+        {selectedCategory === 'laser' && (
+          <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+            <ToggleButtonGroup
+              value={laserGender}
+              exclusive
+              onChange={(_, val) => { if (val) setLaserGender(val); }}
+              size="small"
+            >
+              <ToggleButton value="hombres">Hombres</ToggleButton>
+              <ToggleButton value="mujeres">Mujeres</ToggleButton>
+            </ToggleButtonGroup>
+            <ToggleButtonGroup
+              value={laserItemType}
+              exclusive
+              onChange={(_, val) => { if (val) setLaserItemType(val); }}
+              size="small"
+            >
+              <ToggleButton value="zona">Zona</ToggleButton>
+              <ToggleButton value="paquete">Paquete</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        )}
         {treatments.length === 0 && !loadingTreatments && (
           <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
             No hay tratamientos cargados
           </Typography>
         )}
-        {treatments.map(treatment => (
+        {treatments.filter(t => {
+          if (t.category !== selectedCategory) return false;
+          if (selectedCategory === 'laser') {
+            if (t.gender !== laserGender) return false;
+            if (t.item_type !== laserItemType) return false;
+          }
+          return true;
+        }).map(treatment => (
           <Card key={treatment.id}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -418,39 +472,11 @@ export default function TreatmentsTab() {
                     )}
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {treatment.category && (
-                    <Chip
-                      label={
-                        treatment.category === 'facial' ? 'Facial' :
-                        treatment.category === 'laser' ? 'Depi Laser' :
-                        treatment.category === 'complementarios' ? 'Complementarios' :
-                        'Corporal'
-                      }
-                      size="small"
-                      variant="outlined"
-                    />
-                  )}
-                  {treatment.gender && (
-                    <Chip
-                      label={treatment.gender === 'hombres' ? 'Hombres' : 'Mujeres'}
-                      size="small"
-                      variant="outlined"
-                    />
-                  )}
-                  {treatment.item_type && (
-                    <Chip
-                      label={treatment.item_type === 'zona' ? 'Zona' : 'Paquete'}
-                      size="small"
-                      variant="outlined"
-                    />
-                  )}
-                  <Chip
-                    label={treatment.is_active ? 'Activo' : 'Inactivo'}
-                    color={treatment.is_active ? 'success' : 'default'}
-                    size="small"
-                  />
-                </Box>
+                <Chip
+                  label={treatment.is_active ? 'Activo' : 'Inactivo'}
+                  color={treatment.is_active ? 'success' : 'default'}
+                  size="small"
+                />
               </Box>
             </CardContent>
             <CardActions sx={{ gap: 1 }}>
