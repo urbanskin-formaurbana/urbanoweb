@@ -921,20 +921,42 @@ export default function CreateAppointmentModal({
                   {paymentMode === "existing_cuponera" && (
                     <Box sx={{ml: 4, mt: 1, mb: 2}}>
                       {customerCuponeras.map((cuponera) => (
-                        <Card key={cuponera.purchased_package_id} sx={{mb: 1}}>
+                        <Card
+                          key={cuponera.purchased_package_id}
+                          sx={{
+                            mb: 1,
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            border: "2px solid",
+                            borderColor:
+                              selectedCuponera?.purchased_package_id ===
+                              cuponera.purchased_package_id
+                                ? "primary.main"
+                                : "transparent",
+                            backgroundColor:
+                              selectedCuponera?.purchased_package_id ===
+                              cuponera.purchased_package_id
+                                ? "action.selected"
+                                : "background.paper",
+                            "&:hover": {
+                              boxShadow: 3,
+                              borderColor:
+                                selectedCuponera?.purchased_package_id ===
+                                cuponera.purchased_package_id
+                                  ? "primary.main"
+                                  : "primary.light",
+                            },
+                          }}
+                          onClick={() => setSelectedCuponera(cuponera)}
+                        >
                           <CardContent sx={{pb: 1}}>
-                            <FormControlLabel
-                              control={
-                                <Radio
-                                  checked={
-                                    selectedCuponera?.purchased_package_id ===
-                                    cuponera.purchased_package_id
-                                  }
-                                  onChange={() => setSelectedCuponera(cuponera)}
-                                />
-                              }
-                              label={`${cuponera.package_name} - ${cuponera.sessions_used}/${cuponera.total_sessions} usadas`}
-                            />
+                            <Typography>
+                              {cuponera.package_name}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              {cuponera.sessions_used}/{cuponera.total_sessions}{" "}
+                              sesiones usadas
+                            </Typography>
                           </CardContent>
                         </Card>
                       ))}
@@ -1371,18 +1393,22 @@ export default function CreateAppointmentModal({
                 variant="contained"
                 color="success"
                 onClick={() => {
-                  // Reset for next session
+                  // If using cuponera, skip step 3 and go straight to scheduling
+                  const wasUsingCuponera = paymentMode === "existing_cuponera" && selectedCuponera;
+
                   setSuccessState(null);
-                  setStep(3); // Go to "Sesión y Pago" for next session
-                  setSelectedTreatment({
-                    id: selectedTreatment.id,
-                    name: selectedTreatment.name,
-                    duration_minutes: selectedTreatment.duration_minutes,
-                  });
-                  setPaymentMode(null);
                   setScheduleDate(null);
                   setScheduleTime(null);
                   setAvailableSlots([]);
+
+                  if (wasUsingCuponera) {
+                    // Keep selectedCuponera and paymentMode, jump to scheduling
+                    setStep(4);
+                  } else {
+                    // Normal flow: go to step 3 to choose payment mode again
+                    setPaymentMode(null);
+                    setStep(3);
+                  }
                 }}
               >
                 Agendar próxima sesión
