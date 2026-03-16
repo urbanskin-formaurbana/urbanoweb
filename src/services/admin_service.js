@@ -121,8 +121,11 @@ const adminService = {
     return apiCall(`/admin/customers/${customerId}/approve`, { method: 'PATCH' });
   },
 
-  async getMonthlyReports(months = 6) {
-    return apiCall(`/admin/reports/monthly?months=${months}`, { method: 'GET' });
+  async getMonthlyReports(months = 6, category = null) {
+    const params = new URLSearchParams();
+    params.append('months', months);
+    if (category) params.append('category', category);
+    return apiCall(`/admin/reports/monthly?${params.toString()}`, { method: 'GET' });
   },
 
   // ── Admin Create Appointment ────────────────────────────────────────
