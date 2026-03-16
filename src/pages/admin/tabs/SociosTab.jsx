@@ -141,6 +141,20 @@ export default function SociosTab() {
     // Sort past by scheduled_at descending
     past.sort((a, b) => dayjs(b.scheduled_at).diff(dayjs(a.scheduled_at)));
 
+    // Recalculate session numbers by chronological order within each package
+    const allAppointments = [...upcoming, ...past];
+    const byPackage = {};
+    for (const apt of allAppointments) {
+      if (apt.purchased_package_id) {
+        if (!byPackage[apt.purchased_package_id]) byPackage[apt.purchased_package_id] = [];
+        byPackage[apt.purchased_package_id].push(apt);
+      }
+    }
+    for (const group of Object.values(byPackage)) {
+      group.sort((a, b) => dayjs(a.scheduled_at).diff(dayjs(b.scheduled_at)));
+      group.forEach((apt, i) => { apt.session_number = i + 1; });
+    }
+
     return { cuponeras, upcoming, past };
   };
 
@@ -394,21 +408,22 @@ export default function SociosTab() {
                                               <Typography variant="caption" color="textSecondary">
                                                 {formatDate(apt.scheduled_at)}
                                               </Typography>
-                                              {apt.session_number && (
-                                                <Chip
-                                                  label={`Sesión ${apt.session_number}`}
-                                                  size="small"
-                                                  variant="outlined"
-                                                  sx={{mt: 0.5}}
-                                                />
-                                              )}
                                               {apt.reschedule_count > 0 && (
                                                 <Typography variant="caption" color="error" sx={{display: "block", mt: 0.5}}>
                                                   Reprogramada {apt.reschedule_count} {apt.reschedule_count === 1 ? "vez" : "veces"}
                                                 </Typography>
                                               )}
                                             </Box>
-                                            <Chip label={getStatusLabel(apt.status)} color="primary" size="small" />
+                                            <Box sx={{display: "flex", flexDirection: "column", gap: 0.5, alignItems: "flex-end"}}>
+                                              <Chip label={getStatusLabel(apt.status)} color="primary" size="small" />
+                                              {apt.session_number && (
+                                                <Chip
+                                                  label={`Sesión ${apt.session_number}`}
+                                                  size="small"
+                                                  variant="outlined"
+                                                />
+                                              )}
+                                            </Box>
                                           </Box>
                                         </Box>
                                       ))}
@@ -440,25 +455,26 @@ export default function SociosTab() {
                                               <Typography variant="caption" color="textSecondary">
                                                 {formatDate(apt.scheduled_at)}
                                               </Typography>
-                                              {apt.session_number && (
-                                                <Chip
-                                                  label={`Sesión ${apt.session_number}`}
-                                                  size="small"
-                                                  variant="outlined"
-                                                  sx={{mt: 0.5}}
-                                                />
-                                              )}
                                               {apt.reschedule_count > 0 && (
                                                 <Typography variant="caption" color="error" sx={{display: "block", mt: 0.5}}>
                                                   Reprogramada {apt.reschedule_count} {apt.reschedule_count === 1 ? "vez" : "veces"}
                                                 </Typography>
                                               )}
                                             </Box>
-                                            <Chip
-                                              label={getStatusLabel(apt.status)}
-                                              sx={{backgroundColor: getStatusColor(apt.status), color: "white"}}
-                                              size="small"
-                                            />
+                                            <Box sx={{display: "flex", flexDirection: "column", gap: 0.5, alignItems: "flex-end"}}>
+                                              <Chip
+                                                label={getStatusLabel(apt.status)}
+                                                sx={{backgroundColor: getStatusColor(apt.status), color: "white"}}
+                                                size="small"
+                                              />
+                                              {apt.session_number && (
+                                                <Chip
+                                                  label={`Sesión ${apt.session_number}`}
+                                                  size="small"
+                                                  variant="outlined"
+                                                />
+                                              )}
+                                            </Box>
                                           </Box>
 
                                           {/* Feedback Section */}
