@@ -3,6 +3,41 @@ import { CircularProgress, Box } from '@mui/material';
 import paymentService from '../services/payment_service';
 
 /**
+ * Maps MercadoPago status_detail codes to human-readable Spanish messages
+ */
+const mapMpError = (status, statusDetail) => {
+  const detailMap = {
+    'cc_rejected_bad_filled_security_code': 'El código de seguridad (CVV) ingresado es incorrecto. Verificá e intentá de nuevo.',
+    'cc_rejected_bad_filled_card_number': 'El número de tarjeta ingresado es incorrecto. Verificalo e intentá de nuevo.',
+    'cc_rejected_bad_filled_date': 'La fecha de vencimiento ingresada es incorrecta. Verificala e intentá de nuevo.',
+    'cc_rejected_insufficient_amount': 'Fondos insuficientes en la tarjeta. Usá otra tarjeta o contactá a tu banco.',
+    'cc_rejected_call_for_authorize': 'Tu banco requiere que autorices este pago. Contactá a tu banco e intentá de nuevo.',
+    'cc_rejected_card_disabled': 'La tarjeta está deshabilitada. Contactá a tu banco.',
+    'cc_rejected_duplicated_payment': 'Este pago ya fue procesado anteriormente.',
+    'cc_rejected_high_risk': 'El pago fue rechazado por razones de seguridad. Intentá con otra tarjeta.',
+    'cc_rejected_max_attempts': 'Superaste el límite de intentos. Esperá un momento e intentá de nuevo.',
+  };
+
+  // Check if we have a mapped message for this specific detail
+  if (detailMap[statusDetail]) {
+    return detailMap[statusDetail];
+  }
+
+  // Check if the detail contains "token" and show a user-friendly message
+  if (statusDetail?.includes('token')) {
+    return 'Ocurrió un error al procesar tu tarjeta. Intentá ingresar los datos de nuevo.';
+  }
+
+  // Generic rejection message
+  if (status === 'rejected') {
+    return 'El pago fue rechazado. Verificá los datos de tu tarjeta e intentá de nuevo.';
+  }
+
+  // Fallback
+  return 'Ocurrió un error al procesar el pago. Por favor intentá de nuevo.';
+};
+
+/**
  * MercadoPago Payment Brick Component
  * Renders MercadoPago's full payment form embedded directly on the page
  * Card fields (number, expiry, CVV, name, document) all inline — no redirects
@@ -100,7 +135,9 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
                 if (result.status === 'approved' || result.status === 'pending') {
                   onPaymentSuccessRef.current?.(result.payment_id);
                 } else {
-                  onPaymentErrorRef.current?.(new Error(`Payment ${result.status}: ${result.status_detail}`));
+                  const friendlyErrorMsg = mapMpError(result.status, result.status_detail);
+                  console.error(`Raw payment error - status: ${result.status}, detail: ${result.status_detail}`);
+                  onPaymentErrorRef.current?.(new Error(friendlyErrorMsg));
                 }
               } catch (error) {
                 console.error('Payment processing error:', error);
