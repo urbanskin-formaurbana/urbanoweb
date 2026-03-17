@@ -80,10 +80,14 @@ const laserCampaignService = {
   },
 
   /**
-   * Get all waitlisted customers
+   * Get waitlisted customers, optionally filtered by campaign
+   * @param {string} [campaignId] - If provided, returns entries for that campaign. If not, returns open waitlist.
    */
-  async getWaitlist() {
-    return await apiCall(`${BASE_URL}/admin/waitlist`);
+  async getWaitlist(campaignId = null) {
+    const url = campaignId
+      ? `${BASE_URL}/admin/waitlist?campaign_id=${campaignId}`
+      : `${BASE_URL}/admin/waitlist`;
+    return await apiCall(url);
   },
 
   // ========== Public/Customer endpoints ==========

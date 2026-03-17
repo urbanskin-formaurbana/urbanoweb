@@ -68,7 +68,8 @@ export default function LaserCampaignTab() {
   });
 
   // Waitlist state
-  const [waitlist, setWaitlist] = useState([]);
+  const [waitlist, setWaitlist] = useState([]);  // Open waitlist (next campaign)
+  const [campaignWaitlist, setCampaignWaitlist] = useState([]);  // This campaign
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -84,8 +85,9 @@ export default function LaserCampaignTab() {
       setError('');
 
       // Load active campaign
+      let activeCampaign = null;
       try {
-        const activeCampaign = await laserCampaignService.getActiveCampaignAdmin();
+        activeCampaign = await laserCampaignService.getActiveCampaignAdmin();
         setCampaign(activeCampaign);
         setSlots(activeCampaign.slots || []);
       } catch (err) {
@@ -97,10 +99,17 @@ export default function LaserCampaignTab() {
         }
       }
 
-      // Load waitlist (independent of campaign status)
+      // Load waitlists (independent of campaign status)
       try {
-        const waitlistData = await laserCampaignService.getWaitlist();
-        setWaitlist(waitlistData);
+        // Load both open waitlist and this campaign's waitlist in parallel
+        const [openWL, campaignWL] = await Promise.all([
+          laserCampaignService.getWaitlist(),  // open (null campaign_id)
+          activeCampaign
+            ? laserCampaignService.getWaitlist(activeCampaign._id)
+            : Promise.resolve([]),
+        ]);
+        setWaitlist(openWL);
+        setCampaignWaitlist(campaignWL);
       } catch (err) {
         setError(`Error loading waitlist: ${err.message}`);
       }
@@ -481,11 +490,55 @@ export default function LaserCampaignTab() {
       )}
 
       {/* Waitlist Section - Always visible */}
-      <Card>
+      <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Lista de Espera ({waitlist.length})
-          </Typography>
+          {/* Campaign Waitlist (if campaign exists) */}
+          {campaign && (
+            <>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Lista de espera — {campaign.name} ({campaignWaitlist.length})
+              </Typography>
+
+              <TableContainer component={Paper} sx={{ mb: 3 }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                      <TableCell>Cliente</TableCell>
+                      <TableCell>Teléfono</TableCell>
+                      <TableCell>Fecha de registro</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {campaignWaitlist.length > 0 ? (
+                      campaignWaitlist.map((entry) => (
+                        <TableRow key={entry._id}>
+                          <TableCell>{entry.customer_name}</TableCell>
+                          <TableCell>{entry.customer_phone}</TableCell>
+                          <TableCell>{formatDate(entry.created_at)}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3} align="center">
+                          No hay clientes en lista de espera para esta campaña
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Typography variant="h6" sx={{ mb: 2, mt: 3 }}>
+                Nueva lista de espera (próxima campaña) ({waitlist.length})
+              </Typography>
+            </>
+          )}
+
+          {!campaign && (
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Lista de espera ({waitlist.length})
+            </Typography>
+          )}
 
           <TableContainer component={Paper}>
             <Table size="small">
@@ -494,7 +547,6 @@ export default function LaserCampaignTab() {
                   <TableCell>Cliente</TableCell>
                   <TableCell>Teléfono</TableCell>
                   <TableCell>Fecha de registro</TableCell>
-                  <TableCell>Notificado</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -504,14 +556,11 @@ export default function LaserCampaignTab() {
                       <TableCell>{entry.customer_name}</TableCell>
                       <TableCell>{entry.customer_phone}</TableCell>
                       <TableCell>{formatDate(entry.created_at)}</TableCell>
-                      <TableCell>
-                        {entry.notified_at ? '✓' : '✗'}
-                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} align="center">
+                    <TableCell colSpan={3} align="center">
                       No hay clientes en lista de espera
                     </TableCell>
                   </TableRow>
