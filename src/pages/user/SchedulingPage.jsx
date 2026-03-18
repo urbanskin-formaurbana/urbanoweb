@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import {useNavigate, useLocation} from "react-router-dom";
 import {useAuth} from "../../contexts/AuthContext";
+import appointmentService from "../../services/appointment_service";
 import paymentService from "../../services/payment_service";
 import transferReceiptStore from "../../utils/transferReceiptStore";
 import {
@@ -443,7 +444,7 @@ export default function SchedulingPage() {
               }
               sx={{py: 1.5}}
             >
-              {loading ? "Creando cita..." : "Confirmar cita"}
+              {loading ? "Creando cita..." : "Solicitar cita"}
             </Button>
           </Stack>
         </Container>
