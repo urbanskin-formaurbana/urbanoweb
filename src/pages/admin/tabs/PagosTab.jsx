@@ -382,14 +382,16 @@ export default function PagosTab() {
                   )}
                 </CardContent>
                 <CardActions>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="success"
-                    onClick={() => handleConfirmTransfer(item.id)}
-                  >
-                    Confirmar pago
-                  </Button>
+                  {item.status === "pending" && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      onClick={() => handleConfirmTransfer(item.id)}
+                    >
+                      Confirmar pago
+                    </Button>
+                  )}
                 </CardActions>
               </Card>
             );
