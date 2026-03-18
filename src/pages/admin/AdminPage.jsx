@@ -2,12 +2,12 @@ import { useState } from 'react';
 import {
   Container,
   Box,
+  Button,
   Tabs,
   Tab,
   Select,
   FormControl,
   InputLabel,
-  Button,
   Typography,
   MenuItem,
 } from '@mui/material';
@@ -15,19 +15,21 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAuth } from '../../contexts/AuthContext';
 import AppointmentsTab from './tabs/AppointmentsTab';
+import PagosTab from './tabs/PagosTab';
 import TemplatesTab from './tabs/TemplatesTab';
 import TreatmentsTab from './tabs/TreatmentsTab';
 import SociosTab from './tabs/SociosTab';
 import ReportesTab from './tabs/ReportesTab';
-import LaserCampaignTab from './tabs/LaserCampaignTab';
+import CampaignsTab from './tabs/CampaignsTab';
+import BusinessDetailsTab from './tabs/BusinessDetailsTab';
 
 export default function AdminPage() {
   const { user, logout } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(2);
 
-  const tabLabels = ['Pendientes', 'Confirmadas', 'Todas', 'Plantillas', 'Tratamientos', 'Socios', 'Reportes', 'Depilación Láser'];
+  const tabLabels = ['Pendientes', 'Confirmadas', 'Todas', 'Pagos', 'Plantillas', 'Tratamientos', 'Socios', 'Reportes', 'Campañas', 'Datos del Negocio'];
 
   const handleLogout = () => {
     logout();
@@ -80,11 +82,13 @@ export default function AdminPage() {
       {(activeTab === 0 || activeTab === 1 || activeTab === 2) && (
         <AppointmentsTab activeTab={activeTab} />
       )}
-      {activeTab === 3 && <TemplatesTab />}
-      {activeTab === 4 && <TreatmentsTab />}
-      {activeTab === 5 && <SociosTab />}
-      {activeTab === 6 && <ReportesTab />}
-      {activeTab === 7 && <LaserCampaignTab />}
+      {activeTab === 3 && <PagosTab />}
+      {activeTab === 4 && <TemplatesTab />}
+      {activeTab === 5 && <TreatmentsTab />}
+      {activeTab === 6 && <SociosTab />}
+      {activeTab === 7 && <ReportesTab />}
+      {activeTab === 8 && <CampaignsTab />}
+      {activeTab === 9 && <BusinessDetailsTab />}
     </Container>
   );
 }

@@ -18,6 +18,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import paymentService from '../../services/payment_service';
+import transferReceiptStore from '../../utils/transferReceiptStore';
 import { filterSlotsForCustomer, fetchAvailableSlots } from '../../utils/slotUtils';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -45,15 +46,18 @@ export default function SchedulingPage() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [appointmentCreated, setAppointmentCreated] = useState(false);
-  const [appointmentDetails, setAppointmentDetails] = useState(null);
 
   const treatment = location.state?.treatment || { name: 'Evaluación', slug: 'evaluation' };
   const paymentId = location.state?.paymentId;
   const purchasedPackageId = location.state?.purchased_package_id;
   const sessionInfo = location.state?.sessionInfo; // { sessionNumber, remainingSessions, totalSessions }
   const isEvaluation = location.state?.isEvaluation ?? false;
+  const paymentMethod = location.state?.paymentMethod || 'tarjeta'; // tarjeta | efectivo | transferencia | deposito
+  const campaignItemType = location.state?.campaignItemType; // preserve for navigation back to payment
+  const productType = location.state?.productType; // preserve for navigation back to payment
+  const intentPaymentId = location.state?.intentPaymentId; // Link to payment intent if created at PaymentPage
   const isPackageMode = !!purchasedPackageId && !paymentId; // subsequent session scheduling
+  const isCashOrTransferMode = paymentMethod === 'efectivo' || paymentMethod === 'transferencia'; // payment pending flow
 
   if (!user) {
     return (
@@ -107,11 +111,11 @@ export default function SchedulingPage() {
       return;
     }
 
-    // Check if payment was completed (not required for package mode)
+    // Check if payment was completed (not required for package mode or cash/transfer)
     let paymentIdToUse = paymentService.getPaymentId();
-    if (!paymentIdToUse && !isPackageMode) {
+    if (!paymentIdToUse && !isPackageMode && !isCashOrTransferMode) {
       setError('Payment ID not found. Please complete the payment first.');
-      navigate('/payment', { state: { treatment } });
+      navigate('/payment', { state: { treatment, campaignItemType, productType } });
       return;
     }
 
@@ -134,9 +138,14 @@ export default function SchedulingPage() {
         is_evaluation: isEvaluation,
       };
 
-      // Add payment_id if available (not required for package mode)
+      // Add payment_id if available (not required for package mode or cash/transfer)
       if (paymentIdToUse) {
         appointmentData.payment_id = paymentIdToUse;
+      }
+
+      // Add payment_method_expected for cash/transfer flows
+      if (isCashOrTransferMode) {
+        appointmentData.payment_method_expected = paymentMethod;
       }
 
       // If we have a purchased_package_id from location state, include it
@@ -146,45 +155,49 @@ export default function SchedulingPage() {
 
       const result = await appointmentService.createAppointment(appointmentData);
 
-      // Build appointment details for display
-      // For evaluations, always use 30 min; for regular appointments, use treatment duration
+      // Build appointment details for ExistingAppointmentPage
       const appointmentDuration = isEvaluation ? 30 : (treatment.duration_minutes || SESSION_DURATION);
       const appointmentDetails = {
         id: result.appointment_id,
-        date: selectedDate.format('DD/MM/YYYY'),
-        time: selectedTime.format('HH:mm'),
-        duration: appointmentDuration,
-        treatment: treatment.name,
+        scheduled_at: scheduled_at,
+        duration_minutes: appointmentDuration,
+        treatment_name: treatment.name,
+        treatment_slug: treatment.slug,
+        item_type: treatment.item_type || null,
         customer: user.name,
         payment_id: paymentIdToUse,
         status: result.status,
-        isEvaluation: isEvaluation,
+        payment_status: isCashOrTransferMode ? "awaiting_payment" : "paid",
+        payment_method_expected: isCashOrTransferMode ? paymentMethod : null,
+        is_evaluation: isEvaluation,
         session_number: result.session_number,
         remaining_sessions: result.remaining_sessions,
+        purchased_package_id: purchasedPackageId || null,
       };
-
-      setAppointmentDetails(appointmentDetails);
-      setAppointmentCreated(true);
 
       // Clear payment ID from storage after successful appointment creation (only for online flow)
       if (!isPackageMode) {
         paymentService.clearPaymentId();
       }
+
+      // Link payment intent to appointment if intent was created
+      if (intentPaymentId) {
+        try {
+          await paymentService.linkIntentToAppointment(intentPaymentId, result.appointment_id);
+          transferReceiptStore.file = null; // Clear store after linking
+        } catch (linkErr) {
+          console.warn('Failed to link intent to appointment:', linkErr);
+          // Continue anyway - intent is still there, just not linked yet
+        }
+      }
+
+      // Navigate to appointments overview
+      navigate('/my-appointments');
     } catch (err) {
       setError(err.message || 'Error creating appointment');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleConfirmAndContinue = () => {
-    // Send confirmation and redirect to home
-    navigate('/appointment-confirmed', {
-      state: {
-        appointment: appointmentDetails,
-        loginMethod
-      }
-    });
   };
 
   const steps = ['Autenticación', 'Pago', 'Agendar cita'];
@@ -216,9 +229,7 @@ export default function SchedulingPage() {
 
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-          {!appointmentCreated ? (
-            <>
-              {/* Treatment Info */}
+          {/* Treatment Info */}
               <Card sx={{ mb: 3 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -369,136 +380,6 @@ export default function SchedulingPage() {
                   {loading ? 'Creando cita...' : 'Confirmar cita'}
                 </Button>
               </Stack>
-            </>
-          ) : (
-            <>
-              {/* Appointment Created Confirmation */}
-              <Card sx={{ mb: 4, bgcolor: 'success.light', textAlign: 'center' }}>
-                <CardContent sx={{ py: 4 }}>
-                  <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'success.main', mb: 1 }}>
-                    ¡Cita creada exitosamente!
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Tu cita está pendiente de aprobación
-                  </Typography>
-                </CardContent>
-              </Card>
-
-              {/* Appointment Details */}
-              <Card sx={{ mb: 4 }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                    Detalles de tu cita
-                  </Typography>
-                  <Stack spacing={2}>
-                    <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                      <Typography variant="caption" color="text.secondary">Número de cita</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                        {appointmentDetails.id}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                      <Typography variant="caption" color="text.secondary">Tratamiento</Typography>
-                      <Typography variant="body1">{appointmentDetails.treatment}</Typography>
-                    </Box>
-                    {appointmentDetails.session_number && (
-                      <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                        <Typography variant="caption" color="text.secondary">Sesión</Typography>
-                        <Typography variant="body1">
-                          Sesión {appointmentDetails.session_number} {appointmentDetails.remaining_sessions !== undefined && `de ${appointmentDetails.session_number + appointmentDetails.remaining_sessions}`}
-                        </Typography>
-                      </Box>
-                    )}
-                    <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                      <Typography variant="caption" color="text.secondary">Fecha y hora</Typography>
-                      <Typography variant="body1">
-                        {appointmentDetails.date} a las {appointmentDetails.time}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Estado</Typography>
-                      <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
-                        {appointmentDetails.status}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Remaining Sessions Chip (for cuponera) */}
-              {appointmentDetails.remaining_sessions !== undefined && appointmentDetails.remaining_sessions > 0 && (
-                <Card sx={{ mb: 4, bgcolor: 'success.light', border: '2px solid', borderColor: 'success.main' }}>
-                  <CardContent>
-                    <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
-                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                        ✓ Tienes {appointmentDetails.remaining_sessions} sesione{appointmentDetails.remaining_sessions === 1 ? '' : 's'} restante{appointmentDetails.remaining_sessions === 1 ? '' : 's'} en tu cuponera
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Puedes agendar la próxima sesión en cualquier momento
-                      </Typography>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Next Steps */}
-              <Card sx={{ mb: 4, bgcolor: 'grey.50' }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                    Próximos pasos
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" component="div">
-                    <ol style={{ margin: '0 0 0 20px', paddingLeft: 0 }}>
-                      <li>Recibirás una confirmación en {loginMethod === 'whatsapp' ? 'WhatsApp' : 'tu correo electrónico'}</li>
-                      <li>Cuando el administrador apruebe tu cita, recibirás otra confirmación</li>
-                      <li>Se agregará automáticamente a tu calendario de Google (si disponible)</li>
-                      <li>Presenta 5 minutos antes de la hora programada</li>
-                    </ol>
-                  </Typography>
-                </CardContent>
-              </Card>
-
-              {/* Action Buttons */}
-              <Stack direction="column" spacing={2}>
-                {appointmentDetails.remaining_sessions !== undefined && appointmentDetails.remaining_sessions > 0 && (
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="success"
-                    size="large"
-                    onClick={() => {
-                      const totalSessions = appointmentDetails.session_number + appointmentDetails.remaining_sessions;
-                      navigate('/schedule', {
-                        state: {
-                          treatment,
-                          purchased_package_id: purchasedPackageId,
-                          sessionInfo: {
-                            sessionNumber: appointmentDetails.session_number + 1,
-                            remainingSessions: appointmentDetails.remaining_sessions - 1,
-                            totalSessions
-                          }
-                        }
-                      });
-                    }}
-                    sx={{ py: 2 }}
-                  >
-                    Agendar próxima sesión
-                  </Button>
-                )}
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  color="success"
-                  size="large"
-                  onClick={handleConfirmAndContinue}
-                  sx={{ py: 2 }}
-                >
-                  Ir a inicio
-                </Button>
-              </Stack>
-            </>
-          )}
         </Container>
       </>
     </LocalizationProvider>

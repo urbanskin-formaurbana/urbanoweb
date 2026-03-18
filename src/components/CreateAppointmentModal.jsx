@@ -34,7 +34,7 @@ import "dayjs/locale/es";
 import adminService from "../services/admin_service";
 import appointmentService from "../services/appointment_service";
 import {
-  isLaserTreatment,
+  isCampaignTreatment,
   filterSlotsForEmployee,
   fetchAvailableSlots,
 } from "../utils/slotUtils";
@@ -215,7 +215,7 @@ export default function CreateAppointmentModal({
     if (
       step !== 4 ||
       !selectedTreatment ||
-      !isLaserTreatment(selectedTreatment)
+      !isCampaignTreatment(selectedTreatment)
     ) {
       setAvailableLaserDates(null);
       return;
@@ -1118,13 +1118,13 @@ export default function CreateAppointmentModal({
                 onChange={setScheduleDate}
                 minDate={dayjs()}
                 shouldDisableDate={
-                  isLaserTreatment(selectedTreatment) && availableLaserDates
+                  isCampaignTreatment(selectedTreatment) && availableLaserDates
                     ? (date) =>
                         !availableLaserDates.has(date.format("YYYY-MM-DD"))
                     : undefined
                 }
                 disabled={
-                  isLaserTreatment(selectedTreatment) && loadingLaserDates
+                  isCampaignTreatment(selectedTreatment) && loadingLaserDates
                 }
                 sx={{width: "100%", mb: 2}}
               />

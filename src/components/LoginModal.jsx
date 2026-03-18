@@ -49,7 +49,7 @@ export default function LoginModal({open, onClose, onSuccess}) {
     try {
       const appointment = await appointmentService.getCustomerAppointments();
       if (appointment) {
-        navigate("/existing-appointment", {state: {appointment}});
+        navigate("/my-appointments");
         return;
       }
     } catch (err) {

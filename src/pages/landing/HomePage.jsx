@@ -1,6 +1,6 @@
 /* eslint-disable no-irregular-whitespace */
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import SEO from "../../components/SEO.jsx";
 import {
   Box,
@@ -15,20 +15,21 @@ import {
   Alert,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import {useTheme} from "@mui/material/styles";
 import appointmentService from "../../services/appointment_service.js";
 import paymentService from "../../services/payment_service.js";
 import treatmentService from "../../services/treatment_service.js";
 import authService from "../../services/auth_service.js";
+import {getProductTypes} from "../../services/campaign_service.js";
 import LoginModal from "../../components/LoginModal.jsx";
 import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
-import LaserDepilationModal from "../../components/LaserDepilationModal.jsx";
-import { useAuth } from "../../contexts/AuthContext.jsx";
+import CampaignModal from "../../components/CampaignModal.jsx";
+import {useAuth} from "../../contexts/AuthContext.jsx";
 
 export default function HomePage() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const {isAuthenticated, user} = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [checkingAppointment, setCheckingAppointment] = useState(false);
@@ -39,11 +40,11 @@ export default function HomePage() {
   const [treatmentsError, setTreatmentsError] = useState(null);
   const [canPurchasePackages, setCanPurchasePackages] = useState(false);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-  const [selectedTreatmentForPurchase, setSelectedTreatmentForPurchase] = useState(null);
-  const [laserModalOpen, setLaserModalOpen] = useState(false);
-  const [laserGender, setLaserGender] = useState('hombres');
-
-  const [laserTreatments, setLaserTreatments] = useState([]);
+  const [selectedTreatmentForPurchase, setSelectedTreatmentForPurchase] =
+    useState(null);
+  const [campaignModals, setCampaignModals] = useState({}); // Track modal open state for each campaign
+  const [campaignProducts, setCampaignProducts] = useState([]); // List of available campaign product types
+  const [treatmentsByCategory, setTreatmentsByCategory] = useState({}); // All treatments grouped by category
 
   useEffect(() => {
     treatmentService
@@ -51,8 +52,30 @@ export default function HomePage() {
       .then((data) => {
         setBodyTreatments(data.filter((t) => t.category === "body"));
         setFacialTreatments(data.filter((t) => t.category === "facial"));
-        setComplementaryTreatments(data.filter((t) => t.category === "complementarios"));
-        setLaserTreatments(data.filter((t) => t.category === "laser"));
+        setComplementaryTreatments(
+          data.filter((t) => t.category === "complementarios"),
+        );
+
+        // Build map of all treatments by category (including new dynamic categories)
+        const byCategory = {};
+        data.forEach((t) => {
+          if (!byCategory[t.category]) {
+            byCategory[t.category] = [];
+          }
+          byCategory[t.category].push(t);
+        });
+        setTreatmentsByCategory(byCategory);
+
+        // Fetch campaign product types from backend (with product_label and product_description)
+        getProductTypes()
+          .then((types) => {
+            // Filter out dedicated sections to prevent duplicates
+            const DEDICATED_SECTIONS = ["body", "facial", "complementarios"];
+            setCampaignProducts(
+              types.filter((t) => !DEDICATED_SECTIONS.includes(t.product_type)),
+            );
+          })
+          .catch((err) => console.error("Error loading product types:", err));
       })
       .catch((err) => {
         console.error("Error loading treatments:", err);
@@ -60,10 +83,6 @@ export default function HomePage() {
       })
       .finally(() => setTreatmentsLoading(false));
   }, []);
-
-  // Get laser treatments by gender
-  const laserHombres = laserTreatments.filter((t) => t.gender === "hombres");
-  const laserMujeres = laserTreatments.filter((t) => t.gender === "mujeres");
 
   // Check purchase eligibility when authenticated (only for customers)
   useEffect(() => {
@@ -106,11 +125,10 @@ export default function HomePage() {
   const handlePurchaseConfirm = async (packageId) => {
     setCheckingAppointment(true);
     try {
-      const existingAppointment = await appointmentService.getCustomerAppointments();
+      const existingAppointment =
+        await appointmentService.getCustomerAppointments();
       if (existingAppointment) {
-        navigate("/existing-appointment", {
-          state: { appointment: existingAppointment },
-        });
+        navigate("/my-appointments");
         return;
       }
 
@@ -119,7 +137,10 @@ export default function HomePage() {
         paymentService.savePaymentId(unscheduledPayment._id);
         navigate("/schedule", {
           state: {
-            treatment: { name: selectedTreatmentForPurchase.name, slug: selectedTreatmentForPurchase.slug },
+            treatment: {
+              name: selectedTreatmentForPurchase.name,
+              slug: selectedTreatmentForPurchase.slug,
+            },
           },
         });
         return;
@@ -127,7 +148,10 @@ export default function HomePage() {
 
       navigate("/payment", {
         state: {
-          treatment: { name: selectedTreatmentForPurchase.name, slug: selectedTreatmentForPurchase.slug },
+          treatment: {
+            name: selectedTreatmentForPurchase.name,
+            slug: selectedTreatmentForPurchase.slug,
+          },
           selectedPackageId: packageId,
         },
       });
@@ -154,13 +178,12 @@ export default function HomePage() {
     setCheckingAppointment(true);
     try {
       // Check for existing active appointment
-      const existingAppointment = await appointmentService.getCustomerAppointments();
+      const existingAppointment =
+        await appointmentService.getCustomerAppointments();
 
       if (existingAppointment) {
         // Customer has pending or confirmed appointment
-        navigate("/existing-appointment", {
-          state: { appointment: existingAppointment },
-        });
+        navigate("/my-appointments");
       } else {
         // No existing appointment - check if customer already paid but hasn't scheduled yet
         const unscheduledPayment = await paymentService.getUnscheduledPayment();
@@ -168,12 +191,12 @@ export default function HomePage() {
           // Customer paid but didn't schedule - skip payment, go directly to scheduling
           paymentService.savePaymentId(unscheduledPayment._id);
           navigate("/schedule", {
-            state: { treatment: { name: treatment.name, slug: treatment.slug } },
+            state: {treatment: {name: treatment.name, slug: treatment.slug}, productType: "facial"},
           });
         } else {
           // No payment or payment already has appointment - proceed to payment
           navigate("/payment", {
-            state: { treatment: { name: treatment.name, slug: treatment.slug } },
+            state: {treatment: {name: treatment.name, slug: treatment.slug}, productType: "facial"},
           });
         }
       }
@@ -204,14 +227,14 @@ export default function HomePage() {
           textAlign: "center",
           bgcolor: "success.light",
           color: "success.contrastText",
-          py: { xs: 2, md: 4 },
+          py: {xs: 2, md: 4},
         }}
       >
         <Container>
           <Typography
             variant={isMobile ? "h3" : "h2"}
             component="h1"
-            sx={{ fontWeight: "bold" }}
+            sx={{fontWeight: "bold"}}
             gutterBottom
           >
             FORMA Urbana
@@ -219,9 +242,9 @@ export default function HomePage() {
           <Typography variant="h5" gutterBottom>
             Más que una estética facial y corporal
           </Typography>
-          <Typography sx={{ mb: 3 }}>
-            Tratamientos no invasivos en Montevideo Centro. Sin cirugías. Sin agujas. Resultados
-            reales.
+          <Typography sx={{mb: 3}}>
+            Tratamientos no invasivos en Montevideo Centro. Sin cirugías. Sin
+            agujas. Resultados reales.
           </Typography>
           {!isAuthenticated && (
             <Button
@@ -229,7 +252,7 @@ export default function HomePage() {
               color="success"
               size="large"
               onClick={() => setLoginModalOpen(true)}
-              sx={{ fontWeight: "bold" }}
+              sx={{fontWeight: "bold"}}
             >
               Iniciá sesión para reservar
             </Button>
@@ -239,14 +262,17 @@ export default function HomePage() {
 
       {/* Loading State */}
       {treatmentsLoading && (
-        <Container component="section" sx={{ py: { xs: 4, md: 6 }, textAlign: "center" }}>
+        <Container
+          component="section"
+          sx={{py: {xs: 4, md: 6}, textAlign: "center"}}
+        >
           <CircularProgress />
         </Container>
       )}
 
       {/* Error State */}
       {treatmentsError && !treatmentsLoading && (
-        <Container component="section" sx={{ py: { xs: 3, md: 4 } }}>
+        <Container component="section" sx={{py: {xs: 3, md: 4}}}>
           <Alert severity="error">{treatmentsError}</Alert>
         </Container>
       )}
@@ -254,25 +280,23 @@ export default function HomePage() {
       {/* Body Treatments Section */}
       {!treatmentsLoading && !treatmentsError && (
         <>
-          <Container component="section" sx={{ py: { xs: 3, md: 4 } }}>
+          <Container component="section" sx={{py: {xs: 3, md: 4}}}>
             <Typography
               variant={isMobile ? "h4" : "h3"}
               align="center"
               gutterBottom
-              sx={{ mb: 3 }}
+              sx={{mb: 3}}
             >
               Estética Corporal
             </Typography>
-            <Typography
-              align="center"
-              sx={{ mb: 3, color: "text.secondary" }}
-            >
-              Tecnología no invasiva para reducir contorno, tonificar músculo y reafirmar piel
+            <Typography align="center" sx={{mb: 3, color: "text.secondary"}}>
+              Tecnología no invasiva para reducir contorno, tonificar músculo y
+              reafirmar piel
             </Typography>
 
             <Grid container spacing={3} justifyContent="center">
               {bodyTreatments.map((treatment) => (
-                <Grid key={treatment.slug} size={{ xs: 12, sm: 6, md: 4 }}>
+                <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 4}}>
                   <Card
                     sx={{
                       height: "100%",
@@ -287,12 +311,20 @@ export default function HomePage() {
                     }}
                     onClick={() => handleBodyTreatmentClick(treatment)}
                   >
-                    <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                    <CardContent sx={{flexGrow: 1}}>
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        sx={{fontWeight: "bold"}}
+                      >
                         {treatment.name}
                       </Typography>
                       {treatment.subtitle && (
-                        <Typography variant="body2" color="success.main" gutterBottom>
+                        <Typography
+                          variant="body2"
+                          color="success.main"
+                          gutterBottom
+                        >
                           {treatment.subtitle}
                         </Typography>
                       )}
@@ -307,26 +339,24 @@ export default function HomePage() {
           </Container>
 
           {/* Facial Treatments Section */}
-          <Box sx={{ bgcolor: "grey.50", py: { xs: 3, md: 4 } }}>
+          <Box sx={{bgcolor: "grey.50", py: {xs: 3, md: 4}}}>
             <Container component="section">
               <Typography
                 variant={isMobile ? "h4" : "h3"}
                 align="center"
                 gutterBottom
-                sx={{ mb: 3 }}
+                sx={{mb: 3}}
               >
                 Estética Facial
               </Typography>
-              <Typography
-                align="center"
-                sx={{ mb: 3, color: "text.secondary" }}
-              >
-                Tratamientos para limpiar, hidratar, rejuvenecer y renovar tu piel
+              <Typography align="center" sx={{mb: 3, color: "text.secondary"}}>
+                Tratamientos para limpiar, hidratar, rejuvenecer y renovar tu
+                piel
               </Typography>
 
               <Grid container spacing={3} justifyContent="center">
                 {facialTreatments.map((treatment) => (
-                  <Grid key={treatment.slug} size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 4}}>
                     <Card
                       sx={{
                         height: "100%",
@@ -341,8 +371,12 @@ export default function HomePage() {
                       }}
                       onClick={() => handleFacialTreatmentClick(treatment)}
                     >
-                      <CardContent sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                      <CardContent sx={{flexGrow: 1}}>
+                        <Typography
+                          variant="h6"
+                          gutterBottom
+                          sx={{fontWeight: "bold"}}
+                        >
                           {treatment.name}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -356,85 +390,148 @@ export default function HomePage() {
             </Container>
           </Box>
 
-          {/* Laser Depilation Section - only show if treatments exist */}
-          {laserTreatments.length > 0 && (
-            <Box sx={{ py: { xs: 3, md: 4 } }}>
-              <Container component="section">
-                <Typography
-                  variant={isMobile ? "h4" : "h3"}
-                  align="center"
-                  gutterBottom
-                  sx={{ mb: 3 }}
-                >
-                  Depilación Láser
-                </Typography>
-                <Typography
-                  align="center"
-                  sx={{ mb: 3, color: "text.secondary" }}
-                >
-                  Depilación definitiva sin dolor. Zonas y paquetes personalizados
-                </Typography>
+          {/* Dynamic Campaign Sections */}
+          {campaignProducts.map((campaign) => {
+            const productType = campaign.product_type;
+            const campaignTreatments = treatmentsByCategory[productType] || [];
 
-                <Grid container spacing={3} justifyContent="center">
-                  {[
-                    { gender: "hombres", label: "Hombres" },
-                    { gender: "mujeres", label: "Mujeres" },
-                  ].map(({ gender, label }) => (
-                    <Grid key={gender} size={{ xs: 12, sm: 6, md: 4 }}>
-                      <Card
-                        sx={{
-                          height: "100%",
-                          display: "flex",
-                          flexDirection: "column",
-                          cursor: "pointer",
-                          transition: "transform 0.2s, box-shadow 0.2s",
-                          "&:hover": {
-                            transform: "translateY(-4px)",
-                            boxShadow: 3,
-                          },
-                        }}
-                        onClick={() => {
-                          setLaserGender(gender);
-                          setLaserModalOpen(true);
-                        }}
-                      >
-                        <CardContent sx={{ flexGrow: 1 }}>
-                          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
-                            {label}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center" }}>
-                            Ver zonas y paquetes disponibles
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Container>
-            </Box>
-          )}
+            if (campaignTreatments.length === 0) return null;
+
+            // Check if this campaign has gender-specific treatments
+            const hasGenderSplit = campaignTreatments.some((t) => t.gender);
+
+            return (
+              <Box key={productType} sx={{py: {xs: 3, md: 4}}}>
+                <Container component="section">
+                  <Typography
+                    variant={isMobile ? "h4" : "h3"}
+                    align="center"
+                    gutterBottom
+                    sx={{mb: 3}}
+                  >
+                    {campaign.product_label ||
+                      productType.charAt(0).toUpperCase() +
+                        productType.slice(1)}
+                  </Typography>
+                  {campaign.product_description && (
+                    <Typography
+                      align="center"
+                      sx={{mb: 3, color: "text.secondary"}}
+                    >
+                      {campaign.product_description}
+                    </Typography>
+                  )}
+
+                  <Grid container spacing={3} justifyContent="center">
+                    {hasGenderSplit ? (
+                      [
+                        {gender: "hombres", label: "Hombres"},
+                        {gender: "mujeres", label: "Mujeres"},
+                      ].map(({gender, label}) => (
+                        <Grid key={gender} size={{xs: 12, sm: 6, md: 4}}>
+                          <Card
+                            sx={{
+                              height: "100%",
+                              display: "flex",
+                              flexDirection: "column",
+                              cursor: "pointer",
+                              transition: "transform 0.2s, box-shadow 0.2s",
+                              "&:hover": {
+                                transform: "translateY(-4px)",
+                                boxShadow: 3,
+                              },
+                            }}
+                            onClick={() => {
+                              setCampaignModals((prev) => ({
+                                ...prev,
+                                [`${productType}-${gender}`]: true,
+                              }));
+                            }}
+                          >
+                            <CardContent sx={{flexGrow: 1}}>
+                              <Typography
+                                variant="h5"
+                                gutterBottom
+                                sx={{fontWeight: "bold", textAlign: "center"}}
+                              >
+                                {label}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{textAlign: "center"}}
+                              >
+                                Ver zonas y paquetes disponibles
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))
+                    ) : (
+                      <Grid size={{xs: 12, sm: 6, md: 4}}>
+                        <Card
+                          sx={{
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            cursor: "pointer",
+                            transition: "transform 0.2s, box-shadow 0.2s",
+                            "&:hover": {
+                              transform: "translateY(-4px)",
+                              boxShadow: 3,
+                            },
+                          }}
+                          onClick={() => {
+                            setCampaignModals((prev) => ({
+                              ...prev,
+                              [productType]: true,
+                            }));
+                          }}
+                        >
+                          <CardContent sx={{flexGrow: 1}}>
+                            <Typography
+                              variant="h5"
+                              gutterBottom
+                              sx={{fontWeight: "bold", textAlign: "center"}}
+                            >
+                              Consultar disponibilidad
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{textAlign: "center"}}
+                            >
+                              Zonas y paquetes personalizados
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    )}
+                  </Grid>
+                </Container>
+              </Box>
+            );
+          })}
 
           {/* Complementarios Section - only show if treatments exist */}
           {complementaryTreatments.length > 0 && (
-            <Container component="section" sx={{ py: { xs: 3, md: 4 } }}>
+            <Container component="section" sx={{py: {xs: 3, md: 4}}}>
               <Typography
                 variant={isMobile ? "h4" : "h3"}
                 align="center"
                 gutterBottom
-                sx={{ mb: 3 }}
+                sx={{mb: 3}}
               >
                 Complementarios
               </Typography>
-              <Typography
-                align="center"
-                sx={{ mb: 3, color: "text.secondary" }}
-              >
-                Otros servicios que no encajan completamente en las categorías anteriores
+              <Typography align="center" sx={{mb: 3, color: "text.secondary"}}>
+                Otros servicios que no encajan completamente en las categorías
+                anteriores
               </Typography>
 
               <Grid container spacing={3} justifyContent="center">
                 {complementaryTreatments.map((treatment) => (
-                  <Grid key={treatment.slug} size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 4}}>
                     <Card
                       sx={{
                         height: "100%",
@@ -449,12 +546,20 @@ export default function HomePage() {
                       }}
                       onClick={() => handleFacialTreatmentClick(treatment)}
                     >
-                      <CardContent sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                      <CardContent sx={{flexGrow: 1}}>
+                        <Typography
+                          variant="h6"
+                          gutterBottom
+                          sx={{fontWeight: "bold"}}
+                        >
                           {treatment.name}
                         </Typography>
                         {treatment.subtitle && (
-                          <Typography variant="body2" color="success.main" gutterBottom>
+                          <Typography
+                            variant="body2"
+                            color="success.main"
+                            gutterBottom
+                          >
                             {treatment.subtitle}
                           </Typography>
                         )}
@@ -476,7 +581,7 @@ export default function HomePage() {
         <Box
           component="section"
           sx={{
-            py: { xs: 3, md: 4 },
+            py: {xs: 3, md: 4},
             textAlign: "center",
             bgcolor: "success.light",
             color: "success.contrastText",
@@ -486,7 +591,7 @@ export default function HomePage() {
             <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
               ¿Listo para empezar?
             </Typography>
-            <Typography sx={{ mb: 2 }}>
+            <Typography sx={{mb: 2}}>
               Selecciona un tratamiento arriba para reservar tu sesión
             </Typography>
           </Container>
@@ -506,17 +611,82 @@ export default function HomePage() {
         onConfirm={handlePurchaseConfirm}
       />
 
-      <LaserDepilationModal
-        open={laserModalOpen}
-        onClose={() => setLaserModalOpen(false)}
-        gender={laserGender}
-        treatments={laserGender === "hombres" ? laserHombres : laserMujeres}
-        isAuthenticated={isAuthenticated}
-        onLoginRequired={() => {
-          setLaserModalOpen(false);
-          setLoginModalOpen(true);
-        }}
-      />
+      {/* Dynamic Campaign Modals */}
+      {campaignProducts.map((campaign) => {
+        const productType = campaign.product_type;
+        const label =
+          campaign.product_label ||
+          productType.charAt(0).toUpperCase() + productType.slice(1);
+        const campaignTreatments = treatmentsByCategory[productType] || [];
+
+        const hasGenderSplit = campaignTreatments.some((t) => t.gender);
+
+        if (hasGenderSplit) {
+          return (
+            <Box key={productType}>
+              {["hombres", "mujeres"].map((gender) => {
+                const modalKey = `${productType}-${gender}`;
+                const isOpen = campaignModals[modalKey] || false;
+                const treatments = campaignTreatments.filter(
+                  (t) => t.gender === gender,
+                );
+
+                return (
+                  <CampaignModal
+                    key={modalKey}
+                    open={isOpen}
+                    onClose={() => {
+                      setCampaignModals((prev) => ({
+                        ...prev,
+                        [modalKey]: false,
+                      }));
+                    }}
+                    gender={gender}
+                    treatments={treatments}
+                    isAuthenticated={isAuthenticated}
+                    onLoginRequired={() => {
+                      setCampaignModals((prev) => ({
+                        ...prev,
+                        [modalKey]: false,
+                      }));
+                      setLoginModalOpen(true);
+                    }}
+                    productType={productType}
+                    modalTitle={`${label} - ${gender === "hombres" ? "Hombres" : "Mujeres"}`}
+                  />
+                );
+              })}
+            </Box>
+          );
+        } else {
+          const modalKey = productType;
+          const isOpen = campaignModals[modalKey] || false;
+
+          return (
+            <CampaignModal
+              key={modalKey}
+              open={isOpen}
+              onClose={() => {
+                setCampaignModals((prev) => ({
+                  ...prev,
+                  [modalKey]: false,
+                }));
+              }}
+              treatments={campaignTreatments}
+              isAuthenticated={isAuthenticated}
+              onLoginRequired={() => {
+                setCampaignModals((prev) => ({
+                  ...prev,
+                  [modalKey]: false,
+                }));
+                setLoginModalOpen(true);
+              }}
+              productType={productType}
+              modalTitle={label}
+            />
+          );
+        }
+      })}
     </>
   );
 }

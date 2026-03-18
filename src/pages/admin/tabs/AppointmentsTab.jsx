@@ -28,8 +28,10 @@ import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/locale/es';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import WarningIcon from '@mui/icons-material/Warning';
 import adminService from '../../../services/admin_service';
 import appointmentService from '../../../services/appointment_service';
+import paymentService from '../../../services/payment_service';
 import CreateAppointmentModal from '../../../components/CreateAppointmentModal';
 
 dayjs.extend(utc);
@@ -153,7 +155,7 @@ function filterSlotsForEmployee(slots) {
   );
 }
 
-function AppointmentCard({ appointment, onConfirm, confirming, templates, onReschedule, onComplete, onNoShow }) {
+function AppointmentCard({ appointment, onConfirm, confirming, templates, onReschedule, onComplete, onNoShow, onConfirmPayment }) {
   const statusColor = STATUS_COLORS[appointment.status] || 'default';
   const statusLabel = STATUS_LABELS[appointment.status] || appointment.status;
   const borderColor = {
@@ -165,6 +167,10 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
 
   const [whatsappAnchor, setWhatsappAnchor] = useState(null);
   const [completarAnchor, setCompletarAnchor] = useState(null);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(appointment.total_amount || '');
+  const [paymentMethod, setPaymentMethod] = useState('efectivo');
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
   const phone = formatPhoneForWhatsApp(appointment.customer_phone);
 
   const handleWhatsappMenuClick = (e) => {
@@ -200,6 +206,33 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
     handleWhatsappMenuClose();
   };
 
+  const handlePaymentModalOpen = () => {
+    setPaymentModalOpen(true);
+  };
+
+  const handlePaymentModalClose = () => {
+    setPaymentModalOpen(false);
+    setPaymentAmount(appointment.total_amount || '');
+    setPaymentMethod('efectivo');
+  };
+
+  const handleConfirmPaymentClick = async () => {
+    if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
+      alert('Por favor ingresa un monto válido');
+      return;
+    }
+    setConfirmingPayment(true);
+    try {
+      await onConfirmPayment(appointment.id, {
+        method: paymentMethod,
+        amount: parseFloat(paymentAmount)
+      });
+      handlePaymentModalClose();
+    } finally {
+      setConfirmingPayment(false);
+    }
+  };
+
   return (
     <Card sx={{ borderLeft: `4px solid ${borderColor}` }}>
       <CardContent>
@@ -207,7 +240,17 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
           <Typography variant="subtitle1" fontWeight="bold">
             {appointment.customer_name}
           </Typography>
-          <Chip label={statusLabel} color={statusColor} size="small" />
+          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+            {appointment.payment_status === 'awaiting_payment' && (
+              <Chip
+                icon={<WarningIcon />}
+                label="Pago pendiente"
+                color="warning"
+                size="small"
+              />
+            )}
+            <Chip label={statusLabel} color={statusColor} size="small" />
+          </Box>
         </Box>
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -239,10 +282,30 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
             sx={{ mt: 0.5 }}
           />
         )}
+
+        {appointment.payment_status === 'awaiting_payment' && (
+          <Box sx={{ mt: 1, p: 1, backgroundColor: '#fff3cd', borderRadius: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              Método esperado: {appointment.payment_method_expected === 'efectivo' ? 'Efectivo' : 'Transferencia bancaria'}
+            </Typography>
+          </Box>
+        )}
       </CardContent>
 
       <CardActions sx={{ gap: 0.5, flexWrap: 'nowrap', overflow: 'auto' }}>
-        {appointment.status === 'pending' && (
+        {appointment.payment_status === 'awaiting_payment' && (
+          <Button
+            size="small"
+            variant="contained"
+            color="warning"
+            onClick={handlePaymentModalOpen}
+            sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
+          >
+            Confirmar Pago
+          </Button>
+        )}
+
+        {appointment.status === 'pending' && appointment.payment_status !== 'awaiting_payment' && (
           <Button
             size="small"
             variant="contained"
@@ -323,6 +386,56 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
           </>
         )}
       </CardActions>
+
+      {/* Payment Confirmation Modal */}
+      <Dialog
+        open={paymentModalOpen}
+        onClose={handlePaymentModalClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Confirmar Pago</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Stack spacing={2}>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Cliente: {appointment.customer_name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Tratamiento: {appointment.treatment_name}
+              </Typography>
+            </Box>
+
+            <RadioGroup
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <FormControlLabel value="efectivo" control={<Radio />} label="Efectivo" />
+              <FormControlLabel value="transferencia" control={<Radio />} label="Transferencia Bancaria" />
+            </RadioGroup>
+
+            <TextField
+              label="Monto ($)"
+              type="number"
+              inputProps={{ step: '0.01', min: '0' }}
+              value={paymentAmount}
+              onChange={(e) => setPaymentAmount(e.target.value)}
+              fullWidth
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handlePaymentModalClose}>Cancelar</Button>
+          <Button
+            onClick={handleConfirmPaymentClick}
+            variant="contained"
+            color="primary"
+            disabled={confirmingPayment}
+          >
+            {confirmingPayment ? <CircularProgress size={20} /> : 'Confirmar Pago'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }
@@ -350,6 +463,7 @@ export default function AppointmentsTab({ activeTab }) {
   const [error, setError] = useState(null);
   const [confirming, setConfirming] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [confirmingPayment, setConfirmingPayment] = useState(null);
 
   // Reschedule modal state
   const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
@@ -368,6 +482,8 @@ export default function AppointmentsTab({ activeTab }) {
 
   // Create appointment modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  // Payments/PAGOS tab state
 
   const tabStatuses = [STATUS_FILTERS.pending, STATUS_FILTERS.confirmed, STATUS_FILTERS.all];
   const currentStatus = tabStatuses[activeTab];
@@ -427,19 +543,26 @@ export default function AppointmentsTab({ activeTab }) {
       const response = await adminService.getAppointments(currentStatus);
       setAppointments(response.appointments || []);
     } catch (err) {
-      console.error('Error loading appointments:', err);
+      // Only log if it's not a session expiration error
+      if (!err.message?.includes('Session expired')) {
+        console.error('Error loading appointments:', err);
+      }
       setError('No se pudieron cargar las citas');
     } finally {
       setLoading(false);
     }
   };
 
+
   const loadTemplates = async () => {
     try {
       const response = await adminService.getMessageTemplates();
       setTemplates(response.templates || []);
     } catch (err) {
-      console.error('Error loading templates:', err);
+      // Only log if it's not a session expiration error
+      if (!err.message?.includes('Session expired')) {
+        console.error('Error loading templates:', err);
+      }
     }
   };
 
@@ -542,6 +665,22 @@ export default function AppointmentsTab({ activeTab }) {
     }
   };
 
+  const handleConfirmPayment = async (appointmentId, paymentData) => {
+    setConfirmingPayment(appointmentId);
+    try {
+      await paymentService.confirmAppointmentPayment(appointmentId, paymentData);
+      setAppointments(prev => prev.filter(appt => appt.id !== appointmentId));
+      setSuccessMessage(`Pago confirmado (${paymentData.method})`);
+      setTimeout(() => setSuccessMessage(''), 5000);
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      setError('No se pudo confirmar el pago');
+    } finally {
+      setConfirmingPayment(null);
+    }
+  };
+
+
   const handleCompleteAppointment = async () => {
     if (!completionFeedback.trim()) {
       setError('Por favor agrega feedback sobre la sesión');
@@ -580,32 +719,37 @@ export default function AppointmentsTab({ activeTab }) {
         </Alert>
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button variant="contained" onClick={() => setCreateModalOpen(true)}>
-          + Nueva sesión
-        </Button>
+      {/* Appointments View */}
+      <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Button variant="contained" onClick={() => setCreateModalOpen(true)}>
+            + Nueva sesión
+          </Button>
+        </Box>
+
+        <Stack spacing={2}>
+          {appointments.length === 0 && !loading && (
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
+              No hay citas en esta categoría
+            </Typography>
+          )}
+
+          {appointments.map(appointment => (
+            <AppointmentCard
+              key={appointment.id}
+              appointment={appointment}
+              onConfirm={handleConfirmAppointment}
+              confirming={confirming}
+              templates={templates}
+              onReschedule={handleRescheduleClick}
+              onComplete={handleCompleteClick}
+              onNoShow={handleNoShowClick}
+              onConfirmPayment={handleConfirmPayment}
+            />
+          ))}
+        </Stack>
       </Box>
 
-      <Stack spacing={2}>
-        {appointments.length === 0 && !loading && (
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
-            No hay citas en esta categoría
-          </Typography>
-        )}
-
-        {appointments.map(appointment => (
-          <AppointmentCard
-            key={appointment.id}
-            appointment={appointment}
-            onConfirm={handleConfirmAppointment}
-            confirming={confirming}
-            templates={templates}
-            onReschedule={handleRescheduleClick}
-            onComplete={handleCompleteClick}
-            onNoShow={handleNoShowClick}
-          />
-        ))}
-      </Stack>
 
       {/* Reschedule Modal */}
       <Dialog
@@ -783,6 +927,7 @@ export default function AppointmentsTab({ activeTab }) {
         onCreated={loadAppointments}
         prefilledCustomer={null}
       />
+
     </>
   );
 }

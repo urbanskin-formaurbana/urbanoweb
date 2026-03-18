@@ -98,10 +98,8 @@ export default function LandingLayout() {
   };
 
   const handleExistingAppointmentClick = () => {
-    if (appointment) {
-      navigate("/existing-appointment", { state: { appointment } });
-      handleLinkClick();
-    }
+    navigate("/my-appointments");
+    handleLinkClick();
   };
 
   const handleLogout = () => {
@@ -230,7 +228,7 @@ export default function LandingLayout() {
               );
             })}
 
-            {isAuthenticated && appointment && (
+            {isAuthenticated && (
               <>
                 <Divider sx={{ my: 1 }} />
                 <ListItem sx={{ pt: 2, pb: 0 }}>
@@ -238,7 +236,7 @@ export default function LandingLayout() {
                     variant="caption"
                     sx={{ fontWeight: 700, color: "#2e7d32", textTransform: "uppercase" }}
                   >
-                    Sesiones existentes
+                    {appointment ? "Sesiones existentes" : "Mis Sesiones"}
                   </Typography>
                 </ListItem>
                 <ListItem disablePadding>
@@ -251,7 +249,7 @@ export default function LandingLayout() {
                   >
                     <EventIcon sx={{ mr: 1, fontSize: 20 }} />
                     <Typography variant="body2">
-                      {appointment.status === "pending" ? "Cita pendiente" : "Cita confirmada"}
+                      {appointment ? (appointment.status === "pending" ? "Cita pendiente" : "Cita confirmada") : "Ver mis sesiones"}
                     </Typography>
                   </ListItemButton>
                 </ListItem>

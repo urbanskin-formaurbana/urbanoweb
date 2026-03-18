@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBusiness } from '../../contexts/BusinessContext';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
@@ -22,6 +23,7 @@ export default function AppointmentConfirmedPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { whatsappPhone, businessEmail } = useBusiness();
   const [showWhatsAppMessage, setShowWhatsAppMessage] = useState(false);
 
   const appointment = location.state?.appointment;
@@ -249,10 +251,10 @@ export default function AppointmentConfirmedPage() {
 
             <Stack spacing={1}>
               <Typography variant="body2" color="text.secondary">
-                📧 correo@formaurbana.com
+                📧 {businessEmail}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                💬 WhatsApp: +598 9 1234 5678
+                💬 WhatsApp: {whatsappPhone ? `+${whatsappPhone.slice(0, 3)} ${whatsappPhone.slice(3, 4)} ${whatsappPhone.slice(4, 7)} ${whatsappPhone.slice(7)}` : '+598 98 123 456'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 📍 Montevideo Centro

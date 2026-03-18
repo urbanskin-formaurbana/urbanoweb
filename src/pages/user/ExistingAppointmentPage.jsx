@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import {
   Container,
   Box,
@@ -17,9 +17,11 @@ import {
   CircularProgress,
   Paper,
   Grid,
+  Snackbar,
 } from "@mui/material";
 import {useNavigate, useLocation} from "react-router-dom";
 import {useAuth} from "../../contexts/AuthContext";
+import { useBusiness } from "../../contexts/BusinessContext";
 import {LocalizationProvider, DatePicker} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
@@ -28,12 +30,16 @@ import timezone from "dayjs/plugin/timezone";
 import "dayjs/locale/es";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
+import WarningIcon from "@mui/icons-material/Warning";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import HomeIcon from "@mui/icons-material/Home";
 import EditIcon from "@mui/icons-material/Edit";
 import appointmentService from "../../services/appointment_service";
+import paymentService from "../../services/payment_service";
+import {isCampaignTreatment} from "../../utils/slotUtils";
+import bankService from "../../services/bank_service";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -62,6 +68,7 @@ export default function ExistingAppointmentPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const {user, logout} = useAuth();
+  const { whatsappPhone } = useBusiness();
 
   const appointment = location.state?.appointment;
 
@@ -75,6 +82,39 @@ export default function ExistingAppointmentPage() {
   const [rescheduleError, setRescheduleError] = useState("");
   const [appointmentData, setAppointmentData] = useState(appointment);
 
+  // Comprobante upload state
+  const [uploadingComprobante, setUploadingComprobante] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const fileInputRef = useRef(null);
+
+  // Bank details state
+  const [bankDetails, setBankDetails] = useState({
+    bank_name: "",
+    account_number: "",
+    account_type: "",
+    notes: "",
+  });
+
+  // Load bank details on mount
+  useEffect(() => {
+    const fetchBankDetails = async () => {
+      try {
+        const data = await bankService.getBankDetails();
+        setBankDetails({
+          bank_name: data.bank_name || "",
+          account_number: data.account_number || "",
+          account_type: data.account_type || "",
+          notes: data.notes || "",
+        });
+      } catch (error) {
+        console.error("Error loading bank details:", error);
+      }
+    };
+    fetchBankDetails();
+  }, []);
+
   // Redirect if no appointment data
   useEffect(() => {
     if (!appointment) {
@@ -87,15 +127,31 @@ export default function ExistingAppointmentPage() {
   }
 
   const isPending = appointmentData.status === "pending";
-  const headerBgColor = isPending ? "info.light" : "success.light";
-  const headerTextColor = isPending
-    ? "info.contrastText"
-    : "success.contrastText";
-  const headerIcon = isPending ? (
+  const isAwaitingPayment =
+    appointmentData.payment_status === "awaiting_payment";
+  const headerBgColor = isAwaitingPayment
+    ? "warning.light"
+    : isPending
+      ? "info.light"
+      : "success.light";
+  const headerTextColor = isAwaitingPayment
+    ? "warning.contrastText"
+    : isPending
+      ? "info.contrastText"
+      : "success.contrastText";
+  const headerIcon = isAwaitingPayment ? (
     <HourglassTopIcon
       sx={{
         fontSize: 80,
-        color: isPending ? "info.main" : "success.main",
+        color: "warning.main",
+        mb: 2,
+      }}
+    />
+  ) : isPending ? (
+    <HourglassTopIcon
+      sx={{
+        fontSize: 80,
+        color: "info.main",
         mb: 2,
       }}
     />
@@ -127,7 +183,7 @@ export default function ExistingAppointmentPage() {
 
   const handleWhatsAppContact = () => {
     const message = `Hola FORMA Urbana, tengo una consulta sobre mi cita #${appointment.id}`;
-    const whatsappLink = `https://wa.me/598912345678?text=${encodeURIComponent(message)}`;
+    const whatsappLink = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappLink, "_blank");
   };
 
@@ -138,6 +194,36 @@ export default function ExistingAppointmentPage() {
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  // Comprobante upload handler
+  const handleComprobanteUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingComprobante(true);
+    try {
+      await paymentService.uploadTransferComprobante(appointmentData.id, file);
+      setSnackbarMessage("Comprobante enviado exitosamente");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      // Reload appointment to show updated state
+      const updated = await appointmentService.getAppointmentById(
+        appointmentData.id,
+      );
+      setAppointmentData(updated);
+      // Clear the input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Error uploading comprobante:", error);
+      setSnackbarMessage(error.message || "Error al enviar el comprobante");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setUploadingComprobante(false);
+    }
   };
 
   // Reschedule handlers
@@ -176,7 +262,7 @@ export default function ExistingAppointmentPage() {
         );
         // Convert ISO strings to dayjs objects with America/Montevideo timezone and apply customer filter
         let slots = slotStrings.map((slotStr) =>
-          dayjs.utc(slotStr).tz("America/Montevideo")
+          dayjs.utc(slotStr).tz("America/Montevideo"),
         );
         slots = filterSlotsForCustomer(slots);
         setRescheduleSlots(slots);
@@ -243,12 +329,28 @@ export default function ExistingAppointmentPage() {
         <Box sx={{textAlign: "center"}}>{headerIcon}</Box>
 
         {/* Status Badge */}
-        <Box sx={{display: "flex", justifyContent: "center", mb: 4}}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 2,
+            mb: 4,
+            flexWrap: "wrap",
+          }}
+        >
           <Chip
             label={isPending ? "Pendiente de confirmación" : "Cita confirmada"}
             color={isPending ? "info" : "success"}
             variant="filled"
           />
+          {isAwaitingPayment && (
+            <Chip
+              label="Pago pendiente"
+              color="warning"
+              variant="filled"
+              icon={<WarningIcon />}
+            />
+          )}
         </Box>
 
         {/* Appointment Details */}
@@ -304,13 +406,12 @@ export default function ExistingAppointmentPage() {
                 <Typography variant="caption" color="text.secondary">
                   Servicio
                 </Typography>
-                {appointmentData.treatment_slug?.includes("laser") ? (
+                {isCampaignTreatment(appointmentData) ? (
                   <Box sx={{mt: 0.5}}>
                     <Typography variant="body2" color="text.secondary">
-                      Depilación Láser
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {appointmentData.purchased_package_id ? "Paquete" : "Zona"}
+                      {appointmentData.purchased_package_id
+                        ? "Paquete"
+                        : "Zona"}
                     </Typography>
                     <Typography variant="body1" sx={{fontWeight: "bold"}}>
                       {appointmentData.treatment_name || "Servicio de estética"}
@@ -320,7 +421,8 @@ export default function ExistingAppointmentPage() {
                   <Typography variant="body1" sx={{fontWeight: "bold"}}>
                     {appointmentData.is_evaluation
                       ? `Sesión de evaluación — ${appointmentData.treatment_name || "Servicio de estética"}`
-                      : (appointmentData.treatment_name || "Servicio de estética")}
+                      : appointmentData.treatment_name ||
+                        "Servicio de estética"}
                   </Typography>
                 )}
               </Box>
@@ -344,7 +446,7 @@ export default function ExistingAppointmentPage() {
                     wordBreak: "break-all",
                   }}
                 >
-                  {appointmentData.id}
+                  {appointmentData._id}
                 </Typography>
               </Box>
 
@@ -373,6 +475,146 @@ export default function ExistingAppointmentPage() {
             </Stack>
           </CardContent>
         </Card>
+
+        {/* Awaiting Payment Info */}
+        {isAwaitingPayment && (
+          <Card sx={{mb: 4, bgcolor: "warning.light"}}>
+            <CardContent>
+              <Typography variant="h6" sx={{fontWeight: "bold", mb: 2}}>
+                Próximos pasos
+              </Typography>
+
+              {appointmentData.payment_method_expected === "efectivo" && (
+                <>
+                  <Typography variant="body2" sx={{mb: 2}}>
+                    Tu cita está reservada. Pagarás{" "}
+                    <strong>
+                      $
+                      {appointmentData.treatment_name
+                        ? "según tarifa"
+                        : "el monto acordado"}
+                    </strong>{" "}
+                    en efectivo al momento de tu sesión.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<WhatsAppIcon />}
+                    onClick={() => {
+                      const message = `Hola! Quiero confirmar mi turno de ${appointmentData.treatment_name} para ${formatDate(appointmentData.scheduled_at)} a las ${formatTime(appointmentData.scheduled_at)}. Pagaré en efectivo. Ref: #${appointmentData.id}`;
+                      window.open(
+                        `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`,
+                        "_blank",
+                      );
+                    }}
+                    fullWidth
+                    sx={{mb: 1}}
+                  >
+                    Confirmar por WhatsApp
+                  </Button>
+                </>
+              )}
+
+              {appointmentData.payment_method_expected === "transferencia" && (
+                <>
+                  <Typography variant="body2" sx={{mb: 2}}>
+                    Tu cita está reservada. Realiza una transferencia bancaria
+                    por el monto acordado y sube el comprobante aquí.
+                  </Typography>
+                  {bankDetails.bank_name && bankDetails.account_number ? (
+                    <Box
+                      sx={{p: 2, bgcolor: "grey.50", borderRadius: 1, mb: 2}}
+                    >
+                      <Typography variant="caption" sx={{display: "block"}}>
+                        <strong>Datos bancarios:</strong>
+                        <br />
+                        {bankDetails.bank_name && (
+                          <>
+                            Banco: {bankDetails.bank_name}
+                            <br />
+                          </>
+                        )}
+                        {bankDetails.account_type && (
+                          <>
+                            Tipo: {bankDetails.account_type}
+                            <br />
+                          </>
+                        )}
+                        {bankDetails.account_number && (
+                          <>
+                            Cuenta: {bankDetails.account_number}
+                            <br />
+                          </>
+                        )}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Alert severity="warning" sx={{mb: 2}}>
+                      Los datos bancarios no están configurados. Por favor,
+                      contáctanos por WhatsApp.
+                    </Alert>
+                  )}
+                  <Button
+                    variant="contained"
+                    color="success"
+                    fullWidth
+                    sx={{mb: 1}}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingComprobante}
+                  >
+                    {uploadingComprobante ? "Enviando..." : "Subir Comprobante"}
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={handleComprobanteUpload}
+                    style={{display: "none"}}
+                  />
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Cuponera next-session prompt */}
+        {appointmentData.purchased_package_id &&
+          appointmentData.remaining_sessions > 0 && (
+            <Card sx={{mb: 4, bgcolor: "success.light"}}>
+              <CardContent>
+                <Typography variant="h6" sx={{fontWeight: "bold", mb: 2}}>
+                  ✓ Tenés {appointmentData.remaining_sessions} sesion
+                  {appointmentData.remaining_sessions === 1 ? "" : "es"}{" "}
+                  restante{appointmentData.remaining_sessions === 1 ? "" : "s"}{" "}
+                  en tu cuponera
+                </Typography>
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() =>
+                      navigate("/schedule", {
+                        state: {
+                          purchasedPackageId:
+                            appointmentData.purchased_package_id,
+                          treatment: {slug: appointmentData.treatment_slug},
+                        },
+                      })
+                    }
+                  >
+                    Agendar otra sesión
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="success"
+                    onClick={() => navigate("/")}
+                  >
+                    Ir al inicio
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
 
         {/* Status-Specific Info */}
         {isPending ? (
@@ -564,6 +806,14 @@ export default function ExistingAppointmentPage() {
             </DialogActions>
           </Dialog>
         </LocalizationProvider>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={() => setSnackbarOpen(false)}
+          message={snackbarMessage}
+          anchorOrigin={{vertical: "bottom", horizontal: "center"}}
+        />
       </Container>
     </>
   );

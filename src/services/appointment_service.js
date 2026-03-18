@@ -95,6 +95,37 @@ export const appointmentService = {
   },
 
   /**
+   * Get all customer appointments (full history)
+   * @returns {Promise<object[]>} - All appointments sorted by scheduled_at descending
+   */
+  async getAllCustomerAppointments() {
+    try {
+      const response = await apiCall('/appointments/', {
+        method: 'GET',
+        suppressErrorLog: true,
+      });
+
+      if (!response || !response.appointments) {
+        return [];
+      }
+
+      // Sort by scheduled_at descending (newest first)
+      const sorted = response.appointments.sort(
+        (a, b) => new Date(b.scheduled_at) - new Date(a.scheduled_at)
+      );
+
+      return sorted;
+    } catch (err) {
+      if (err.message && (err.message.includes('Unauthorized') || err.message.includes('Session expired'))) {
+        return [];
+      }
+
+      console.error('Error fetching all appointments:', err);
+      throw err;
+    }
+  },
+
+  /**
    * Get single appointment details
    * @param {string} appointmentId - Appointment ID
    * @returns {Promise<object>} - Appointment details

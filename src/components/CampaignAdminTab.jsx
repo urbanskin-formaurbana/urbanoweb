@@ -33,13 +33,21 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/locale/es';
-import laserCampaignService from '../../../services/laser_campaign_service';
+import { createCampaignService } from '../services/campaign_service';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.locale('es');
 
-export default function LaserCampaignTab() {
+/**
+ * Generic Campaign Admin Tab
+ * Props:
+ *   - productType: string (e.g., 'laser', 'hifu')
+ *   - productLabel: string (e.g., 'Depilación Láser', 'HIFU Corporal')
+ */
+export default function CampaignAdminTab({ productType, productLabel }) {
+  const campaignService = createCampaignService(productType);
+
   // Campaign management state
   const [campaign, setCampaign] = useState(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -77,7 +85,7 @@ export default function LaserCampaignTab() {
   // Load campaign and slots on mount
   useEffect(() => {
     loadCampaignAndSlots();
-  }, []);
+  }, [productType]);
 
   async function loadCampaignAndSlots() {
     try {
@@ -87,25 +95,25 @@ export default function LaserCampaignTab() {
       // Load active campaign
       let activeCampaign = null;
       try {
-        activeCampaign = await laserCampaignService.getActiveCampaignAdmin();
-        setCampaign(activeCampaign);
-        setSlots(activeCampaign.slots || []);
-      } catch (err) {
-        if (err.response?.status === 404 || err.message === 'No active campaign') {
+        activeCampaign = await campaignService.getActiveCampaignAdmin();
+        if (activeCampaign) {
+          setCampaign(activeCampaign);
+          setSlots(activeCampaign.slots || []);
+        } else {
           setCampaign(null);
           setSlots([]);
-        } else {
-          throw err;
         }
+      } catch (err) {
+        throw err;
       }
 
       // Load waitlists (independent of campaign status)
       try {
         // Load both open waitlist and this campaign's waitlist in parallel
         const [openWL, campaignWL] = await Promise.all([
-          laserCampaignService.getWaitlist(),  // open (null campaign_id)
+          campaignService.getWaitlist(),  // open (null campaign_id)
           activeCampaign
-            ? laserCampaignService.getWaitlist(activeCampaign._id)
+            ? campaignService.getWaitlist(activeCampaign._id)
             : Promise.resolve([]),
         ]);
         setWaitlist(openWL);
@@ -137,7 +145,7 @@ export default function LaserCampaignTab() {
       }
 
       setLoading(true);
-      await laserCampaignService.createCampaign(
+      await campaignService.createCampaign(
         createFormData.name,
         startDate,
         endDate
@@ -169,7 +177,7 @@ export default function LaserCampaignTab() {
       }
 
       setLoading(true);
-      await laserCampaignService.addBulkSlots(
+      await campaignService.addBulkSlots(
         campaign._id,
         selectedDays,
         bulkFormData.startTime,
@@ -193,7 +201,7 @@ export default function LaserCampaignTab() {
 
     try {
       setLoading(true);
-      await laserCampaignService.deleteSlot(campaign._id, slotId);
+      await campaignService.deleteSlot(campaign._id, slotId);
       setSuccess('Turno eliminado');
       await loadCampaignAndSlots();
     } catch (err) {
@@ -232,7 +240,7 @@ export default function LaserCampaignTab() {
       }
 
       setLoading(true);
-      await laserCampaignService.updateCampaign(campaign._id, {
+      await campaignService.updateCampaign(campaign._id, {
         name: editFormData.name,
         starts_on: startDate,
         ends_on: endDate,
@@ -305,7 +313,7 @@ export default function LaserCampaignTab() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Campaña Activa
+            Campaña Activa — {productLabel}
           </Typography>
 
           {campaign ? (

@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import {useNavigate, useLocation} from "react-router-dom";
 import {useAuth} from "../../contexts/AuthContext";
+import { useBusiness } from "../../contexts/BusinessContext";
 import LoginModal from "../../components/LoginModal";
 import PhoneCountryInput from "../../components/PhoneCountryInput";
 import authService from "../../services/auth_service";
@@ -27,11 +28,15 @@ import MercadoPagoBrick from "../../components/MercadoPagoBrick";
 import {extractCountryAndPhone} from "../../utils/countries";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import bankService from "../../services/bank_service";
+import transferReceiptStore from "../../utils/transferReceiptStore";
 
 export default function PaymentPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const {user, loading} = useAuth();
+  const { whatsappPhone } = useBusiness();
   const MP_FEE_RATE = 0.0729; // MercadoPago effective fee ~7.29% for Uruguay (for display only)
   const [paymentStatus, setPaymentStatus] = useState("idle"); // idle | processing | approved | rejected | error
   const [error, setError] = useState("");
@@ -61,7 +66,34 @@ export default function PaymentPage() {
   );
   const selectedPackageId = location.state?.selectedPackageId || null;
   const isEvaluation = location.state?.isEvaluation ?? false;
-  const laserItemType = location.state?.laserItemType || null;
+  const campaignItemType = location.state?.campaignItemType || location.state?.campaignItemType || null;
+  const productType = location.state?.productType || null;
+  const [paymentMethod, setPaymentMethod] = useState("tarjeta"); // tarjeta | efectivo | transferencia | deposito
+  const [bankDetails, setBankDetails] = useState({
+    bank_name: "",
+    account_number: "",
+    account_type: "",
+    notes: "",
+  });
+  const [transferFile, setTransferFile] = useState(null);
+
+  // Load bank details on mount
+  useEffect(() => {
+    const fetchBankDetails = async () => {
+      try {
+        const data = await bankService.getBankDetails();
+        setBankDetails({
+          bank_name: data.bank_name || "",
+          account_number: data.account_number || "",
+          account_type: data.account_type || "",
+          notes: data.notes || "",
+        });
+      } catch (error) {
+        console.error("Error loading bank details:", error);
+      }
+    };
+    fetchBankDetails();
+  }, []);
 
   // Load treatment description and price from DB
   useEffect(() => {
@@ -119,7 +151,7 @@ export default function PaymentPage() {
   useEffect(() => {
     if (paymentStatus === "approved") {
       const timer = setTimeout(() => {
-        navigate("/schedule", {state: {treatment, laserItemType}});
+        navigate("/schedule", {state: {treatment, campaignItemType, paymentMethod: "tarjeta", productType}});
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -149,8 +181,8 @@ export default function PaymentPage() {
         .getCustomerAppointments()
         .then((appointment) => {
           if (appointment) {
-            // User has an existing appointment, redirect to view it
-            navigate("/existing-appointment", {state: {appointment}});
+            // User has an existing appointment, redirect to appointments overview
+            navigate("/my-appointments");
           } else {
             // No existing appointment, check for completed payment without appointment
             return paymentService.getUnscheduledPayment();
@@ -159,7 +191,7 @@ export default function PaymentPage() {
         .then((payment) => {
           if (payment) {
             paymentService.savePaymentId(payment._id);
-            navigate("/schedule", {state: {treatment, isEvaluation, laserItemType}});
+            navigate("/schedule", {state: {treatment, isEvaluation, campaignItemType}});
           }
         })
         .catch(() => {}); // Fail silently
@@ -318,6 +350,66 @@ export default function PaymentPage() {
     setPaymentStatus("payment_ready");
   };
 
+  const handleContinueWithoutPayment = async (method) => {
+    // For efectivo and transferencia flows, create a payment intent and navigate to scheduling
+    // (This should never be called for tarjeta or deposito, which have their own flows)
+    if (method !== 'efectivo' && method !== 'transferencia') {
+      setError(`Payment method ${method} is not supported in this flow`);
+      return;
+    }
+
+    if (!isProfileComplete()) {
+      setError("Por favor completa todos los campos de perfil");
+      return;
+    }
+
+    if (!treatment.slug || !treatment.name) {
+      setError("Treatment information is missing");
+      return;
+    }
+
+    setProfileLoading(true);
+    try {
+      // Use slug as treatmentId, fall back to name if slug missing
+      const treatmentId = treatment.slug || treatment.name || 'unknown';
+      const treatmentName = treatment.name || 'Tratamiento';
+
+      // Create payment intent
+      const intent = await paymentService.createPaymentIntent({
+        treatmentId: treatmentId,
+        treatmentName: treatmentName,
+        amount: basePrice,
+        paymentMethod: method
+      });
+
+      // Upload comprobante for transferencia if file is selected
+      if (method === 'transferencia' && transferFile) {
+        try {
+          await paymentService.uploadComprobanteToIntent(intent.payment_id, transferFile);
+          transferReceiptStore.file = null; // No longer needed - already uploaded
+        } catch (uploadErr) {
+          console.warn('Comprobante upload to intent failed:', uploadErr);
+          // Continue anyway - user can upload from ExistingAppointmentPage
+        }
+      }
+
+      setProfileLocked(true);
+      navigate("/schedule", {
+        state: {
+          treatment,
+          campaignItemType,
+          productType,
+          paymentMethod: method,
+          intentPaymentId: intent.payment_id  // Link the intent for later
+        }
+      });
+    } catch (err) {
+      setError(err.message || 'Error creating payment intent');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
   const isProfileComplete = () => {
     return (
       profileData.firstName.trim() &&
@@ -396,11 +488,11 @@ export default function PaymentPage() {
             </Typography>
             <Stack spacing={1} sx={{mt: 1}}>
               <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "flex-start"}}>
-                {laserItemType ? (
+                {campaignItemType ? (
                   <Box>
                     <Typography variant="body2" color="text.secondary">Depilación Láser</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {laserItemType === "zona" ? "Zona" : "Paquete"}
+                      {campaignItemType === "zona" ? "Zona" : "Paquete"}
                     </Typography>
                     <Typography variant="body1">{treatment.name}</Typography>
                   </Box>
@@ -726,7 +818,7 @@ export default function PaymentPage() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate("/schedule", {state: {treatment, laserItemType}})}
+                onClick={() => navigate("/schedule", {state: {treatment, campaignItemType}})}
               >
                 Continuar para agendar cita
               </Button>
@@ -734,8 +826,104 @@ export default function PaymentPage() {
           </Card>
         )}
 
-        {/* Card Payment Section */}
+        {/* Payment Method Selector */}
         {paymentStatus !== "approved" && paymentStatus !== "pending" && (
+          <Card sx={{mb: 3}}>
+            <CardContent>
+              <Typography variant="h6" sx={{mb: 2, fontWeight: "bold"}}>
+                Método de Pago
+              </Typography>
+              <Stack spacing={2}>
+                <Box
+                  onClick={() => setPaymentMethod("tarjeta")}
+                  sx={{
+                    p: 2,
+                    border: "2px solid",
+                    borderColor: paymentMethod === "tarjeta" ? "success.main" : "divider",
+                    borderRadius: 1,
+                    cursor: "pointer",
+                    bgcolor: paymentMethod === "tarjeta" ? "success.light" : "transparent",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <Typography variant="body1" sx={{fontWeight: paymentMethod === "tarjeta" ? "bold" : "normal"}}>
+                    💳 Tarjeta / Saldo en MercadoPago
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    ${totalPrice} (incluye costo de procesamiento)
+                  </Typography>
+                </Box>
+
+                <Box
+                  onClick={() => setPaymentMethod("transferencia")}
+                  sx={{
+                    p: 2,
+                    border: "2px solid",
+                    borderColor: paymentMethod === "transferencia" ? "success.main" : "divider",
+                    borderRadius: 1,
+                    cursor: "pointer",
+                    bgcolor: paymentMethod === "transferencia" ? "success.light" : "transparent",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <Typography variant="body1" sx={{fontWeight: paymentMethod === "transferencia" ? "bold" : "normal"}}>
+                    🏦 Transferencia Bancaria
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    ${basePrice} (sin costo de procesamiento)
+                  </Typography>
+                </Box>
+
+                {user?.can_purchase_packages && (
+                  <Box
+                    onClick={() => setPaymentMethod("efectivo")}
+                    sx={{
+                      p: 2,
+                      border: "2px solid",
+                      borderColor: paymentMethod === "efectivo" ? "success.main" : "divider",
+                      borderRadius: 1,
+                      cursor: "pointer",
+                      bgcolor: paymentMethod === "efectivo" ? "success.light" : "transparent",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <Typography variant="body1" sx={{fontWeight: paymentMethod === "efectivo" ? "bold" : "normal"}}>
+                      💵 Efectivo
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      ${basePrice} (pagar al momento de la sesión)
+                    </Typography>
+                  </Box>
+                )}
+
+                {!user?.can_purchase_packages && (campaignItemType || productType) && (
+                  <Box
+                    onClick={() => setPaymentMethod("deposito")}
+                    sx={{
+                      p: 2,
+                      border: "2px solid",
+                      borderColor: paymentMethod === "deposito" ? "success.main" : "divider",
+                      borderRadius: 1,
+                      cursor: "pointer",
+                      bgcolor: paymentMethod === "deposito" ? "success.light" : "transparent",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <Typography variant="body1" sx={{fontWeight: paymentMethod === "deposito" ? "bold" : "normal"}}>
+                      💎 Reserva con $500
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      $500 ahora + ${basePrice - 500} en efectivo/transferencia
+                    </Typography>
+                  </Box>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Card Payment Section */}
+        {paymentStatus !== "approved" && paymentStatus !== "pending" && paymentMethod === "tarjeta" && (
           <Card
             sx={{
               ...(paymentStatus === "payment_ready" && {
@@ -798,6 +986,170 @@ export default function PaymentPage() {
                     {profileLoading ? "Preparando..." : "Pagar ahora"}
                   </Button>
                 </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Efectivo Payment Section */}
+        {paymentStatus !== "approved" && paymentStatus !== "pending" && paymentMethod === "efectivo" && (
+          <Card sx={{mb: 3}}>
+            <CardContent>
+              <Typography variant="h6" sx={{mb: 2, fontWeight: "bold"}}>
+                Pago en Efectivo
+              </Typography>
+              <Alert severity="info" sx={{mb: 2}}>
+                Pagarás ${basePrice} al momento de tu sesión. El turno será reservado una vez que confirmes tu cita.
+              </Alert>
+              <Button
+                variant="contained"
+                color="success"
+                size="large"
+                onClick={() => handleContinueWithoutPayment("efectivo")}
+                disabled={!isProfileComplete() || profileLoading}
+                fullWidth
+                sx={{mb: 1}}
+              >
+                {profileLoading ? "Preparando..." : "Continuar sin pagar ahora"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Transferencia Payment Section */}
+        {paymentStatus !== "approved" && paymentStatus !== "pending" && paymentMethod === "transferencia" && (
+          <Card sx={{mb: 3}}>
+            <CardContent>
+              <Typography variant="h6" sx={{mb: 2, fontWeight: "bold"}}>
+                Transferencia Bancaria
+              </Typography>
+              <Alert severity="info" sx={{mb: 2}}>
+                Monto a transferir: <strong>${basePrice}</strong>
+              </Alert>
+              {bankDetails.bank_name && bankDetails.account_number ? (
+                <Box sx={{p: 2, bgcolor: "grey.50", borderRadius: 1, mb: 2}}>
+                  <Typography variant="body2" sx={{mb: 1}}>
+                    <strong>Datos para la transferencia:</strong>
+                  </Typography>
+                  <Typography variant="caption" sx={{display: "block", mb: 0.5}}>
+                    {bankDetails.bank_name && <>Banco: {bankDetails.bank_name}<br/></>}
+                    {bankDetails.account_type && <>Tipo: {bankDetails.account_type}<br/></>}
+                    {bankDetails.account_number && <>Cuenta: {bankDetails.account_number}<br/></>}
+                    {bankDetails.notes && <>{bankDetails.notes}</>}
+                  </Typography>
+                </Box>
+              ) : (
+                <Box sx={{mb: 2}}>
+                  <Typography variant="body2" sx={{mb: 1}}>
+                    Por favor, contáctanos por WhatsApp para los detalles de la cuenta
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<WhatsAppIcon />}
+                    onClick={() => window.open(`https://wa.me/${whatsappPhone}?text=Hola%2C%20me%20gustaría%20saber%20los%20datos%20bancarios%20para%20realizar%20la%20transferencia`, "_blank")}
+                  >
+                    WhatsApp
+                  </Button>
+                </Box>
+              )}
+
+              {/* Comprobante Upload */}
+              <Box sx={{mb: 2}}>
+                <Typography variant="body2" sx={{mb: 1, fontWeight: 500}}>
+                  Adjunta el comprobante de transferencia
+                </Typography>
+                <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
+                  <input
+                    id="transfer-file-input"
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setTransferFile(file);
+                        transferReceiptStore.file = file;
+                      }
+                    }}
+                    style={{display: "none"}}
+                  />
+                  <label htmlFor="transfer-file-input" style={{flex: 1}}>
+                    <Button
+                      component="span"
+                      variant="outlined"
+                      fullWidth
+                      sx={{textAlign: "left"}}
+                    >
+                      {transferFile ? `✓ ${transferFile.name}` : "Seleccionar archivo (PNG, JPG, PDF)"}
+                    </Button>
+                  </label>
+                </Box>
+                <Typography variant="caption" color="textSecondary" sx={{display: "block", mt: 1}}>
+                  Máximo 15MB. Necesario para agendar la sesión.
+                </Typography>
+              </Box>
+
+              <Button
+                variant="contained"
+                color="success"
+                size="large"
+                onClick={() => handleContinueWithoutPayment("transferencia")}
+                disabled={!isProfileComplete() || profileLoading || !transferFile}
+                fullWidth
+              >
+                {profileLoading ? "Preparando..." : "Adjuntar comprobante y agendar"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Deposito Payment Section */}
+        {paymentStatus !== "approved" && paymentStatus !== "pending" && paymentMethod === "deposito" && (
+          <Card
+            sx={{
+              ...(paymentStatus === "payment_ready" && {
+                mx: {xs: -2, sm: 0},
+                borderRadius: {xs: 0, sm: 2},
+              }),
+            }}
+          >
+            <CardContent sx={{m: -2}}>
+              <Typography variant="h6" sx={{mb: 2, fontWeight: "bold", m: 2}}>
+                Reserva con Depósito de $500
+              </Typography>
+              <Alert severity="info" sx={{mb: 2, m: 2}}>
+                Paga $500 ahora para reservar tu sesión. Los ${basePrice - 500} restantes los pagas en efectivo o transferencia al momento de tu sesión.
+              </Alert>
+              {paymentStatus === "payment_ready" ? (
+                <>
+                  {error && (
+                    <Alert severity="error" sx={{mb: 3, m: 2}}>
+                      {error}
+                    </Alert>
+                  )}
+                  <MercadoPagoBrick
+                    key="deposit-brick"
+                    preferenceId={preferenceId}
+                    amount={500}
+                    treatmentId={treatment.slug}
+                    payerEmail={profileData.email}
+                    isEvaluation={false}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    onPaymentError={handlePaymentError}
+                  />
+                </>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="large"
+                  onClick={handleShowCardPayment}
+                  disabled={!isProfileComplete() || profileLoading}
+                  fullWidth
+                  sx={{m: 2, width: "calc(100% - 32px)"}}
+                >
+                  {profileLoading ? "Preparando..." : "Pagar Depósito de $500"}
+                </Button>
               )}
             </CardContent>
           </Card>

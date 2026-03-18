@@ -80,6 +80,184 @@ export const paymentService = {
       return null; // Fail silently — user can still pay normally
     }
   },
+
+  // ========== Transfer Comprobante Upload ==========
+
+  /**
+   * Upload bank transfer receipt (comprobante)
+   * @param {string} appointmentId - Appointment ID
+   * @param {File} file - Receipt file (image or PDF, max 5MB)
+   * @returns {Promise<object>} - { payment_id, status, message }
+   */
+  async uploadTransferComprobante(appointmentId, file) {
+    const formData = new FormData();
+    formData.append('appointment_id', appointmentId);
+    formData.append('file', file);
+
+    return apiCall('/payments/transfer/comprobante', {
+      method: 'POST',
+      body: formData,
+      // Don't set Content-Type; fetch will set it with boundary
+    });
+  },
+
+  // ========== Deposit Payment ==========
+
+  /**
+   * Create $500 deposit payment for campaign treatment
+   * @param {object} data - { token, payment_method_id, installments, payer_email, treatment_id, full_amount }
+   * @returns {Promise<object>} - { payment_id, amount, full_amount, remaining, checkout_url, status }
+   */
+  async createDepositPayment(data) {
+    return apiCall('/payments/deposit', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // ========== Admin: Payment Management ==========
+
+  /**
+   * Get pending transfer payments awaiting admin confirmation
+   * @returns {Promise<object>} - { transfers: [...], total }
+   */
+  async getPendingTransfers() {
+    return apiCall('/payments/?status=pending&method=transferencia', {
+      method: 'GET',
+    });
+  },
+
+  /**
+   * Confirm payment for appointment (efectivo or transferencia)
+   * @param {string} appointmentId - Appointment ID
+   * @param {object} data - { method: 'efectivo'|'transferencia', amount }
+   * @returns {Promise<object>} - { payment_id, appointment_id, method, amount, status }
+   */
+  async confirmAppointmentPayment(appointmentId, data) {
+    return apiCall(`/payments/admin/appointment/${appointmentId}/confirm-payment`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Confirm transfer payment after reviewing comprobante
+   * @param {string} paymentId - Payment ID
+   * @returns {Promise<object>} - { payment_id, status, message }
+   */
+  async confirmTransferPayment(paymentId) {
+    return apiCall(`/payments/admin/${paymentId}/confirm-transfer`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  },
+
+  /**
+   * Get deposits awaiting remainder payment
+   * @returns {Promise<object>} - { deposits: [...], total }
+   */
+  async getPendingDeposits() {
+    return apiCall('/payments/admin/deposits', {
+      method: 'GET',
+    });
+  },
+
+  /**
+   * Record remainder payment for deposit
+   * @param {string} appointmentId - Appointment ID
+   * @param {object} data - { method: 'efectivo'|'transferencia', amount }
+   * @returns {Promise<object>} - { payment_id, appointment_id, deposit_amount, remainder_amount, total_amount, method, status }
+   */
+  async addDepositRemainder(appointmentId, data) {
+    return apiCall(`/payments/admin/${appointmentId}/add-deposit-remainder`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Create a payment intent (before scheduling)
+   * @param {object} data - { treatmentId, treatmentName, amount, paymentMethod }
+   * @returns {Promise<object>} - { payment_id, amount, payment_method }
+   */
+  async createPaymentIntent(data) {
+    // Convert camelCase to snake_case for backend
+    const payload = {
+      treatment_id: data.treatmentId,
+      treatment_name: data.treatmentName,
+      amount: data.amount,
+      payment_method: data.paymentMethod,
+    };
+    return apiCall('/payments/intent', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /**
+   * Get pending payment intents (unscheduled)
+   * @returns {Promise<object>} - { intents: [...] }
+   */
+  async getPendingIntents() {
+    return apiCall('/payments/intents', {
+      method: 'GET',
+    });
+  },
+
+  /**
+   * Upload comprobante to a payment intent
+   * @param {string} paymentId - Payment intent ID
+   * @param {File} file - Receipt file
+   * @returns {Promise<object>} - { payment_id, status, message }
+   */
+  async uploadComprobanteToIntent(paymentId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Get auth token for Authorization header
+    const token = localStorage.getItem('access_token');
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/payments/transfer/comprobante?payment_id=${paymentId}`, {
+      method: 'POST',
+      headers,
+      body: formData,
+      // Don't set Content-Type; let browser set it with multipart/form-data boundary
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to upload comprobante to intent');
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Link a payment intent to an appointment (after scheduling)
+   * @param {string} paymentId - Payment intent ID
+   * @param {string} appointmentId - Appointment ID
+   * @returns {Promise<object>} - { status, payment_id, appointment_id }
+   */
+  async linkIntentToAppointment(paymentId, appointmentId) {
+    return apiCall(`/payments/${paymentId}/link-appointment`, {
+      method: 'PATCH',
+      body: JSON.stringify({ appointment_id: appointmentId }),
+    });
+  },
+
+  /**
+   * Get all transfer payments with receipts (admin only)
+   * @returns {Promise<object>} - { transfers: [...], total }
+   */
+  async getTransfersWithReceipt() {
+    return apiCall('/payments/admin/transfers', {
+      method: 'GET',
+    });
+  },
 };
 
 export default paymentService;

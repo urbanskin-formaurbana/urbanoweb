@@ -11,8 +11,7 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import FormaUrbanaLogo from "../assets/images/FormaUrbanaLogo.svg";
-
-const WHATSAPP_LINK = "https://wa.me/59893770785";
+import { useBusiness } from "../contexts/BusinessContext";
 
 const LANDING_LINKS = [
   {
@@ -36,6 +35,9 @@ const LANDING_LINKS = [
 ];
 
 export default function NotFound() {
+  const { whatsappPhone } = useBusiness();
+  const WHATSAPP_LINK = `https://wa.me/${whatsappPhone}`;
+
   return (
     <Container
       maxWidth="lg"

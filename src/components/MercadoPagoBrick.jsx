@@ -67,7 +67,6 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
         if (currentGeneration !== mountGenerationRef.current) return;
 
         if (window.mp && typeof window.mp.bricks === 'function') {
-          console.log('SDK ready, rendering Payment Brick');
           await initBrick();
           return;
         }
@@ -113,10 +112,9 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
           },
           callbacks: {
             onReady: () => {
-              console.log('Payment Brick ready');
+              // Brick is ready for input
             },
             onSubmit: async ({ selectedPaymentMethod, formData }) => {
-              console.log('Payment Brick submitted:', selectedPaymentMethod, formData);
               try {
                 const paymentData = {
                   token: formData.token,
@@ -131,7 +129,6 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
                   paymentData.package_id = packageId;
                 }
                 const result = await paymentService.processPayment(paymentData);
-                console.log('Payment processed:', result);
                 if (result.status === 'approved' || result.status === 'pending') {
                   onPaymentSuccessRef.current?.(result.payment_id);
                 } else {
@@ -164,7 +161,6 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
 
         if (currentGeneration === mountGenerationRef.current) {
           brickControllerRef.current = controller;
-          console.log('Payment Brick rendered successfully');
         } else {
           try { controller.unmount(); } catch (e) { /* ignore */ }
         }

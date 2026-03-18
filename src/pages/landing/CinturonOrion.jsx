@@ -1,6 +1,7 @@
 /* eslint-disable no-irregular-whitespace */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useBusiness } from "../../contexts/BusinessContext";
 import SEO from "../../components/SEO.jsx";
 import LipoLaserImg from "../../assets/images/Lipo-laser.jpg";
 import {
@@ -34,6 +35,7 @@ export default function CinturonOrion() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const { whatsappPhone } = useBusiness();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [treatment, setTreatment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -107,9 +109,7 @@ export default function CinturonOrion() {
 
       if (existingAppointment) {
         // Customer has pending or confirmed appointment
-        navigate("/existing-appointment", {
-          state: { appointment: existingAppointment }
-        });
+        navigate("/my-appointments");
       } else {
         // No existing appointment - check if customer already paid but hasn't scheduled yet
         const unscheduledPayment = await paymentService.getUnscheduledPayment();
@@ -140,9 +140,7 @@ export default function CinturonOrion() {
     try {
       const existingAppointment = await appointmentService.getCustomerAppointments();
       if (existingAppointment) {
-        navigate("/existing-appointment", {
-          state: { appointment: existingAppointment },
-        });
+        navigate("/my-appointments");
         return;
       }
 
@@ -191,7 +189,7 @@ export default function CinturonOrion() {
   };
 
   // WhatsApp contact link (for footer button)
-  const whatsappLink = `https://wa.me/598912345678?text=Hola%20FORMA%20Urbana%2C%20me%20gustaría%20saber%20más%20sobre%20el%20Cinturón%20de%20Orión`;
+  const whatsappLink = `https://wa.me/${whatsappPhone}?text=Hola%20FORMA%20Urbana%2C%20me%20gustaría%20saber%20más%20sobre%20el%20Cinturón%20de%20Orión`;
   return (
     <>
       <SEO

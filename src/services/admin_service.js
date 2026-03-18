@@ -150,6 +150,18 @@ const adminService = {
       body: JSON.stringify(data),
     });
   },
+
+  // Category configs
+  async getCategoryConfigs() {
+    return apiCall('/category-configs', { method: 'GET' });
+  },
+
+  async upsertCategoryConfig(category, label, description, isGenderSplit = false) {
+    return apiCall(`/category-configs/${category}`, {
+      method: 'PUT',
+      body: JSON.stringify({ label, description, is_gender_split: isGenderSplit }),
+    });
+  },
 };
 
 export default adminService;

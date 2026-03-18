@@ -17,5 +17,9 @@ export default function ProtectedUserRoute({ children }) {
     return <Navigate to="/" replace />;
   }
 
+  if (user?.user_type === 'employee') {
+    return <Navigate to="/admin" replace />;
+  }
+
   return children;
 }

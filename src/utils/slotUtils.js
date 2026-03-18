@@ -7,17 +7,26 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import appointmentService from '../services/appointment_service.js';
-import laserCampaignService from '../services/laser_campaign_service.js';
+import createCampaignService from '../services/campaign_service.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 /**
- * Check if treatment is laser-based
+ * Check if treatment is a campaign product (data-driven)
+ * Campaign treatments have item_type field (zona, paquete, etc.)
+ */
+export function isCampaignTreatment(treatment) {
+  if (!treatment) return false;
+  return treatment.item_type != null;
+}
+
+/**
+ * Alias for backward compatibility
+ * @deprecated Use isCampaignTreatment instead
  */
 export function isLaserTreatment(treatment) {
-  if (!treatment) return false;
-  return treatment.gender != null || treatment.category === 'laser';
+  return isCampaignTreatment(treatment);
 }
 
 /**
@@ -62,16 +71,18 @@ export function getSlotDuration(treatment, paymentMode) {
 
 /**
  * Fetch available slots for a given date and treatment
- * Handles both laser and regular treatments
+ * Handles both campaign (laser, hifu) and regular treatments
  * Returns: raw ISO datetime strings
  */
 export async function fetchAvailableSlots(date, treatment, paymentMode) {
   if (!treatment) return [];
 
   try {
-    if (isLaserTreatment(treatment)) {
+    if (isCampaignTreatment(treatment)) {
       const duration = getSlotDuration(treatment, paymentMode);
-      return laserCampaignService.getAvailableSlots(duration);
+      const productType = treatment.category; // e.g., 'laser', 'hifu'
+      const campaignService = createCampaignService(productType);
+      return await campaignService.getAvailableSlots(duration);
     } else {
       const duration = getSlotDuration(treatment, paymentMode);
       return appointmentService.getAvailableSlots(date, duration);

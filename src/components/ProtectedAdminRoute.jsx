@@ -29,9 +29,12 @@ export default function ProtectedAdminRoute({ children }) {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
-        });
+        }).catch(() => null); // Suppress network errors
 
-        if (response.status === 401) {
+        if (!response) {
+          // Network error, allow to proceed and let API handle it
+          setSessionValid(true);
+        } else if (response.status === 401) {
           // Token expired, clear auth state
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
@@ -43,7 +46,7 @@ export default function ProtectedAdminRoute({ children }) {
           setSessionValid(true);
         }
       } catch (error) {
-        // Network error, allow to proceed and let API handle it
+        // Unexpected error, allow to proceed and let API handle it
         setSessionValid(true);
       } finally {
         setSessionVerified(true);
