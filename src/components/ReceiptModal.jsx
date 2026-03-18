@@ -15,10 +15,11 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 // Set up PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
-export default function ReceiptModal({ open, receiptUrl, isPdf, onClose }) {
+export default function ReceiptModal({ open, receiptUrl, isPdf, onClose, canConfirm = false, onConfirm }) {
   const [pdfPages, setPdfPages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [confirmStep, setConfirmStep] = useState(false);
 
   useEffect(() => {
     if (!open || !receiptUrl || !isPdf) {
@@ -64,7 +65,20 @@ export default function ReceiptModal({ open, receiptUrl, isPdf, onClose }) {
   }, [open, receiptUrl, isPdf]);
 
   const handleClose = () => {
+    setConfirmStep(false);
     onClose();
+  };
+
+  const handleConfirmClick = async () => {
+    if (!confirmStep) {
+      setConfirmStep(true);
+    } else {
+      try {
+        await onConfirm?.();
+      } finally {
+        setConfirmStep(false);
+      }
+    }
   };
 
   return (
@@ -105,6 +119,35 @@ export default function ReceiptModal({ open, receiptUrl, isPdf, onClose }) {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cerrar</Button>
+        {canConfirm && (
+          <>
+            {!confirmStep ? (
+              <Button
+                onClick={handleConfirmClick}
+                variant="contained"
+                color="success"
+              >
+                Confirmar pago
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={() => setConfirmStep(false)}
+                  sx={{ textDecoration: 'underline', cursor: 'pointer' }}
+                >
+                  Volver
+                </Button>
+                <Button
+                  onClick={handleConfirmClick}
+                  variant="contained"
+                  color="error"
+                >
+                  Sí, confirmar →
+                </Button>
+              </>
+            )}
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );

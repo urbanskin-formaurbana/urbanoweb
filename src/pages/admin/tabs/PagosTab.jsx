@@ -49,8 +49,7 @@ export default function PagosTab() {
   const [remainderAmount, setRemainderAmount] = useState("");
   const [remainderMethod, setRemainderMethod] = useState("efectivo");
   const [savingRemainder, setSavingRemainder] = useState(false);
-  const [receiptModalUrl, setReceiptModalUrl] = useState(null);
-  const [receiptIsPdf, setReceiptIsPdf] = useState(false);
+  const [receiptItem, setReceiptItem] = useState(null);
 
   useEffect(() => {
     loadPayments();
@@ -357,8 +356,12 @@ export default function PagosTab() {
                           size="small"
                           clickable
                           onClick={() => {
-                            setReceiptIsPdf(true);
-                            setReceiptModalUrl(item.comprobante_url);
+                            setReceiptItem({
+                              id: item.id,
+                              url: item.comprobante_url,
+                              isPdf: true,
+                              status: item.status,
+                            });
                           }}
                         />
                       ) : (
@@ -373,26 +376,18 @@ export default function PagosTab() {
                             cursor: "pointer",
                           }}
                           onClick={() => {
-                            setReceiptIsPdf(false);
-                            setReceiptModalUrl(item.comprobante_url);
+                            setReceiptItem({
+                              id: item.id,
+                              url: item.comprobante_url,
+                              isPdf: false,
+                              status: item.status,
+                            });
                           }}
                         />
                       )}
                     </Box>
                   )}
                 </CardContent>
-                <CardActions>
-                  {item.status === "pending" && (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="success"
-                      onClick={() => handleConfirmTransfer(item.id)}
-                    >
-                      Confirmar pago
-                    </Button>
-                  )}
-                </CardActions>
               </Card>
             );
           } else if (item.type === "transfer_scheduled") {
@@ -491,8 +486,12 @@ export default function PagosTab() {
                           size="small"
                           clickable
                           onClick={() => {
-                            setReceiptIsPdf(true);
-                            setReceiptModalUrl(item.comprobante_url);
+                            setReceiptItem({
+                              id: item.id,
+                              url: item.comprobante_url,
+                              isPdf: true,
+                              status: item.status,
+                            });
                           }}
                         />
                       ) : (
@@ -507,8 +506,12 @@ export default function PagosTab() {
                             cursor: "pointer",
                           }}
                           onClick={() => {
-                            setReceiptIsPdf(false);
-                            setReceiptModalUrl(item.comprobante_url);
+                            setReceiptItem({
+                              id: item.id,
+                              url: item.comprobante_url,
+                              isPdf: false,
+                              status: item.status,
+                            });
                           }}
                         />
                       )}
@@ -602,10 +605,15 @@ export default function PagosTab() {
 
       {/* Receipt Modal */}
       <ReceiptModal
-        open={!!receiptModalUrl}
-        receiptUrl={receiptModalUrl}
-        isPdf={receiptIsPdf}
-        onClose={() => setReceiptModalUrl(null)}
+        open={!!receiptItem}
+        receiptUrl={receiptItem?.url}
+        isPdf={receiptItem?.isPdf}
+        onClose={() => setReceiptItem(null)}
+        canConfirm={receiptItem?.status === 'pending'}
+        onConfirm={async () => {
+          await handleConfirmTransfer(receiptItem.id);
+          setReceiptItem(null);
+        }}
       />
 
       {/* Success Message */}
