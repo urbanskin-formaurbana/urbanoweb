@@ -147,6 +147,7 @@ export default function CampaignAdminTab({ productType, productLabel }) {
       setLoading(true);
       await campaignService.createCampaign(
         createFormData.name,
+        productLabel,
         startDate,
         endDate
       );

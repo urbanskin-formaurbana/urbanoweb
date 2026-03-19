@@ -152,13 +152,14 @@ export default function SchedulingPage() {
         is_evaluation: isEvaluation,
       };
 
-      // Add payment_id if available (not required for package mode or cash/transfer)
+      // Add payment_id if available
       if (paymentIdToUse) {
         appointmentData.payment_id = paymentIdToUse;
-      }
-
-      // Add payment_method_expected for cash/transfer flows
-      if (isCashOrTransferMode) {
+      } else if (intentPaymentId) {
+        // Link payment intent at creation time (transfer/deposit flow)
+        appointmentData.payment_id = intentPaymentId;
+      } else if (isCashOrTransferMode) {
+        // Fallback for cash/transfer without intent (admin-created flow)
         appointmentData.payment_method_expected = paymentMethod;
       }
 
@@ -197,18 +198,9 @@ export default function SchedulingPage() {
         paymentService.clearPaymentId();
       }
 
-      // Link payment intent to appointment if intent was created
+      // Clear transfer receipt from store if any
       if (intentPaymentId) {
-        try {
-          await paymentService.linkIntentToAppointment(
-            intentPaymentId,
-            result.appointment_id,
-          );
-          transferReceiptStore.file = null; // Clear store after linking
-        } catch (linkErr) {
-          console.warn("Failed to link intent to appointment:", linkErr);
-          // Continue anyway - intent is still there, just not linked yet
-        }
+        transferReceiptStore.file = null;
       }
 
       // Navigate to appointments overview

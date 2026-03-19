@@ -292,7 +292,7 @@ export default function AppointmentHistoryPage() {
                             slug: intent.treatment_id,
                           },
                           paymentMethod: intent.payment_method,
-                          intentPaymentId: intent.id,
+                          intentPaymentId: intent._id,
                         },
                       })
                     }
