@@ -23,6 +23,7 @@ import {
   FormControlLabel,
   Radio,
 } from '@mui/material';
+import DepositRemainderModal from '../../../components/DepositRemainderModal';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -158,7 +159,7 @@ function filterSlotsForEmployee(slots) {
   );
 }
 
-function AppointmentCard({ appointment, onConfirm, confirming, templates, onReschedule, onComplete, onNoShow, onConfirmPayment }) {
+function AppointmentCard({ appointment, onConfirm, confirming, templates, onReschedule, onComplete, onNoShow, onConfirmPayment, onOpenDepositRemainder, pendingDeposit }) {
   const statusColor = STATUS_COLORS[appointment.status] || 'default';
   const statusLabel = STATUS_LABELS[appointment.status] || appointment.status;
   const borderColor = {
@@ -296,6 +297,18 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
       </CardContent>
 
       <CardActions sx={{ gap: 0.5, flexWrap: 'nowrap', overflow: 'auto' }}>
+        {pendingDeposit && (
+          <Button
+            size="small"
+            variant="contained"
+            color="primary"
+            onClick={() => onOpenDepositRemainder(pendingDeposit)}
+            sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
+          >
+            Agregar Pago
+          </Button>
+        )}
+
         {appointment.payment_status === 'awaiting_payment' && (
           <Button
             size="small"
@@ -486,6 +499,14 @@ export default function AppointmentsTab({ activeTab }) {
   // Create appointment modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
+  // Deposit remainder modal state
+  const [depositRemainderModalOpen, setDepositRemainderModalOpen] = useState(false);
+  const [selectedDeposit, setSelectedDeposit] = useState(null);
+  const [remainderMethod, setRemainderMethod] = useState('efectivo');
+  const [remainderAmount, setRemainderAmount] = useState('');
+  const [savingRemainder, setSavingRemainder] = useState(false);
+  const [pendingDeposits, setPendingDeposits] = useState([]);
+
   // Payments/PAGOS tab state
 
   const tabStatuses = [STATUS_FILTERS.pending, STATUS_FILTERS.confirmed, STATUS_FILTERS.all];
@@ -494,7 +515,17 @@ export default function AppointmentsTab({ activeTab }) {
   useEffect(() => {
     loadTemplates();
     loadAppointments();
+    loadPendingDeposits();
   }, [currentStatus]);
+
+  const loadPendingDeposits = async () => {
+    try {
+      const response = await paymentService.getPendingDeposits();
+      setPendingDeposits(response.deposits || []);
+    } catch (err) {
+      console.error('Error loading pending deposits:', err);
+    }
+  };
 
   // Load available slots when reschedule date changes
   useEffect(() => {
@@ -712,6 +743,46 @@ export default function AppointmentsTab({ activeTab }) {
     }
   };
 
+  const handleOpenDepositRemainder = (deposit) => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    setSelectedDeposit(deposit);
+    setRemainderAmount((deposit.remaining || 0).toString());
+    setRemainderMethod('efectivo');
+    setDepositRemainderModalOpen(true);
+  };
+
+  const handleRemainderModalClose = () =>
+    closeDialogSafely(() => {
+      setDepositRemainderModalOpen(false);
+      setSelectedDeposit(null);
+      setRemainderMethod('efectivo');
+      setRemainderAmount('');
+    });
+
+  const handleAddDepositRemainder = async () => {
+    if (!selectedDeposit || !remainderAmount || parseFloat(remainderAmount) <= 0) {
+      setError('Por favor ingresa un monto válido');
+      return;
+    }
+    setSavingRemainder(true);
+    try {
+      await paymentService.addDepositRemainder(selectedDeposit.appointment_id, {
+        method: remainderMethod,
+        amount: parseFloat(remainderAmount),
+      });
+      setSuccessMessage(`Cobro de ${remainderMethod} registrado`);
+      loadAppointments();
+      handleRemainderModalClose();
+    } catch (err) {
+      console.error('Error adding deposit remainder:', err);
+      setError('No se pudo registrar el cobro');
+    } finally {
+      setSavingRemainder(false);
+    }
+  };
+
   return (
     <>
       {loading && <LinearProgress />}
@@ -737,19 +808,24 @@ export default function AppointmentsTab({ activeTab }) {
             </Typography>
           )}
 
-          {appointments.map(appointment => (
-            <AppointmentCard
-              key={appointment.id}
-              appointment={appointment}
-              onConfirm={handleConfirmAppointment}
-              confirming={confirming}
-              templates={templates}
-              onReschedule={handleRescheduleClick}
-              onComplete={handleCompleteClick}
-              onNoShow={handleNoShowClick}
-              onConfirmPayment={handleConfirmPayment}
-            />
-          ))}
+          {appointments.map(appointment => {
+            const pendingDeposit = pendingDeposits.find(d => d.appointment_id === appointment.id);
+            return (
+              <AppointmentCard
+                key={appointment.id}
+                appointment={appointment}
+                onConfirm={handleConfirmAppointment}
+                confirming={confirming}
+                templates={templates}
+                onReschedule={handleRescheduleClick}
+                onComplete={handleCompleteClick}
+                onNoShow={handleNoShowClick}
+                onConfirmPayment={handleConfirmPayment}
+                onOpenDepositRemainder={handleOpenDepositRemainder}
+                pendingDeposit={pendingDeposit}
+              />
+            );
+          })}
         </Stack>
       </Box>
 
@@ -917,6 +993,20 @@ export default function AppointmentsTab({ activeTab }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Deposit Remainder Modal */}
+      <DepositRemainderModal
+        open={depositRemainderModalOpen}
+        onClose={handleRemainderModalClose}
+        selectedDeposit={selectedDeposit}
+        remainderAmount={remainderAmount}
+        setRemainderAmount={setRemainderAmount}
+        remainderMethod={remainderMethod}
+        setRemainderMethod={setRemainderMethod}
+        savingRemainder={savingRemainder}
+        onConfirm={handleAddDepositRemainder}
+        title="Agregar Pago"
+      />
 
       {/* Success Message */}
       <Snackbar open={!!successMessage} autoHideDuration={3000} onClose={() => setSuccessMessage('')}>

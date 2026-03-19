@@ -25,9 +25,6 @@ import {
   Tab,
   ToggleButtonGroup,
   ToggleButton,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
 } from "@mui/material";
 import adminService from "../../../services/admin_service";
 
@@ -689,84 +686,6 @@ export default function TreatmentsTab() {
           ))}
 
       </Stack>
-
-      {/* Deposit Remainder Modal */}
-      <Dialog
-        open={depositRemainderModalOpen}
-        onClose={handleRemainderModalClose}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Agregar Cobro del Depósito</DialogTitle>
-        <DialogContent sx={{pt: 2}}>
-          {selectedDeposit && (
-            <Stack spacing={2}>
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Cliente: {selectedDeposit.customer_name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Tratamiento: {selectedDeposit.treatment_name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
-                  Total contratado: ${selectedDeposit.full_amount.toFixed(2)}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Ya pagado: ${selectedDeposit.paid_amount.toFixed(2)}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="error"
-                  sx={{fontWeight: "bold", mt: 1}}
-                >
-                  Resta: ${selectedDeposit.remaining.toFixed(2)}
-                </Typography>
-              </Box>
-
-              <RadioGroup
-                value={remainderMethod}
-                onChange={(e) => setRemainderMethod(e.target.value)}
-              >
-                <FormControlLabel
-                  value="efectivo"
-                  control={<Radio />}
-                  label="Efectivo"
-                />
-                <FormControlLabel
-                  value="transferencia"
-                  control={<Radio />}
-                  label="Transferencia Bancaria"
-                />
-              </RadioGroup>
-
-              <TextField
-                label="Monto a cobrar ($)"
-                type="number"
-                size="small"
-                inputProps={{step: "0.01", min: "0"}}
-                value={remainderAmount}
-                onChange={(e) => setRemainderAmount(e.target.value)}
-                fullWidth
-              />
-            </Stack>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleRemainderModalClose}>Cancelar</Button>
-          <Button
-            onClick={handleAddDepositRemainder}
-            variant="contained"
-            color="primary"
-            disabled={savingRemainder}
-          >
-            {savingRemainder ? (
-              <CircularProgress size={20} />
-            ) : (
-              "Registrar Cobro"
-            )}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Create Treatment Dialog */}
       <Dialog
