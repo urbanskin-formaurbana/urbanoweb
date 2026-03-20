@@ -232,9 +232,16 @@ export default function CreateAppointmentModal({
     }
   }, [paymentMode, selectedTreatment]);
 
-  const singleSessionTotalAmount = Number(
+  const treatmentSingleSessionAmount = Number(
     selectedTreatment?.single_session_price || 0,
   );
+  const customSingleSessionAmount = Number(newPurchase.amount_paid);
+  const singleSessionTotalAmount =
+    paymentMode === "single_session" &&
+    Number.isFinite(customSingleSessionAmount) &&
+    customSingleSessionAmount > 0
+      ? customSingleSessionAmount
+      : treatmentSingleSessionAmount;
   const configuredDepositAmount = getValidDepositAmount(depositAmountConfig);
   const effectiveDepositAmount =
     singleSessionTotalAmount > 0
