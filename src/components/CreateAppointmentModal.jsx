@@ -50,6 +50,33 @@ function formatAppointmentDate(isoString) {
     .format("dddd, D [de] MMMM");
 }
 
+const BUILTIN_CATEGORY_LABELS = {
+  body: "Corporal",
+  facial: "Facial",
+  complementarios: "Complementarios",
+};
+
+function formatCategoryLabel(category) {
+  if (!category) return "";
+  return category
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatGenderLabel(gender) {
+  if (!gender) return "";
+  if (gender === "mujeres") return "Mujeres";
+  if (gender === "hombres") return "Hombres";
+  return formatCategoryLabel(gender);
+}
+
+function formatItemTypeLabel(itemType) {
+  if (!itemType) return "";
+  if (itemType === "zona") return "Zona";
+  if (itemType === "paquete") return "Paquete";
+  return formatCategoryLabel(itemType);
+}
+
 export default function CreateAppointmentModal({
   open,
   onClose,
@@ -72,7 +99,6 @@ export default function CreateAppointmentModal({
   const [customerMode, setCustomerMode] = useState(
     prefilledCustomer ? "search" : "search",
   );
-  const [customerSearch, setCustomerSearch] = useState("");
   const [customerOptions, setCustomerOptions] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(
     prefilledCustomer || null,
@@ -90,6 +116,7 @@ export default function CreateAppointmentModal({
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [laserGender, setLaserGender] = useState(null);
   const [laserItemType, setLaserItemType] = useState(null);
+  const [categoryConfigs, setCategoryConfigs] = useState([]);
   const [loadingTreatments, setLoadingTreatments] = useState(false);
 
   // Step 3: Payment
@@ -138,8 +165,8 @@ export default function CreateAppointmentModal({
 
   // Load treatments on step 2
   useEffect(() => {
-    if (open && step === 2 && treatments.length === 0) {
-      loadTreatments();
+    if (open && step === 2) {
+      loadStep2Data();
     }
   }, [open, step]);
 
@@ -254,13 +281,31 @@ export default function CreateAppointmentModal({
     }
   };
 
-  const loadTreatments = async () => {
+  const loadStep2Data = async () => {
     setLoadingTreatments(true);
     try {
-      const result = await adminService.getTreatments();
+      const [treatmentsResult, categoryConfigResult] = await Promise.allSettled(
+        [adminService.getTreatments(), adminService.getCategoryConfigs()],
+      );
+
+      if (treatmentsResult.status !== "fulfilled") {
+        throw treatmentsResult.reason;
+      }
+
+      const result = treatmentsResult.value;
       setTreatments(
         (result?.treatments || []).filter((t) => t.is_active !== false),
       );
+
+      if (categoryConfigResult.status === "fulfilled") {
+        setCategoryConfigs(categoryConfigResult.value || []);
+      } else {
+        console.error(
+          "Error loading category configs:",
+          categoryConfigResult.reason,
+        );
+        setCategoryConfigs([]);
+      }
     } catch (err) {
       console.error("Error loading treatments:", err);
       setError("Error al cargar tratamientos");
@@ -317,6 +362,148 @@ export default function CreateAppointmentModal({
     }
   };
 
+  const getCategoryConfig = (category) => {
+    return (
+      categoryConfigs.find((config) => config.category === category) || null
+    );
+  };
+
+  const getCategoryLabel = (category) => {
+    const config = getCategoryConfig(category);
+    if (config?.label) return config.label;
+    if (BUILTIN_CATEGORY_LABELS[category])
+      return BUILTIN_CATEGORY_LABELS[category];
+    return formatCategoryLabel(category);
+  };
+
+  const getCategoryTreatments = (category) => {
+    return treatments.filter((treatment) => treatment.category === category);
+  };
+
+  const isGenderSplitCategory = (category, categoryTreatments) => {
+    const config = getCategoryConfig(category);
+    return (
+      config?.is_gender_split === true ||
+      categoryTreatments.some((treatment) => treatment.gender != null)
+    );
+  };
+
+  const getGenderOptions = (categoryTreatments) => {
+    const options = [
+      ...new Set(
+        categoryTreatments
+          .map((treatment) => treatment.gender)
+          .filter((gender) => gender != null),
+      ),
+    ];
+    if (options.length > 0) return options;
+    return ["mujeres", "hombres"];
+  };
+
+  const getItemTypeOptions = (categoryTreatments, gender = null) => {
+    let filtered = categoryTreatments;
+    if (gender) {
+      filtered = filtered.filter((treatment) => treatment.gender === gender);
+    }
+    return [
+      ...new Set(
+        filtered
+          .map((treatment) => treatment.item_type)
+          .filter((itemType) => itemType != null),
+      ),
+    ];
+  };
+
+  const getAvailableCategories = () => {
+    const categoryOrder = {
+      body: 0,
+      facial: 1,
+      complementarios: 2,
+    };
+    const categories = [
+      ...new Set(
+        treatments
+          .map((treatment) => treatment.category)
+          .filter((category) => category != null),
+      ),
+    ];
+
+    categories.sort((a, b) => {
+      const orderA = categoryOrder[a] ?? Number.MAX_SAFE_INTEGER;
+      const orderB = categoryOrder[b] ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      return getCategoryLabel(a).localeCompare(getCategoryLabel(b), "es");
+    });
+
+    return categories.map((category) => {
+      const categoryTreatments = getCategoryTreatments(category);
+      return {
+        key: category,
+        label: getCategoryLabel(category),
+        count: categoryTreatments.length,
+        isGenderSplit: isGenderSplitCategory(category, categoryTreatments),
+      };
+    });
+  };
+
+  const getFilteredTreatments = () => {
+    if (!selectedCategory) return [];
+
+    const categoryTreatments = getCategoryTreatments(selectedCategory);
+    const requiresGender = isGenderSplitCategory(
+      selectedCategory,
+      categoryTreatments,
+    );
+
+    let filtered = categoryTreatments;
+
+    if (requiresGender && laserGender) {
+      filtered = filtered.filter(
+        (treatment) => treatment.gender === laserGender,
+      );
+    }
+
+    const itemTypeOptions = getItemTypeOptions(
+      categoryTreatments,
+      requiresGender ? laserGender : null,
+    );
+    if (itemTypeOptions.length > 1 && laserItemType) {
+      filtered = filtered.filter(
+        (treatment) => treatment.item_type === laserItemType,
+      );
+    }
+
+    return filtered;
+  };
+
+  useEffect(() => {
+    if (!selectedCategory) return;
+    const availableCategories = getAvailableCategories();
+    if (
+      !availableCategories.some((category) => category.key === selectedCategory)
+    ) {
+      setSelectedCategory(null);
+      setLaserGender(null);
+      setLaserItemType(null);
+      setSelectedTreatment(null);
+    }
+  }, [selectedCategory, treatments, categoryConfigs]);
+
+  useEffect(() => {
+    if (!selectedTreatment) return;
+    const filtered = getFilteredTreatments();
+    if (!filtered.some((treatment) => treatment.id === selectedTreatment.id)) {
+      setSelectedTreatment(null);
+    }
+  }, [
+    selectedCategory,
+    laserGender,
+    laserItemType,
+    treatments,
+    categoryConfigs,
+    selectedTreatment,
+  ]);
+
   const handleNextStep = () => {
     // Validate current step
     if (step === 1) {
@@ -344,7 +531,9 @@ export default function CreateAppointmentModal({
       }
       if (
         (paymentMode === "single_session" || paymentMode === "new_package") &&
-        (newPurchase.amount_paid === "" || isNaN(parseFloat(newPurchase.amount_paid)) || !newPurchase.payment_method)
+        (newPurchase.amount_paid === "" ||
+          isNaN(parseFloat(newPurchase.amount_paid)) ||
+          !newPurchase.payment_method)
       ) {
         setError("Completa el monto y método de pago");
         return;
@@ -364,12 +553,27 @@ export default function CreateAppointmentModal({
     setError(null);
     // Handle sub-steps within step 2
     if (step === 2) {
-      if (selectedCategory === "laser" && laserItemType) {
+      const categoryTreatments = selectedCategory
+        ? getCategoryTreatments(selectedCategory)
+        : [];
+      const requiresGender = selectedCategory
+        ? isGenderSplitCategory(selectedCategory, categoryTreatments)
+        : false;
+      const itemTypeOptions = selectedCategory
+        ? getItemTypeOptions(
+            categoryTreatments,
+            requiresGender ? laserGender : null,
+          )
+        : [];
+      const requiresItemType = itemTypeOptions.length > 1;
+
+      if (requiresItemType && laserItemType) {
         setLaserItemType(null);
-      } else if (selectedCategory === "laser" && laserGender) {
+      } else if (requiresGender && laserGender) {
         setLaserGender(null);
       } else if (selectedCategory) {
         setSelectedCategory(null);
+        setSelectedTreatment(null);
       } else {
         setStep(step - 1);
       }
@@ -385,7 +589,6 @@ export default function CreateAppointmentModal({
     try {
       let customerId = selectedCustomer.id || selectedCustomer._id;
       let purchasedPackageId = null;
-      let paymentId = null;
 
       // Create new customer if needed
       if (customerMode === "new") {
@@ -407,7 +610,6 @@ export default function CreateAppointmentModal({
         };
 
         const payment = await adminService.createManualPayment(paymentData);
-        paymentId = payment.payment_id;
         if (payment.purchased_package_id) {
           purchasedPackageId = payment.purchased_package_id;
         }
@@ -431,14 +633,17 @@ export default function CreateAppointmentModal({
         is_evaluation: paymentMode === "evaluacion",
       };
 
-      const appointmentResult = await adminService.createAdminAppointment(appointmentData);
+      const appointmentResult =
+        await adminService.createAdminAppointment(appointmentData);
 
       // Show success screen with multi-session option if there are remaining sessions
       setSuccessState({
         appointment_id: appointmentResult.id,
         session_number: appointmentResult.session_number,
         remaining_sessions: appointmentResult.remaining_sessions,
-        total_sessions: appointmentResult.session_number + (appointmentResult.remaining_sessions || 0),
+        total_sessions:
+          appointmentResult.session_number +
+          (appointmentResult.remaining_sessions || 0),
         treatment_name: selectedTreatment.name,
         customer_name: selectedCustomer.full_name || selectedCustomer.name,
       });
@@ -593,92 +798,48 @@ export default function CreateAppointmentModal({
         );
 
       case 2: {
-        // Determine current sub-step
+        const categories = getAvailableCategories();
+        const categoryTreatments = selectedCategory
+          ? getCategoryTreatments(selectedCategory)
+          : [];
+        const selectedCategoryInfo = categories.find(
+          (category) => category.key === selectedCategory,
+        );
+        const requiresGender = selectedCategory
+          ? isGenderSplitCategory(selectedCategory, categoryTreatments)
+          : false;
+        const genderOptions = requiresGender
+          ? getGenderOptions(categoryTreatments)
+          : [];
+        const itemTypeOptions = selectedCategory
+          ? getItemTypeOptions(
+              categoryTreatments,
+              requiresGender ? laserGender : null,
+            )
+          : [];
+        const requiresItemType = itemTypeOptions.length > 1;
+
         let subStep = "category";
-        if (selectedCategory === "laser" && !laserGender) {
-          subStep = "laser_gender";
-        } else if (selectedCategory === "laser" && !laserItemType) {
-          subStep = "laser_item_type";
-        } else if (selectedCategory) {
-          subStep = "treatments";
+        if (selectedCategory) {
+          if (requiresGender && !laserGender) {
+            subStep = "gender";
+          } else if (requiresItemType && !laserItemType) {
+            subStep = "item_type";
+          } else {
+            subStep = "treatments";
+          }
         }
 
-        // Helper to get available categories
-        const getAvailableCategories = () => {
-          const isLaser = (t) => t.gender != null || t.category === "laser";
-          const categories = [
-            {
-              key: "body",
-              label: "Corporal",
-              check: (t) => t.category === "body" && !isLaser(t),
-            },
-            {
-              key: "facial",
-              label: "Facial",
-              check: (t) => t.category === "facial" && !isLaser(t),
-            },
-            {
-              key: "laser",
-              label: "Depilación Láser",
-              check: (t) => isLaser(t),
-            },
-            {
-              key: "complementarios",
-              label: "Complementarios",
-              check: (t) => t.category === "complementarios" && !isLaser(t),
-            },
-          ];
-          return categories.filter((cat) => treatments.some(cat.check));
-        };
-
-        // Helper to get filtered treatments for display
-        const getFilteredTreatments = () => {
-          const isLaser = (t) => t.gender != null || t.category === "laser";
-          let filtered = treatments;
-
-          if (selectedCategory === "laser") {
-            filtered = filtered.filter((t) => isLaser(t));
-            if (laserGender) {
-              filtered = filtered.filter((t) => t.gender === laserGender);
-            }
-            if (laserItemType) {
-              filtered = filtered.filter((t) => t.item_type === laserItemType);
-            }
-          } else if (selectedCategory) {
-            filtered = filtered.filter((t) => {
-              const isLaserT = isLaser(t);
-              if (selectedCategory === "body")
-                return t.category === "body" && !isLaserT;
-              if (selectedCategory === "facial")
-                return t.category === "facial" && !isLaserT;
-              if (selectedCategory === "complementarios")
-                return t.category === "complementarios" && !isLaserT;
-              return false;
-            });
-          }
-
-          return filtered;
-        };
-
-        // Helper to build breadcrumb path
-        const getBreadcrumb = () => {
-          const parts = [];
-          if (selectedCategory === "laser") {
-            parts.push("Depilación Láser");
-          } else if (selectedCategory) {
-            const cat = getAvailableCategories().find(
-              (c) => c.key === selectedCategory,
-            );
-            if (cat) parts.push(cat.label);
-          }
-          if (laserGender) {
-            parts.push(laserGender === "mujeres" ? "Mujeres" : "Hombres");
-          }
-          if (laserItemType) {
-            parts.push(laserItemType === "zona" ? "Zona" : "Paquete");
-          }
-          return parts;
-        };
+        const breadcrumb = [];
+        if (selectedCategoryInfo) {
+          breadcrumb.push(selectedCategoryInfo.label);
+        }
+        if (requiresGender && laserGender) {
+          breadcrumb.push(formatGenderLabel(laserGender));
+        }
+        if (requiresItemType && laserItemType) {
+          breadcrumb.push(formatItemTypeLabel(laserItemType));
+        }
 
         if (loadingTreatments) {
           return (
@@ -690,12 +851,15 @@ export default function CreateAppointmentModal({
 
         // Sub-step: category selection
         if (subStep === "category") {
-          const categories = getAvailableCategories();
           return (
             <Box sx={{py: 2}}>
+              {categories.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  No hay tratamientos activos para agendar.
+                </Typography>
+              )}
               <Box sx={{maxHeight: 360, overflowY: "auto", pr: 1}}>
                 {categories.map((cat) => {
-                  const count = treatments.filter(cat.check).length;
                   return (
                     <Card
                       key={cat.key}
@@ -703,6 +867,7 @@ export default function CreateAppointmentModal({
                         setSelectedCategory(cat.key);
                         setLaserGender(null);
                         setLaserItemType(null);
+                        setSelectedTreatment(null);
                       }}
                       sx={{
                         mb: 1.5,
@@ -724,7 +889,7 @@ export default function CreateAppointmentModal({
                           {cat.label}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {count} tratamiento{count !== 1 ? "s" : ""}
+                          {cat.count} tratamiento{cat.count !== 1 ? "s" : ""}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -735,24 +900,25 @@ export default function CreateAppointmentModal({
           );
         }
 
-        // Sub-step: laser gender selection
-        if (subStep === "laser_gender") {
+        // Sub-step: gender selection
+        if (subStep === "gender") {
           return (
             <Box sx={{py: 2}}>
               <Box sx={{mb: 2, display: "flex", gap: 1, flexWrap: "wrap"}}>
                 <Chip
-                  label="Depilación Láser ›"
+                  label={`${selectedCategoryInfo?.label || getCategoryLabel(selectedCategory)} ›`}
                   variant="outlined"
                   size="small"
                 />
               </Box>
               <Box sx={{maxHeight: 360, overflowY: "auto", pr: 1}}>
-                {["mujeres", "hombres"].map((gender) => (
+                {genderOptions.map((gender) => (
                   <Card
                     key={gender}
                     onClick={() => {
                       setLaserGender(gender);
                       setLaserItemType(null);
+                      setSelectedTreatment(null);
                     }}
                     sx={{
                       mb: 1.5,
@@ -771,7 +937,7 @@ export default function CreateAppointmentModal({
                   >
                     <CardContent>
                       <Typography variant="subtitle1" fontWeight="bold">
-                        {gender === "mujeres" ? "Mujeres" : "Hombres"}
+                        {formatGenderLabel(gender)}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -781,27 +947,32 @@ export default function CreateAppointmentModal({
           );
         }
 
-        // Sub-step: laser item type selection
-        if (subStep === "laser_item_type") {
+        // Sub-step: item type selection
+        if (subStep === "item_type") {
           return (
             <Box sx={{py: 2}}>
               <Box sx={{mb: 2, display: "flex", gap: 1, flexWrap: "wrap"}}>
                 <Chip
-                  label="Depilación Láser ›"
+                  label={`${selectedCategoryInfo?.label || getCategoryLabel(selectedCategory)} ›`}
                   variant="outlined"
                   size="small"
                 />
-                <Chip
-                  label={`${laserGender === "mujeres" ? "Mujeres" : "Hombres"} ›`}
-                  variant="outlined"
-                  size="small"
-                />
+                {requiresGender && (
+                  <Chip
+                    label={`${formatGenderLabel(laserGender)} ›`}
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
               </Box>
               <Box sx={{maxHeight: 360, overflowY: "auto", pr: 1}}>
-                {["zona", "paquete"].map((itemType) => (
+                {itemTypeOptions.map((itemType) => (
                   <Card
                     key={itemType}
-                    onClick={() => setLaserItemType(itemType)}
+                    onClick={() => {
+                      setLaserItemType(itemType);
+                      setSelectedTreatment(null);
+                    }}
                     sx={{
                       mb: 1.5,
                       cursor: "pointer",
@@ -819,7 +990,7 @@ export default function CreateAppointmentModal({
                   >
                     <CardContent>
                       <Typography variant="subtitle1" fontWeight="bold">
-                        {itemType === "zona" ? "Zona" : "Paquete"}
+                        {formatItemTypeLabel(itemType)}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -831,7 +1002,6 @@ export default function CreateAppointmentModal({
 
         // Sub-step: treatments list
         const filteredTreatments = getFilteredTreatments();
-        const breadcrumb = getBreadcrumb();
 
         return (
           <Box sx={{py: 2}}>
@@ -846,6 +1016,11 @@ export default function CreateAppointmentModal({
                   />
                 ))}
               </Box>
+            )}
+            {filteredTreatments.length === 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                No hay tratamientos para los filtros seleccionados.
+              </Typography>
             )}
             <Box sx={{maxHeight: 360, overflowY: "auto", pr: 1}}>
               {filteredTreatments.map((treatment) => (
@@ -950,9 +1125,7 @@ export default function CreateAppointmentModal({
                           onClick={() => setSelectedCuponera(cuponera)}
                         >
                           <CardContent sx={{pb: 1}}>
-                            <Typography>
-                              {cuponera.package_name}
-                            </Typography>
+                            <Typography>{cuponera.package_name}</Typography>
                             <Typography variant="body2" color="textSecondary">
                               {cuponera.sessions_used}/{cuponera.total_sessions}{" "}
                               sesiones usadas
@@ -1258,32 +1431,48 @@ export default function CreateAppointmentModal({
     const hasRemainingSessionsImport = successState.remaining_sessions > 0;
 
     return (
-      <Box sx={{ py: 2, textAlign: 'center' }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'success.main', mb: 2 }}>
+      <Box sx={{py: 2, textAlign: "center"}}>
+        <Typography
+          variant="h6"
+          sx={{fontWeight: "bold", color: "success.main", mb: 2}}
+        >
           ✓ Sesión creada exitosamente
         </Typography>
 
-        <Card sx={{ mb: 3, bgcolor: 'success.light' }}>
+        <Card sx={{mb: 3, bgcolor: "success.light"}}>
           <CardContent>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Sesión {successState.session_number} de {successState.total_sessions}
+            <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+              Sesión {successState.session_number} de{" "}
+              {successState.total_sessions}
             </Typography>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+            <Typography variant="subtitle1" sx={{fontWeight: "bold"}}>
               {successState.treatment_name}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
               Cliente: {successState.customer_name}
             </Typography>
           </CardContent>
         </Card>
 
         {hasRemainingSessionsImport && (
-          <Card sx={{ mb: 3, bgcolor: 'info.light', border: '2px solid', borderColor: 'info.main' }}>
+          <Card
+            sx={{
+              mb: 3,
+              bgcolor: "info.light",
+              border: "2px solid",
+              borderColor: "info.main",
+            }}
+          >
             <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'info.main' }}>
-                {successState.remaining_sessions} sesione{successState.remaining_sessions === 1 ? '' : 's'} restante{successState.remaining_sessions === 1 ? '' : 's'}
+              <Typography
+                variant="h6"
+                sx={{fontWeight: "bold", color: "info.main"}}
+              >
+                {successState.remaining_sessions} sesione
+                {successState.remaining_sessions === 1 ? "" : "s"} restante
+                {successState.remaining_sessions === 1 ? "" : "s"}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
                 ¿Deseas agendar la próxima sesión?
               </Typography>
             </CardContent>
@@ -1315,7 +1504,11 @@ export default function CreateAppointmentModal({
               </Box>
 
               {error && (
-                <Alert severity="error" onClose={() => setError(null)} sx={{mb: 2}}>
+                <Alert
+                  severity="error"
+                  onClose={() => setError(null)}
+                  sx={{mb: 2}}
+                >
                   {error}
                 </Alert>
               )}
@@ -1394,7 +1587,8 @@ export default function CreateAppointmentModal({
                 color="success"
                 onClick={() => {
                   // If using cuponera, skip step 3 and go straight to scheduling
-                  const wasUsingCuponera = paymentMode === "existing_cuponera" && selectedCuponera;
+                  const wasUsingCuponera =
+                    paymentMode === "existing_cuponera" && selectedCuponera;
 
                   setSuccessState(null);
                   setScheduleDate(null);

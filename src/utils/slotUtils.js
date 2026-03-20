@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import appointmentService from '../services/appointment_service.js';
-import createCampaignService from '../services/campaign_service.js';
+import { createCampaignService } from '../services/campaign_service.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
