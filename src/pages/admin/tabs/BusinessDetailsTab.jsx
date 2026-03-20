@@ -14,6 +14,16 @@ import {
 import { Check as CheckIcon } from "@mui/icons-material";
 import bankService from "../../../services/bank_service";
 
+const DEFAULT_DEPOSIT_AMOUNT = 500;
+
+function getValidDepositAmount(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_DEPOSIT_AMOUNT;
+  }
+  return parsed;
+}
+
 export default function BusinessDetailsTab() {
   const [businessDetails, setBusinessDetails] = useState({
     bank_name: "",
@@ -22,6 +32,7 @@ export default function BusinessDetailsTab() {
     notes: "",
     whatsapp_phone: "",
     business_email: "",
+    deposit_amount: DEFAULT_DEPOSIT_AMOUNT.toString(),
   });
 
   const [loading, setLoading] = useState(true);
@@ -43,6 +54,7 @@ export default function BusinessDetailsTab() {
         notes: data.notes || "",
         whatsapp_phone: data.whatsapp_phone || "",
         business_email: data.business_email || "",
+        deposit_amount: getValidDepositAmount(data.deposit_amount).toString(),
       });
     } catch (error) {
       console.error("Error loading business details:", error);
@@ -66,7 +78,17 @@ export default function BusinessDetailsTab() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await bankService.updateBankDetails(businessDetails);
+      const normalizedDepositAmount = getValidDepositAmount(
+        businessDetails.deposit_amount,
+      );
+      await bankService.updateBankDetails({
+        ...businessDetails,
+        deposit_amount: normalizedDepositAmount,
+      });
+      setBusinessDetails((prev) => ({
+        ...prev,
+        deposit_amount: normalizedDepositAmount.toString(),
+      }));
       setSnackbar({
         open: true,
         message: "Datos del negocio guardados exitosamente",
@@ -122,6 +144,16 @@ export default function BusinessDetailsTab() {
               fullWidth
               helperText="Se mostrará en el sitio web para contacto"
               type="email"
+            />
+
+            <TextField
+              label="Monto de seña por defecto"
+              value={businessDetails.deposit_amount}
+              onChange={handleChange("deposit_amount")}
+              type="number"
+              fullWidth
+              inputProps={{ min: 1, step: 1 }}
+              helperText="Se usa para reservas con seña (si está vacío o inválido se toma $500)"
             />
 
             <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: "bold" }}>

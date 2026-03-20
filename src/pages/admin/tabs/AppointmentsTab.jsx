@@ -62,6 +62,12 @@ const STATUS_COLORS = {
   cancelled: 'error',
 };
 
+const PAYMENT_METHOD_LABELS = {
+  efectivo: 'Efectivo',
+  transferencia: 'Transferencia bancaria',
+  posnet: 'POSNet',
+};
+
 function formatPhoneForWhatsApp(phone) {
   if (!phone) return null;
 
@@ -152,6 +158,10 @@ function formatTemplateMessage(template, appointment) {
     .replace(/{{hora}}/g, timeStr);
 }
 
+function formatPaymentMethodLabel(method) {
+  return PAYMENT_METHOD_LABELS[method] || method || 'No definido';
+}
+
 function filterSlotsForEmployee(slots) {
   const now = dayjs().tz('America/Montevideo');
   return slots.filter(slot =>
@@ -176,6 +186,16 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
   const [paymentMethod, setPaymentMethod] = useState('efectivo');
   const [confirmingPayment, setConfirmingPayment] = useState(false);
   const phone = formatPhoneForWhatsApp(appointment.customer_phone);
+  const allowConfirmWithoutPayment =
+    appointment.allow_confirm_without_payment === true ||
+    appointment.payment_plan === 'pay_later' ||
+    appointment.payment_plan === 'deposit';
+  const canConfirmAppointment =
+    appointment.status === 'pending' &&
+    (
+      appointment.payment_status !== 'awaiting_payment' ||
+      allowConfirmWithoutPayment
+    );
 
   const handleWhatsappMenuClick = (e) => {
     setWhatsappAnchor(e.currentTarget);
@@ -290,7 +310,7 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
         {appointment.payment_status === 'awaiting_payment' && (
           <Box sx={{ mt: 1, p: 1, backgroundColor: '#fff3cd', borderRadius: 1 }}>
             <Typography variant="caption" color="text.secondary">
-              Método esperado: {appointment.payment_method_expected === 'efectivo' ? 'Efectivo' : 'Transferencia bancaria'}
+              Método esperado: {formatPaymentMethodLabel(appointment.payment_method_expected)}
             </Typography>
           </Box>
         )}
@@ -321,7 +341,7 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
           </Button>
         )}
 
-        {appointment.status === 'pending' && appointment.payment_status !== 'awaiting_payment' && (
+        {canConfirmAppointment && (
           <Button
             size="small"
             variant="contained"
@@ -428,6 +448,7 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
             >
               <FormControlLabel value="efectivo" control={<Radio />} label="Efectivo" />
               <FormControlLabel value="transferencia" control={<Radio />} label="Transferencia Bancaria" />
+              <FormControlLabel value="posnet" control={<Radio />} label="POSNet" />
             </RadioGroup>
 
             <TextField
@@ -479,7 +500,6 @@ export default function AppointmentsTab({ activeTab }) {
   const [error, setError] = useState(null);
   const [confirming, setConfirming] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
-  const [confirmingPayment, setConfirmingPayment] = useState(null);
 
   // Reschedule modal state
   const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
@@ -700,17 +720,14 @@ export default function AppointmentsTab({ activeTab }) {
   };
 
   const handleConfirmPayment = async (appointmentId, paymentData) => {
-    setConfirmingPayment(appointmentId);
     try {
       await paymentService.confirmAppointmentPayment(appointmentId, paymentData);
-      setAppointments(prev => prev.filter(appt => appt.id !== appointmentId));
+      await Promise.all([loadAppointments(), loadPendingDeposits()]);
       setSuccessMessage(`Pago confirmado (${paymentData.method})`);
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (error) {
       console.error('Error confirming payment:', error);
       setError('No se pudo confirmar el pago');
-    } finally {
-      setConfirmingPayment(null);
     }
   };
 
@@ -773,7 +790,7 @@ export default function AppointmentsTab({ activeTab }) {
         amount: parseFloat(remainderAmount),
       });
       setSuccessMessage(`Cobro de ${remainderMethod} registrado`);
-      loadAppointments();
+      await Promise.all([loadAppointments(), loadPendingDeposits()]);
       handleRemainderModalClose();
     } catch (err) {
       console.error('Error adding deposit remainder:', err);
@@ -781,6 +798,10 @@ export default function AppointmentsTab({ activeTab }) {
     } finally {
       setSavingRemainder(false);
     }
+  };
+
+  const handleAppointmentCreated = async () => {
+    await Promise.all([loadAppointments(), loadPendingDeposits()]);
   };
 
   return (
@@ -1017,7 +1038,7 @@ export default function AppointmentsTab({ activeTab }) {
       <CreateAppointmentModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        onCreated={loadAppointments}
+        onCreated={handleAppointmentCreated}
         prefilledCustomer={null}
       />
 

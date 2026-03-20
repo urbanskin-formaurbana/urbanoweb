@@ -33,6 +33,7 @@ import timezone from "dayjs/plugin/timezone";
 import "dayjs/locale/es";
 import adminService from "../services/admin_service";
 import appointmentService from "../services/appointment_service";
+import bankService from "../services/bank_service";
 import {
   isCampaignTreatment,
   filterSlotsForEmployee,
@@ -56,6 +57,14 @@ const BUILTIN_CATEGORY_LABELS = {
   complementarios: "Complementarios",
 };
 
+const DEFAULT_DEPOSIT_AMOUNT = 500;
+
+const PAYMENT_METHOD_LABELS = {
+  efectivo: "Efectivo",
+  transferencia: "Transferencia bancaria",
+  posnet: "POSNet",
+};
+
 function formatCategoryLabel(category) {
   if (!category) return "";
   return category
@@ -75,6 +84,25 @@ function formatItemTypeLabel(itemType) {
   if (itemType === "zona") return "Zona";
   if (itemType === "paquete") return "Paquete";
   return formatCategoryLabel(itemType);
+}
+
+function getValidDepositAmount(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_DEPOSIT_AMOUNT;
+  }
+  return parsed;
+}
+
+function formatPaymentMethodLabel(method) {
+  return PAYMENT_METHOD_LABELS[method] || method || "No definido";
+}
+
+function formatMoney(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "0";
+  if (Number.isInteger(parsed)) return parsed.toString();
+  return parsed.toFixed(2);
 }
 
 export default function CreateAppointmentModal({
@@ -131,8 +159,13 @@ export default function CreateAppointmentModal({
     total_sessions: "",
     amount_paid: "",
     payment_method: "efectivo",
+    payment_plan: "full_now",
+    payment_method_expected: "efectivo",
   });
   const [loadingStep3, setLoadingStep3] = useState(false);
+  const [depositAmountConfig, setDepositAmountConfig] = useState(
+    DEFAULT_DEPOSIT_AMOUNT,
+  );
 
   // Step 4: Schedule
   const [scheduleDate, setScheduleDate] = useState(null);
@@ -198,6 +231,19 @@ export default function CreateAppointmentModal({
       }));
     }
   }, [paymentMode, selectedTreatment]);
+
+  const singleSessionTotalAmount = Number(
+    selectedTreatment?.single_session_price || 0,
+  );
+  const configuredDepositAmount = getValidDepositAmount(depositAmountConfig);
+  const effectiveDepositAmount =
+    singleSessionTotalAmount > 0
+      ? Math.min(configuredDepositAmount, singleSessionTotalAmount)
+      : configuredDepositAmount;
+  const singleSessionRemainingAmount = Math.max(
+    singleSessionTotalAmount - effectiveDepositAmount,
+    0,
+  );
 
   // Load available slots when date changes
   useEffect(() => {
@@ -317,10 +363,24 @@ export default function CreateAppointmentModal({
   const loadStep3Data = async () => {
     setLoadingStep3(true);
     try {
+      const [historyResult, packagesResult, bankDetailsResult] =
+        await Promise.allSettled([
+          adminService.getCustomerHistory(
+            selectedCustomer.id || selectedCustomer._id,
+          ),
+          appointmentService.getTreatmentPackages(selectedTreatment.slug),
+          bankService.getBankDetails(),
+        ]);
+
+      if (historyResult.status !== "fulfilled") {
+        throw historyResult.reason;
+      }
+      if (packagesResult.status !== "fulfilled") {
+        throw packagesResult.reason;
+      }
+
       // Load customer history (cuponeras + can_purchase_packages status)
-      const history = await adminService.getCustomerHistory(
-        selectedCustomer.id || selectedCustomer._id,
-      );
+      const history = historyResult.value;
       const activeCuponeras = (history.timeline || []).filter(
         (item) =>
           item.kind === "cuponera" &&
@@ -331,13 +391,17 @@ export default function CreateAppointmentModal({
       setCustomerCanPurchasePackages(history.can_purchase_packages ?? false);
 
       // Load treatment packages
-      const data = await appointmentService.getTreatmentPackages(
-        selectedTreatment.slug,
-      );
+      const data = packagesResult.value;
       const packages = (data.packages || []).filter(
         (p) => p.is_active !== false,
       );
       setTreatmentPackages(packages);
+
+      if (bankDetailsResult.status === "fulfilled") {
+        setDepositAmountConfig(getValidDepositAmount(bankDetailsResult.value?.deposit_amount));
+      } else {
+        setDepositAmountConfig(DEFAULT_DEPOSIT_AMOUNT);
+      }
 
       // Auto-reset paymentMode if the selected mode is now unavailable
       if (paymentMode) {
@@ -529,10 +593,48 @@ export default function CreateAppointmentModal({
         setError("Selecciona un paquete");
         return;
       }
+      if (paymentMode === "single_session") {
+        if (!newPurchase.payment_plan) {
+          setError("Selecciona cómo se manejará el pago");
+          return;
+        }
+        if (newPurchase.payment_plan === "full_now") {
+          if (
+            newPurchase.amount_paid === "" ||
+            isNaN(parseFloat(newPurchase.amount_paid)) ||
+            parseFloat(newPurchase.amount_paid) <= 0 ||
+            !newPurchase.payment_method
+          ) {
+            setError("Completa el monto y método de pago");
+            return;
+          }
+        }
+        if (
+          newPurchase.payment_plan === "pay_later" &&
+          !newPurchase.payment_method_expected
+        ) {
+          setError("Selecciona el método esperado para el cobro");
+          return;
+        }
+        if (newPurchase.payment_plan === "deposit") {
+          if (!newPurchase.payment_method) {
+            setError("Selecciona el método de pago de la seña");
+            return;
+          }
+          if (
+            singleSessionRemainingAmount > 0 &&
+            !newPurchase.payment_method_expected
+          ) {
+            setError("Selecciona el método esperado para cobrar el resto");
+            return;
+          }
+        }
+      }
       if (
-        (paymentMode === "single_session" || paymentMode === "new_package") &&
+        paymentMode === "new_package" &&
         (newPurchase.amount_paid === "" ||
           isNaN(parseFloat(newPurchase.amount_paid)) ||
+          parseFloat(newPurchase.amount_paid) <= 0 ||
           !newPurchase.payment_method)
       ) {
         setError("Completa el monto y método de pago");
@@ -589,6 +691,12 @@ export default function CreateAppointmentModal({
     try {
       let customerId = selectedCustomer.id || selectedCustomer._id;
       let purchasedPackageId = null;
+      let paymentId = null;
+      let singleSessionPaymentPlan = null;
+      let paymentMethodExpected = null;
+      let allowConfirmWithoutPayment = false;
+      const hasSingleSessionRemainder =
+        newPurchase.payment_plan === "deposit" && singleSessionRemainingAmount > 0;
 
       // Create new customer if needed
       if (customerMode === "new") {
@@ -597,22 +705,50 @@ export default function CreateAppointmentModal({
       }
 
       // Create payment/package if needed
-      if (paymentMode === "single_session" || paymentMode === "new_package") {
+      if (paymentMode === "single_session") {
+        singleSessionPaymentPlan = newPurchase.payment_plan || "full_now";
+
+        if (singleSessionPaymentPlan === "pay_later") {
+          paymentMethodExpected = newPurchase.payment_method_expected;
+          allowConfirmWithoutPayment = true;
+        } else {
+          const upfrontAmount =
+            singleSessionPaymentPlan === "deposit"
+              ? effectiveDepositAmount
+              : parseFloat(newPurchase.amount_paid);
+          if (singleSessionPaymentPlan === "deposit" && hasSingleSessionRemainder) {
+            paymentMethodExpected = newPurchase.payment_method_expected;
+            allowConfirmWithoutPayment = true;
+          }
+
+          const paymentData = {
+            customer_id: customerId,
+            treatment_id: selectedTreatment.id,
+            amount: upfrontAmount,
+            payment_method: newPurchase.payment_method,
+            item_type: "single_session",
+            payment_plan: singleSessionPaymentPlan,
+            total_amount: singleSessionTotalAmount || upfrontAmount,
+            payment_method_expected: paymentMethodExpected || undefined,
+          };
+          const payment = await adminService.createManualPayment(paymentData);
+          paymentId = payment?.payment_id || payment?.id || payment?._id || null;
+        }
+      } else if (paymentMode === "new_package") {
         const paymentData = {
           customer_id: customerId,
           treatment_id: selectedTreatment.id,
           amount: parseFloat(newPurchase.amount_paid),
           payment_method: newPurchase.payment_method,
-          item_type:
-            paymentMode === "single_session" ? "single_session" : "package",
-          package_id:
-            paymentMode === "new_package" ? selectedPackage.id : undefined,
+          item_type: "package",
+          package_id: selectedPackage.id,
         };
 
         const payment = await adminService.createManualPayment(paymentData);
         if (payment.purchased_package_id) {
           purchasedPackageId = payment.purchased_package_id;
         }
+        paymentId = payment?.payment_id || payment?.id || payment?._id || null;
       } else if (paymentMode === "existing_cuponera") {
         purchasedPackageId = selectedCuponera.purchased_package_id;
       }
@@ -632,6 +768,21 @@ export default function CreateAppointmentModal({
         purchased_package_id: purchasedPackageId,
         is_evaluation: paymentMode === "evaluacion",
       };
+      if (paymentId) {
+        appointmentData.payment_id = paymentId;
+      }
+      if (paymentMode === "single_session") {
+        appointmentData.payment_plan = singleSessionPaymentPlan || "full_now";
+        if (singleSessionTotalAmount > 0) {
+          appointmentData.total_amount = singleSessionTotalAmount;
+        }
+        if (paymentMethodExpected) {
+          appointmentData.payment_method_expected = paymentMethodExpected;
+        }
+        if (allowConfirmWithoutPayment) {
+          appointmentData.allow_confirm_without_payment = true;
+        }
+      }
 
       const appointmentResult =
         await adminService.createAdminAppointment(appointmentData);
@@ -678,7 +829,10 @@ export default function CreateAppointmentModal({
         total_sessions: "",
         amount_paid: "",
         payment_method: "efectivo",
+        payment_plan: "full_now",
+        payment_method_expected: "efectivo",
       });
+      setDepositAmountConfig(DEFAULT_DEPOSIT_AMOUNT);
       onClose();
     }
   };
@@ -1081,9 +1235,19 @@ export default function CreateAppointmentModal({
             <RadioGroup
               value={paymentMode || ""}
               onChange={(e) => {
-                setPaymentMode(e.target.value);
+                const nextMode = e.target.value;
+                setPaymentMode(nextMode);
                 setSelectedCuponera(null);
                 setSelectedPackage(null);
+                if (nextMode === "single_session") {
+                  setNewPurchase((prev) => ({
+                    ...prev,
+                    amount_paid: selectedTreatment?.single_session_price || "",
+                    payment_plan: "full_now",
+                    payment_method: "efectivo",
+                    payment_method_expected: "efectivo",
+                  }));
+                }
               }}
             >
               {customerCuponeras.length > 0 && (
@@ -1154,34 +1318,144 @@ export default function CreateAppointmentModal({
                     gap: 1,
                   }}
                 >
-                  <TextField
-                    label="Monto"
-                    type="number"
-                    value={newPurchase.amount_paid}
+                  <Typography variant="body2" color="text.secondary">
+                    Monto total de la sesión: ${formatMoney(singleSessionTotalAmount)}
+                  </Typography>
+
+                  <RadioGroup
+                    value={newPurchase.payment_plan}
                     onChange={(e) =>
                       setNewPurchase((prev) => ({
                         ...prev,
-                        amount_paid: e.target.value,
+                        payment_plan: e.target.value,
                       }))
                     }
-                  />
-                  <FormControl>
-                    <InputLabel>Método de pago</InputLabel>
-                    <Select
-                      value={newPurchase.payment_method}
-                      onChange={(e) =>
-                        setNewPurchase((prev) => ({
-                          ...prev,
-                          payment_method: e.target.value,
-                        }))
-                      }
-                      label="Método de pago"
-                    >
-                      <MenuItem value="efectivo">Efectivo</MenuItem>
-                      <MenuItem value="transferencia">Transferencia</MenuItem>
-                      <MenuItem value="posnet">POSNet</MenuItem>
-                    </Select>
-                  </FormControl>
+                  >
+                    <FormControlLabel
+                      value="full_now"
+                      control={<Radio />}
+                      label="Pago completo ahora"
+                    />
+                    <FormControlLabel
+                      value="pay_later"
+                      control={<Radio />}
+                      label="Pagar durante sesión"
+                    />
+                    <FormControlLabel
+                      value="deposit"
+                      control={<Radio />}
+                      label={`Seña + resto (seña: $${formatMoney(effectiveDepositAmount)})`}
+                    />
+                  </RadioGroup>
+
+                  {newPurchase.payment_plan === "full_now" && (
+                    <>
+                      <TextField
+                        label="Monto"
+                        type="number"
+                        value={newPurchase.amount_paid}
+                        onChange={(e) =>
+                          setNewPurchase((prev) => ({
+                            ...prev,
+                            amount_paid: e.target.value,
+                          }))
+                        }
+                      />
+                      <FormControl>
+                        <InputLabel>Método de pago</InputLabel>
+                        <Select
+                          value={newPurchase.payment_method}
+                          onChange={(e) =>
+                            setNewPurchase((prev) => ({
+                              ...prev,
+                              payment_method: e.target.value,
+                            }))
+                          }
+                          label="Método de pago"
+                        >
+                          <MenuItem value="efectivo">Efectivo</MenuItem>
+                          <MenuItem value="transferencia">Transferencia</MenuItem>
+                          <MenuItem value="posnet">POSNet</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </>
+                  )}
+
+                  {newPurchase.payment_plan === "pay_later" && (
+                    <FormControl>
+                      <InputLabel>Método esperado de cobro</InputLabel>
+                      <Select
+                        value={newPurchase.payment_method_expected}
+                        onChange={(e) =>
+                          setNewPurchase((prev) => ({
+                            ...prev,
+                            payment_method_expected: e.target.value,
+                          }))
+                        }
+                        label="Método esperado de cobro"
+                      >
+                        <MenuItem value="efectivo">Efectivo</MenuItem>
+                        <MenuItem value="transferencia">Transferencia</MenuItem>
+                        <MenuItem value="posnet">POSNet</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
+
+                  {newPurchase.payment_plan === "deposit" && (
+                    <>
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 1,
+                          backgroundColor: "grey.100",
+                        }}
+                      >
+                        <Typography variant="body2">
+                          Seña a cobrar ahora: ${formatMoney(effectiveDepositAmount)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Resto pendiente: ${formatMoney(singleSessionRemainingAmount)}
+                        </Typography>
+                      </Box>
+                      <FormControl>
+                        <InputLabel>Método de pago de la seña</InputLabel>
+                        <Select
+                          value={newPurchase.payment_method}
+                          onChange={(e) =>
+                            setNewPurchase((prev) => ({
+                              ...prev,
+                              payment_method: e.target.value,
+                            }))
+                          }
+                          label="Método de pago de la seña"
+                        >
+                          <MenuItem value="efectivo">Efectivo</MenuItem>
+                          <MenuItem value="transferencia">Transferencia</MenuItem>
+                          <MenuItem value="posnet">POSNet</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {singleSessionRemainingAmount > 0 && (
+                        <FormControl>
+                          <InputLabel>Método esperado para el resto</InputLabel>
+                          <Select
+                            value={newPurchase.payment_method_expected}
+                            onChange={(e) =>
+                              setNewPurchase((prev) => ({
+                                ...prev,
+                                payment_method_expected: e.target.value,
+                              }))
+                            }
+                            label="Método esperado para el resto"
+                          >
+                            <MenuItem value="efectivo">Efectivo</MenuItem>
+                            <MenuItem value="transferencia">Transferencia</MenuItem>
+                            <MenuItem value="posnet">POSNet</MenuItem>
+                          </Select>
+                        </FormControl>
+                      )}
+                    </>
+                  )}
                 </Box>
               )}
 
@@ -1379,12 +1653,63 @@ export default function CreateAppointmentModal({
                       <Typography variant="body2">
                         <strong>Tipo:</strong> Sesión individual
                       </Typography>
-                      <Typography variant="body2">
-                        <strong>Monto:</strong> ${newPurchase.amount_paid}
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Método:</strong> {newPurchase.payment_method}
-                      </Typography>
+                      {newPurchase.payment_plan === "full_now" && (
+                        <>
+                          <Typography variant="body2">
+                            <strong>Plan de pago:</strong> Pago completo ahora
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Monto:</strong> ${formatMoney(newPurchase.amount_paid)}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Método:</strong>{" "}
+                            {formatPaymentMethodLabel(newPurchase.payment_method)}
+                          </Typography>
+                        </>
+                      )}
+                      {newPurchase.payment_plan === "pay_later" && (
+                        <>
+                          <Typography variant="body2">
+                            <strong>Plan de pago:</strong> Pagar durante sesión
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Total a cobrar luego:</strong> $
+                            {formatMoney(singleSessionTotalAmount)}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Método esperado:</strong>{" "}
+                            {formatPaymentMethodLabel(
+                              newPurchase.payment_method_expected,
+                            )}
+                          </Typography>
+                        </>
+                      )}
+                      {newPurchase.payment_plan === "deposit" && (
+                        <>
+                          <Typography variant="body2">
+                            <strong>Plan de pago:</strong> Seña + resto
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Total:</strong> ${formatMoney(singleSessionTotalAmount)}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Seña:</strong> ${formatMoney(effectiveDepositAmount)} (
+                            {formatPaymentMethodLabel(newPurchase.payment_method)})
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Resto:</strong> $
+                            {formatMoney(singleSessionRemainingAmount)}
+                          </Typography>
+                          {singleSessionRemainingAmount > 0 && (
+                            <Typography variant="body2">
+                              <strong>Método esperado para el resto:</strong>{" "}
+                              {formatPaymentMethodLabel(
+                                newPurchase.payment_method_expected,
+                              )}
+                            </Typography>
+                          )}
+                        </>
+                      )}
                     </>
                   )}
                   {paymentMode === "new_package" && (
@@ -1574,7 +1899,10 @@ export default function CreateAppointmentModal({
                   total_sessions: "",
                   amount_paid: "",
                   payment_method: "efectivo",
+                  payment_plan: "full_now",
+                  payment_method_expected: "efectivo",
                 });
+                setDepositAmountConfig(DEFAULT_DEPOSIT_AMOUNT);
                 onCreated();
                 handleClose();
               }}

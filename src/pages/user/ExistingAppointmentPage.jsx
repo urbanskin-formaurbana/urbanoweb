@@ -573,6 +573,31 @@ export default function ExistingAppointmentPage() {
                   />
                 </>
               )}
+
+              {appointmentData.payment_method_expected === "posnet" && (
+                <>
+                  <Typography variant="body2" sx={{mb: 2}}>
+                    Tu cita está reservada. Podrás pagar con POSNet al momento de
+                    tu sesión.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<WhatsAppIcon />}
+                    onClick={() => {
+                      const message = `Hola! Quiero confirmar mi turno de ${appointmentData.treatment_name} para ${formatDate(appointmentData.scheduled_at)} a las ${formatTime(appointmentData.scheduled_at)}. Pagaré con POSNet. Ref: #${appointmentData.id}`;
+                      window.open(
+                        `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`,
+                        "_blank",
+                      );
+                    }}
+                    fullWidth
+                    sx={{mb: 1}}
+                  >
+                    Confirmar por WhatsApp
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         )}

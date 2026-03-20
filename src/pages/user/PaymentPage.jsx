@@ -32,6 +32,23 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import bankService from "../../services/bank_service";
 import transferReceiptStore from "../../utils/transferReceiptStore";
 
+const DEFAULT_DEPOSIT_AMOUNT = 500;
+
+function getValidDepositAmount(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_DEPOSIT_AMOUNT;
+  }
+  return parsed;
+}
+
+function formatMoney(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "0";
+  if (Number.isInteger(parsed)) return parsed.toString();
+  return parsed.toFixed(2);
+}
+
 export default function PaymentPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,7 +92,22 @@ export default function PaymentPage() {
     account_type: "",
     notes: "",
   });
+  const [depositAmountConfig, setDepositAmountConfig] = useState(
+    DEFAULT_DEPOSIT_AMOUNT,
+  );
   const [transferFile, setTransferFile] = useState(null);
+
+  const parsedBasePrice = Number(basePrice);
+  const hasValidBasePrice = Number.isFinite(parsedBasePrice);
+  const normalizedDepositAmount = getValidDepositAmount(depositAmountConfig);
+  const effectiveDepositAmount =
+    hasValidBasePrice
+      ? Math.min(normalizedDepositAmount, Math.max(parsedBasePrice, 0))
+      : normalizedDepositAmount;
+  const depositRemainderAmount = Math.max(
+    (hasValidBasePrice ? parsedBasePrice : 0) - effectiveDepositAmount,
+    0,
+  );
 
   // Load bank details on mount
   useEffect(() => {
@@ -88,8 +120,10 @@ export default function PaymentPage() {
           account_type: data.account_type || "",
           notes: data.notes || "",
         });
+        setDepositAmountConfig(getValidDepositAmount(data.deposit_amount));
       } catch (error) {
         console.error("Error loading bank details:", error);
+        setDepositAmountConfig(DEFAULT_DEPOSIT_AMOUNT);
       }
     };
     fetchBankDetails();
@@ -910,10 +944,11 @@ export default function PaymentPage() {
                     }}
                   >
                     <Typography variant="body1" sx={{fontWeight: paymentMethod === "deposito" ? "bold" : "normal"}}>
-                      💎 Reserva con $500
+                      💎 Reserva con ${formatMoney(effectiveDepositAmount)}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      $500 ahora + ${basePrice - 500} en efectivo/transferencia
+                      ${formatMoney(effectiveDepositAmount)} ahora + $
+                      {formatMoney(depositRemainderAmount)} en efectivo/transferencia
                     </Typography>
                   </Box>
                 )}
@@ -1115,10 +1150,11 @@ export default function PaymentPage() {
           >
             <CardContent sx={{m: -2}}>
               <Typography variant="h6" sx={{mb: 2, fontWeight: "bold", m: 2}}>
-                Reserva con Depósito de $500
+                Reserva con Depósito de ${formatMoney(effectiveDepositAmount)}
               </Typography>
               <Alert severity="info" sx={{mb: 2, m: 2}}>
-                Paga $500 ahora para reservar tu sesión. Los ${basePrice - 500} restantes los pagas en efectivo o transferencia al momento de tu sesión.
+                Paga ${formatMoney(effectiveDepositAmount)} ahora para reservar tu sesión. Los $
+                {formatMoney(depositRemainderAmount)} restantes los pagas en efectivo o transferencia al momento de tu sesión.
               </Alert>
               {paymentStatus === "payment_ready" ? (
                 <>
@@ -1130,7 +1166,7 @@ export default function PaymentPage() {
                   <MercadoPagoBrick
                     key="deposit-brick"
                     preferenceId={preferenceId}
-                    amount={500}
+                    amount={effectiveDepositAmount}
                     treatmentId={treatment.slug}
                     payerEmail={profileData.email}
                     isEvaluation={false}
@@ -1148,7 +1184,9 @@ export default function PaymentPage() {
                   fullWidth
                   sx={{m: 2, width: "calc(100% - 32px)"}}
                 >
-                  {profileLoading ? "Preparando..." : "Pagar Depósito de $500"}
+                  {profileLoading
+                    ? "Preparando..."
+                    : `Pagar Depósito de $${formatMoney(effectiveDepositAmount)}`}
                 </Button>
               )}
             </CardContent>

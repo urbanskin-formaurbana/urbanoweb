@@ -73,6 +73,11 @@ export default function DepositRemainderModal({
                 control={<Radio />}
                 label="Transferencia Bancaria"
               />
+              <FormControlLabel
+                value="posnet"
+                control={<Radio />}
+                label="POSNet"
+              />
             </RadioGroup>
 
             <TextField

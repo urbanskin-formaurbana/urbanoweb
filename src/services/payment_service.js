@@ -128,9 +128,9 @@ export const paymentService = {
   },
 
   /**
-   * Confirm payment for appointment (efectivo or transferencia)
+   * Confirm payment for appointment (efectivo, transferencia, o posnet)
    * @param {string} appointmentId - Appointment ID
-   * @param {object} data - { method: 'efectivo'|'transferencia', amount }
+   * @param {object} data - { method: 'efectivo'|'transferencia'|'posnet', amount }
    * @returns {Promise<object>} - { payment_id, appointment_id, method, amount, status }
    */
   async confirmAppointmentPayment(appointmentId, data) {
@@ -165,7 +165,7 @@ export const paymentService = {
   /**
    * Record remainder payment for deposit
    * @param {string} appointmentId - Appointment ID
-   * @param {object} data - { method: 'efectivo'|'transferencia', amount }
+   * @param {object} data - { method: 'efectivo'|'transferencia'|'posnet', amount }
    * @returns {Promise<object>} - { payment_id, appointment_id, deposit_amount, remainder_amount, total_amount, method, status }
    */
   async addDepositRemainder(appointmentId, data) {
