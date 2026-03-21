@@ -267,17 +267,7 @@ export default function CreateAppointmentModal({
           selectedTreatment,
           paymentMode,
         );
-        console.log(
-          "[CreateAppointmentModal] Raw slots from API:",
-          slotStrings?.length,
-          slotStrings?.slice(0, 3),
-        );
         const filtered = filterSlotsForEmployee(slotStrings);
-        console.log(
-          "[CreateAppointmentModal] After filterSlotsForEmployee:",
-          filtered?.length,
-          filtered?.slice(0, 3),
-        );
         setAvailableSlots(filtered);
       } catch (err) {
         console.error("Error loading slots:", err);
@@ -813,6 +803,8 @@ export default function CreateAppointmentModal({
         customerMode === "new"
           ? newCustomerForm.full_name
           : selectedCustomer.full_name || selectedCustomer.name;
+      const wasCuphoneraCreated = paymentMode === "purchase_cuponera";
+
       setSuccessState({
         appointment_id: appointmentResult.id,
         session_number: appointmentResult.session_number,
@@ -822,6 +814,7 @@ export default function CreateAppointmentModal({
           (appointmentResult.remaining_sessions || 0),
         treatment_name: selectedTreatment.name,
         customer_name: displayCustomerName,
+        wasCuphoneraCreated,
       });
 
       setSubmitting(false);
@@ -1793,13 +1786,21 @@ export default function CreateAppointmentModal({
 
         <Card sx={{mb: 3, bgcolor: "success.light"}}>
           <CardContent>
-            <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
-              Sesión {successState.session_number} de{" "}
-              {successState.total_sessions}
-            </Typography>
-            <Typography variant="subtitle1" sx={{fontWeight: "bold"}}>
-              {successState.treatment_name}
-            </Typography>
+            {successState.wasCuphoneraCreated ? (
+              <>
+                <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                  Cuponera creada
+                </Typography>
+                <Typography variant="subtitle1" sx={{fontWeight: "bold"}}>
+                  {successState.total_sessions} sesiones de{" "}
+                  {successState.treatment_name}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="subtitle1" sx={{fontWeight: "bold"}}>
+                Sesión de {successState.treatment_name}
+              </Typography>
+            )}
             <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
               Cliente: {successState.customer_name}
             </Typography>
