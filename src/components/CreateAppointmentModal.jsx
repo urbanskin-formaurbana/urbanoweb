@@ -205,10 +205,10 @@ export default function CreateAppointmentModal({
 
   // Load all step 3 data when entering step 3
   useEffect(() => {
-    if (open && step === 3 && selectedCustomer && selectedTreatment) {
+    if (open && step === 3 && selectedTreatment && (selectedCustomer || customerMode === "new")) {
       loadStep3Data();
     }
-  }, [open, step, selectedCustomer, selectedTreatment]);
+  }, [open, step, selectedCustomer, selectedTreatment, customerMode]);
 
   // Update amount when package is selected
   useEffect(() => {
@@ -370,32 +370,41 @@ export default function CreateAppointmentModal({
   const loadStep3Data = async () => {
     setLoadingStep3(true);
     try {
+      const isNewCustomer = customerMode === "new";
+
+      // For existing customers, fetch history; for new customers, skip it
+      const historyPromise = isNewCustomer
+        ? Promise.resolve(null)
+        : adminService.getCustomerHistory(selectedCustomer.id || selectedCustomer._id);
+
       const [historyResult, packagesResult, bankDetailsResult] =
         await Promise.allSettled([
-          adminService.getCustomerHistory(
-            selectedCustomer.id || selectedCustomer._id,
-          ),
+          historyPromise,
           appointmentService.getTreatmentPackages(selectedTreatment.slug),
           bankService.getBankDetails(),
         ]);
 
-      if (historyResult.status !== "fulfilled") {
-        throw historyResult.reason;
-      }
       if (packagesResult.status !== "fulfilled") {
         throw packagesResult.reason;
       }
 
       // Load customer history (cuponeras + can_purchase_packages status)
-      const history = historyResult.value;
-      const activeCuponeras = (history.timeline || []).filter(
-        (item) =>
-          item.kind === "cuponera" &&
-          item.sessions_used < item.total_sessions &&
-          item.treatment_name === selectedTreatment.name,
-      );
+      let activeCuponeras = [];
+      let canPurchasePackages = true; // Default for new customers
+
+      if (!isNewCustomer && historyResult.status === "fulfilled") {
+        const history = historyResult.value;
+        activeCuponeras = (history.timeline || []).filter(
+          (item) =>
+            item.kind === "cuponera" &&
+            item.sessions_used < item.total_sessions &&
+            item.treatment_name === selectedTreatment.name,
+        );
+        canPurchasePackages = history.can_purchase_packages ?? true;
+      }
+
       setCustomerCuponeras(activeCuponeras);
-      setCustomerCanPurchasePackages(history.can_purchase_packages ?? false);
+      setCustomerCanPurchasePackages(canPurchasePackages);
 
       // Load treatment packages
       const data = packagesResult.value;
@@ -416,8 +425,7 @@ export default function CreateAppointmentModal({
           ...(activeCuponeras.length > 0 ? ["existing_cuponera"] : []),
           "single_session",
           ...(packages.length > 0 ? ["new_package"] : []),
-          ...(selectedTreatment?.category === "body" &&
-          !(history.can_purchase_packages ?? false)
+          ...(selectedTreatment?.category === "body" && !canPurchasePackages
             ? ["evaluacion"]
             : []),
         ];
@@ -578,8 +586,12 @@ export default function CreateAppointmentModal({
   const handleNextStep = () => {
     // Validate current step
     if (step === 1) {
-      if (!selectedCustomer) {
+      if (customerMode === "search" && !selectedCustomer) {
         setError("Selecciona un cliente");
+        return;
+      }
+      if (customerMode === "new" && !newCustomerForm.full_name) {
+        setError("Ingresa el nombre del cliente");
         return;
       }
     } else if (step === 2) {
@@ -795,6 +807,10 @@ export default function CreateAppointmentModal({
         await adminService.createAdminAppointment(appointmentData);
 
       // Show success screen with multi-session option if there are remaining sessions
+      const displayCustomerName =
+        customerMode === "new"
+          ? newCustomerForm.full_name
+          : selectedCustomer.full_name || selectedCustomer.name;
       setSuccessState({
         appointment_id: appointmentResult.id,
         session_number: appointmentResult.session_number,
@@ -803,7 +819,7 @@ export default function CreateAppointmentModal({
           appointmentResult.session_number +
           (appointmentResult.remaining_sessions || 0),
         treatment_name: selectedTreatment.name,
-        customer_name: selectedCustomer.full_name || selectedCustomer.name,
+        customer_name: displayCustomerName,
       });
 
       setSubmitting(false);
