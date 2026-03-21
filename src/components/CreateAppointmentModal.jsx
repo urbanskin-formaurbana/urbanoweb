@@ -63,6 +63,7 @@ const PAYMENT_METHOD_LABELS = {
   efectivo: "Efectivo",
   transferencia: "Transferencia bancaria",
   posnet: "POSNet",
+  mercadopago_qr: "Mercadopago QR",
 };
 
 function formatCategoryLabel(category) {
@@ -166,6 +167,7 @@ export default function CreateAppointmentModal({
   const [depositAmountConfig, setDepositAmountConfig] = useState(
     DEFAULT_DEPOSIT_AMOUNT,
   );
+  const [payLaterAmount, setPayLaterAmount] = useState("");
 
   // Step 4: Schedule
   const [scheduleDate, setScheduleDate] = useState(null);
@@ -231,6 +233,13 @@ export default function CreateAppointmentModal({
       }));
     }
   }, [paymentMode, selectedTreatment]);
+
+  // Initialize payLaterAmount when payment plan changes to pay_later
+  useEffect(() => {
+    if (newPurchase.payment_plan === "pay_later" && selectedTreatment) {
+      setPayLaterAmount(selectedTreatment.single_session_price?.toString() || "");
+    }
+  }, [newPurchase.payment_plan, selectedTreatment]);
 
   const treatmentSingleSessionAmount = Number(
     selectedTreatment?.single_session_price || 0,
@@ -784,7 +793,9 @@ export default function CreateAppointmentModal({
       }
       if (paymentMode === "single_session") {
         appointmentData.payment_plan = singleSessionPaymentPlan || "full_now";
-        if (singleSessionTotalAmount > 0) {
+        if (singleSessionPaymentPlan === "pay_later" && payLaterAmount) {
+          appointmentData.total_amount = parseFloat(payLaterAmount);
+        } else if (singleSessionTotalAmount > 0) {
           appointmentData.total_amount = singleSessionTotalAmount;
         }
         if (paymentMethodExpected) {
@@ -1394,29 +1405,41 @@ export default function CreateAppointmentModal({
                           <MenuItem value="efectivo">Efectivo</MenuItem>
                           <MenuItem value="transferencia">Transferencia</MenuItem>
                           <MenuItem value="posnet">POSNet</MenuItem>
+                          <MenuItem value="mercadopago_qr">Mercadopago QR</MenuItem>
                         </Select>
                       </FormControl>
                     </>
                   )}
 
                   {newPurchase.payment_plan === "pay_later" && (
-                    <FormControl>
-                      <InputLabel>Método esperado de cobro</InputLabel>
-                      <Select
-                        value={newPurchase.payment_method_expected}
-                        onChange={(e) =>
-                          setNewPurchase((prev) => ({
-                            ...prev,
-                            payment_method_expected: e.target.value,
-                          }))
-                        }
-                        label="Método esperado de cobro"
-                      >
-                        <MenuItem value="efectivo">Efectivo</MenuItem>
-                        <MenuItem value="transferencia">Transferencia</MenuItem>
-                        <MenuItem value="posnet">POSNet</MenuItem>
-                      </Select>
-                    </FormControl>
+                    <>
+                      <TextField
+                        label="Monto a cobrar"
+                        type="number"
+                        value={payLaterAmount}
+                        onChange={(e) => setPayLaterAmount(e.target.value)}
+                        slotProps={{ input: { min: "0", step: "0.01" } }}
+                        fullWidth
+                      />
+                      <FormControl>
+                        <InputLabel>Método esperado de cobro</InputLabel>
+                        <Select
+                          value={newPurchase.payment_method_expected}
+                          onChange={(e) =>
+                            setNewPurchase((prev) => ({
+                              ...prev,
+                              payment_method_expected: e.target.value,
+                            }))
+                          }
+                          label="Método esperado de cobro"
+                        >
+                          <MenuItem value="efectivo">Efectivo</MenuItem>
+                          <MenuItem value="transferencia">Transferencia</MenuItem>
+                          <MenuItem value="posnet">POSNet</MenuItem>
+                          <MenuItem value="mercadopago_qr">Mercadopago QR</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </>
                   )}
 
                   {newPurchase.payment_plan === "deposit" && (
@@ -1450,6 +1473,7 @@ export default function CreateAppointmentModal({
                           <MenuItem value="efectivo">Efectivo</MenuItem>
                           <MenuItem value="transferencia">Transferencia</MenuItem>
                           <MenuItem value="posnet">POSNet</MenuItem>
+                          <MenuItem value="mercadopago_qr">Mercadopago QR</MenuItem>
                         </Select>
                       </FormControl>
 
@@ -1469,6 +1493,7 @@ export default function CreateAppointmentModal({
                             <MenuItem value="efectivo">Efectivo</MenuItem>
                             <MenuItem value="transferencia">Transferencia</MenuItem>
                             <MenuItem value="posnet">POSNet</MenuItem>
+                            <MenuItem value="mercadopago_qr">Mercadopago QR</MenuItem>
                           </Select>
                         </FormControl>
                       )}
@@ -1694,7 +1719,7 @@ export default function CreateAppointmentModal({
                           </Typography>
                           <Typography variant="body2">
                             <strong>Total a cobrar luego:</strong> $
-                            {formatMoney(singleSessionTotalAmount)}
+                            {formatMoney(payLaterAmount || singleSessionTotalAmount)}
                           </Typography>
                           <Typography variant="body2">
                             <strong>Método esperado:</strong>{" "}
