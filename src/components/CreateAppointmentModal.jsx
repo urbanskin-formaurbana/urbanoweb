@@ -708,7 +708,9 @@ export default function CreateAppointmentModal({
     setError(null);
 
     try {
-      let customerId = selectedCustomer.id || selectedCustomer._id;
+      let customerId = customerMode === "new"
+        ? null
+        : selectedCustomer.id || selectedCustomer._id;
       let purchasedPackageId = null;
       let paymentId = null;
       let singleSessionPaymentPlan = null;
@@ -1652,7 +1654,9 @@ export default function CreateAppointmentModal({
                 <Box sx={{mb: 2}}>
                   <Typography variant="body2">
                     <strong>Cliente:</strong>{" "}
-                    {selectedCustomer?.full_name || selectedCustomer?.name}
+                    {customerMode === "new"
+                      ? newCustomerForm.full_name
+                      : selectedCustomer?.full_name || selectedCustomer?.name}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Tratamiento:</strong> {selectedTreatment?.name}
