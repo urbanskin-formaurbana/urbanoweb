@@ -121,6 +121,13 @@ const adminService = {
     return apiCall(`/admin/customers/${customerId}/approve`, { method: 'PATCH' });
   },
 
+  async updateCustomer(customerId, data) {
+    return apiCall(`/admin/customers/${customerId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
   async getMonthlyReports(months = 6, category = null) {
     const params = new URLSearchParams();
     params.append('months', months);

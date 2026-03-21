@@ -14,6 +14,10 @@ import {
   Collapse,
   IconButton,
   Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {ExpandMore as ExpandMoreIcon, Edit as EditIcon, Check as CheckIcon, Close as CloseIcon} from "@mui/icons-material";
 import dayjs from "dayjs";
@@ -43,6 +47,13 @@ export default function SociosTab() {
   // Create appointment modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createModalCustomer, setCreateModalCustomer] = useState(null);
+
+  // Edit customer modal state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     loadCustomers();
@@ -186,6 +197,38 @@ export default function SociosTab() {
     setFeedbackText("");
   };
 
+  const handleOpenEdit = (customer) => {
+    setEditingCustomer(customer);
+    setEditName(customer.name || "");
+    setEditPhone(customer.phone || "");
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    setSavingEdit(true);
+    try {
+      await adminService.updateCustomer(editingCustomer.id, {
+        whatsapp_phone: editPhone,
+        full_name: editName,
+      });
+      // Update local state
+      setCustomers((prev) =>
+        prev.map((c) =>
+          c.id === editingCustomer.id
+            ? { ...c, name: editName, phone: editPhone }
+            : c
+        )
+      );
+      setSnackbarMsg("Cliente actualizado");
+      setEditDialogOpen(false);
+    } catch (err) {
+      console.error("Error updating customer:", err);
+      setSnackbarMsg("Error al actualizar cliente");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       completed: "#2e7d32",
@@ -258,6 +301,15 @@ export default function SociosTab() {
                         {customer.phone} | {customer.email}
                       </Typography>
                     </Box>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenEdit(customer);
+                      }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
                     <IconButton
                       size="small"
                       onClick={() => handleExpandCustomer(customer.id)}
@@ -557,6 +609,44 @@ export default function SociosTab() {
         onClose={() => setSnackbarMsg("")}
         message={snackbarMsg}
       />
+
+      {/* Edit Customer Dialog */}
+      <Dialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Editar socio</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField
+              label="Nombre completo"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              fullWidth
+            />
+            <TextField
+              label="WhatsApp"
+              value={editPhone}
+              onChange={(e) => setEditPhone(e.target.value)}
+              fullWidth
+              placeholder="+598 98 123 456"
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialogOpen(false)}>Cancelar</Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveEdit}
+            disabled={savingEdit}
+            startIcon={savingEdit ? <CircularProgress size={18} /> : null}
+          >
+            {savingEdit ? "Guardando..." : "Guardar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Create Appointment Modal */}
       <CreateAppointmentModal
