@@ -121,7 +121,7 @@ function CampaignModal({
       onClose();
       navigate("/payment", {
         state: {
-          treatment: { name: item.name, slug: item.slug },
+          treatment: { name: item.name, slug: item.slug, item_type: item.item_type, category: productType },
           selectedPackageId: null,
           campaignItemType: item.item_type,
           productType: productType,

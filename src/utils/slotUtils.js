@@ -70,6 +70,26 @@ export function getSlotDuration(treatment, paymentMode) {
 }
 
 /**
+ * Fetch all available slots for a campaign treatment (no date filter)
+ * Used to populate the date list in the UI
+ * Returns: raw ISO datetime strings
+ */
+export async function fetchAllCampaignSlots(treatment, paymentMode) {
+  if (!treatment || !isCampaignTreatment(treatment)) return [];
+
+  try {
+    const duration = getSlotDuration(treatment, paymentMode);
+    const productType = treatment.category; // e.g., 'laser', 'hifu'
+    if (!productType) return [];
+    const campaignService = createCampaignService(productType);
+    return await campaignService.getAvailableSlots(duration);
+  } catch (err) {
+    console.error('Error fetching all campaign slots:', err);
+    throw err;
+  }
+}
+
+/**
  * Fetch available slots for a given date and treatment
  * Handles both campaign (laser, hifu) and regular treatments
  * Returns: raw ISO datetime strings
@@ -82,7 +102,13 @@ export async function fetchAvailableSlots(date, treatment, paymentMode) {
       const duration = getSlotDuration(treatment, paymentMode);
       const productType = treatment.category; // e.g., 'laser', 'hifu'
       const campaignService = createCampaignService(productType);
-      return await campaignService.getAvailableSlots(duration);
+      const allSlots = await campaignService.getAvailableSlots(duration);
+
+      // Filter slots to only those matching the requested date
+      const targetDate = dayjs(date).tz('America/Montevideo').format('YYYY-MM-DD');
+      return allSlots.filter(slot =>
+        dayjs.utc(slot).tz('America/Montevideo').format('YYYY-MM-DD') === targetDate
+      );
     } else {
       const duration = getSlotDuration(treatment, paymentMode);
       return appointmentService.getAvailableSlots(date, duration);

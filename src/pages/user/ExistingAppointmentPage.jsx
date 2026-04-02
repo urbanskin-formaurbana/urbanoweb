@@ -38,7 +38,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import EditIcon from "@mui/icons-material/Edit";
 import appointmentService from "../../services/appointment_service";
 import paymentService from "../../services/payment_service";
-import {isCampaignTreatment} from "../../utils/slotUtils";
+import {fetchAvailableSlots, fetchAllCampaignSlots} from "../../utils/slotUtils";
 import bankService from "../../services/bank_service";
 
 dayjs.extend(utc);
@@ -81,6 +81,8 @@ export default function ExistingAppointmentPage() {
   const [rescheduling, setRescheduling] = useState(false);
   const [rescheduleError, setRescheduleError] = useState("");
   const [appointmentData, setAppointmentData] = useState(appointment);
+  const [rescheduleCampaignDates, setRescheduleCampaignDates] = useState([]); // for campaign treatments
+  const [loadingCampaignDates, setLoadingCampaignDates] = useState(false);
 
   // Comprobante upload state
   const [uploadingComprobante, setUploadingComprobante] = useState(false);
@@ -227,13 +229,33 @@ export default function ExistingAppointmentPage() {
   };
 
   // Reschedule handlers
-  const handleRescheduleClick = () => {
-    // Pre-fill with next valid day
-    setRescheduleDate(dayjs().add(1, "day"));
+  const handleRescheduleClick = async () => {
+    setRescheduleDate(null);
     setRescheduleSlots([]);
     setRescheduleTime(null);
     setRescheduleError("");
     setRescheduleOpen(true);
+
+    // For campaign treatments, load available campaign dates
+    if (appointmentData.treatment_category) {
+      setLoadingCampaignDates(true);
+      try {
+        const allSlots = await fetchAllCampaignSlots(appointmentData, null);
+        const uniqueDates = [
+          ...new Set(
+            allSlots.map((slot) =>
+              dayjs.utc(slot).tz("America/Montevideo").format("YYYY-MM-DD"),
+            ),
+          ),
+        ].sort();
+        setRescheduleCampaignDates(uniqueDates);
+      } catch (err) {
+        console.error("Error loading campaign dates:", err);
+        setRescheduleError("Error loading campaign dates");
+      } finally {
+        setLoadingCampaignDates(false);
+      }
+    }
   };
 
   const handleRescheduleClose = () => {
@@ -254,12 +276,22 @@ export default function ExistingAppointmentPage() {
       setRescheduleTime(null);
 
       try {
-        // Fetch available slots, excluding current appointment
-        const slotStrings = await appointmentService.getAvailableSlots(
-          rescheduleDate.toDate(),
-          appointmentData.duration_minutes || 90,
-          appointmentData.id,
-        );
+        // For campaign treatments, use fetchAvailableSlots which filters by date
+        // For regular treatments, use appointmentService.getAvailableSlots with exclude param
+        let slotStrings;
+        if (appointmentData.treatment_category) {
+          slotStrings = await fetchAvailableSlots(
+            rescheduleDate.toDate(),
+            appointmentData,
+            null, // no payment mode for reschedule
+          );
+        } else {
+          slotStrings = await appointmentService.getAvailableSlots(
+            rescheduleDate.toDate(),
+            appointmentData.duration_minutes || 90,
+            appointmentData.id,
+          );
+        }
         // Convert ISO strings to dayjs objects with America/Montevideo timezone and apply customer filter
         let slots = slotStrings.map((slotStr) =>
           dayjs.utc(slotStr).tz("America/Montevideo"),
@@ -267,6 +299,7 @@ export default function ExistingAppointmentPage() {
         slots = filterSlotsForCustomer(slots);
         setRescheduleSlots(slots);
       } catch (err) {
+        console.error("Error loading available slots:", err);
         setRescheduleError("Error loading available slots");
       } finally {
         setLoadingSlots(false);
@@ -406,7 +439,7 @@ export default function ExistingAppointmentPage() {
                 <Typography variant="caption" color="text.secondary">
                   Servicio
                 </Typography>
-                {isCampaignTreatment(appointmentData) ? (
+                {appointmentData.treatment_category ? (
                   <Box sx={{mt: 0.5}}>
                     <Typography variant="body2" color="text.secondary">
                       {appointmentData.purchased_package_id
@@ -745,7 +778,7 @@ export default function ExistingAppointmentPage() {
                 </Alert>
               )}
 
-              {/* Date Picker */}
+              {/* Date Picker / Campaign Date List */}
               <Box sx={{mb: 3}}>
                 <Typography
                   variant="subtitle2"
@@ -753,19 +786,67 @@ export default function ExistingAppointmentPage() {
                 >
                   Selecciona la fecha
                 </Typography>
-                <DatePicker
-                  value={rescheduleDate}
-                  onChange={setRescheduleDate}
-                  minDate={dayjs().add(1, "day")}
-                  maxDate={dayjs().add(30, "days")}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      variant: "outlined",
-                      size: "small",
-                    },
-                  }}
-                />
+
+                {appointmentData.treatment_category ? (
+                  // Campaign date list
+                  loadingCampaignDates ? (
+                    <Box
+                      sx={{display: "flex", justifyContent: "center", py: 2}}
+                    >
+                      <CircularProgress size={32} />
+                    </Box>
+                  ) : rescheduleCampaignDates.length > 0 ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 1,
+                        maxHeight: "150px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {rescheduleCampaignDates.map((dateStr) => (
+                        <Button
+                          key={dateStr}
+                          variant={
+                            rescheduleDate?.format("YYYY-MM-DD") === dateStr
+                              ? "contained"
+                              : "outlined"
+                          }
+                          onClick={() =>
+                            setRescheduleDate(dayjs.tz(dateStr, "America/Montevideo"))
+                          }
+                          size="small"
+                          sx={{
+                            py: 1,
+                            fontSize: "0.85rem",
+                          }}
+                        >
+                          {dayjs(dateStr).format("ddd D MMM")}
+                        </Button>
+                      ))}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No hay fechas disponibles en la campaña
+                    </Typography>
+                  )
+                ) : (
+                  // Regular date picker
+                  <DatePicker
+                    value={rescheduleDate}
+                    onChange={setRescheduleDate}
+                    minDate={dayjs().add(1, "day")}
+                    maxDate={dayjs().add(30, "days")}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                        size: "small",
+                      },
+                    }}
+                  />
+                )}
               </Box>
 
               {/* Time Slots */}

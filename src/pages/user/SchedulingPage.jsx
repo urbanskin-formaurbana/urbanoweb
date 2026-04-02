@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useState, useEffect, useMemo} from "react";
 import {
   Container,
   Box,
@@ -23,6 +23,8 @@ import transferReceiptStore from "../../utils/transferReceiptStore";
 import {
   filterSlotsForCustomer,
   fetchAvailableSlots,
+  fetchAllCampaignSlots,
+  isCampaignTreatment,
 } from "../../utils/slotUtils";
 import {
   LocalizationProvider,
@@ -54,18 +56,26 @@ export default function SchedulingPage() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [campaignDates, setCampaignDates] = useState([]); // dates with available campaign slots
+  const [loadingCampaignDates, setLoadingCampaignDates] = useState(false);
 
-  const treatment = location.state?.treatment || {
+  const productType = location.state?.productType; // preserve for navigation back to payment
+  const rawTreatment = location.state?.treatment || {
     name: "Evaluación",
     slug: "evaluation",
   };
+  // Ensure campaign treatments always have category set, using productType as fallback
+  // useMemo prevents a new object reference on every render (which would cause infinite useEffect loops)
+  const treatment = useMemo(() => ({
+    ...rawTreatment,
+    category: rawTreatment.category || productType,
+  }), [rawTreatment.name, rawTreatment.slug, rawTreatment.item_type, rawTreatment.category, productType]);
   const paymentId = location.state?.paymentId;
   const purchasedPackageId = location.state?.purchased_package_id;
   const sessionInfo = location.state?.sessionInfo; // { sessionNumber, remainingSessions, totalSessions }
   const isEvaluation = location.state?.isEvaluation ?? false;
   const paymentMethod = location.state?.paymentMethod || "tarjeta"; // tarjeta | efectivo | transferencia | deposito
   const campaignItemType = location.state?.campaignItemType; // preserve for navigation back to payment
-  const productType = location.state?.productType; // preserve for navigation back to payment
   const intentPaymentId = location.state?.intentPaymentId; // Link to payment intent if created at PaymentPage
   const isPackageMode = !!purchasedPackageId && !paymentId; // subsequent session scheduling
   const isCashOrTransferMode =
@@ -81,6 +91,41 @@ export default function SchedulingPage() {
       </Container>
     );
   }
+
+  // Load campaign dates when treatment changes (for campaign treatments only)
+  useEffect(() => {
+    if (!isCampaignTreatment(treatment)) {
+      setCampaignDates([]);
+      return;
+    }
+
+    const loadCampaignDates = async () => {
+      setLoadingCampaignDates(true);
+
+      try {
+        const paymentMode = isEvaluation ? "evaluacion" : null;
+        const allSlots = await fetchAllCampaignSlots(treatment, paymentMode);
+
+        // Extract unique dates from slots
+        const uniqueDates = [
+          ...new Set(
+            allSlots.map((slot) =>
+              dayjs.utc(slot).tz("America/Montevideo").format("YYYY-MM-DD"),
+            ),
+          ),
+        ].sort();
+
+        setCampaignDates(uniqueDates);
+      } catch (err) {
+        console.error("Error loading campaign dates:", err);
+        setError("Error loading campaign dates");
+      } finally {
+        setLoadingCampaignDates(false);
+      }
+    };
+
+    loadCampaignDates();
+  }, [treatment, isEvaluation]);
 
   // Load available slots when date changes
   useEffect(() => {
@@ -284,7 +329,7 @@ export default function SchedulingPage() {
 
           {/* Date & Time Selection */}
           <Grid container spacing={3} sx={{mb: 4}}>
-            {/* Date Picker */}
+            {/* Date Picker / Campaign Date List */}
             <Grid size={{xs: 12, sm: 6}}>
               <Paper sx={{p: 2}}>
                 <Box
@@ -295,18 +340,66 @@ export default function SchedulingPage() {
                     Selecciona la fecha
                   </Typography>
                 </Box>
-                <DatePicker
-                  value={selectedDate}
-                  onChange={setSelectedDate}
-                  minDate={dayjs().add(1, "day")} // Can't book today
-                  maxDate={dayjs().add(30, "days")} // 30 days in advance
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      variant: "outlined",
-                    },
-                  }}
-                />
+
+                {isCampaignTreatment(treatment) ? (
+                  // Campaign date list
+                  loadingCampaignDates ? (
+                    <Box
+                      sx={{display: "flex", justifyContent: "center", py: 2}}
+                    >
+                      <CircularProgress size={32} />
+                    </Box>
+                  ) : campaignDates.length > 0 ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 1,
+                        maxHeight: "250px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {campaignDates.map((dateStr) => (
+                        <Button
+                          key={dateStr}
+                          variant={
+                            selectedDate?.format("YYYY-MM-DD") === dateStr
+                              ? "contained"
+                              : "outlined"
+                          }
+                          onClick={() =>
+                            setSelectedDate(dayjs.tz(dateStr, "America/Montevideo"))
+                          }
+                          size="small"
+                          sx={{
+                            py: 1,
+                            fontSize: "0.85rem",
+                          }}
+                        >
+                          {dayjs(dateStr).format("ddd D MMM")}
+                        </Button>
+                      ))}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No hay fechas disponibles en la campaña
+                    </Typography>
+                  )
+                ) : (
+                  // Regular date picker
+                  <DatePicker
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                    minDate={dayjs().add(1, "day")} // Can't book today
+                    maxDate={dayjs().add(30, "days")} // 30 days in advance
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                      },
+                    }}
+                  />
+                )}
               </Paper>
             </Grid>
 
