@@ -12,6 +12,7 @@ import {
   ListItemButton,
   Button,
   Divider,
+  ListSubheader,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -23,6 +24,7 @@ import { SentryTestButton } from "../components/SentryTestButton.jsx";
 import { useAuth } from "../contexts/AuthContext";
 import appointmentService from "../services/appointment_service";
 import authService from "../services/auth_service";
+import { getProductTypes } from "../services/campaign_service.js";
 
 const STANDARD_LINKS = [
   { to: "/", label: "FORMA Urbana" },
@@ -40,6 +42,12 @@ const TEST_LINKS = [
   { to: "/terminos-y-condiciones", label: "Términos y condiciones" },
 ];
 
+const STATIC_HOME_SECTIONS = [
+  { label: "Estética Corporal", id: "estetica-corporal" },
+  { label: "Estética Facial", id: "estetica-facial" },
+  { label: "Complementarios", id: "complementarios" },
+];
+
 export default function LandingLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -52,6 +60,7 @@ export default function LandingLayout() {
   const [appointment, setAppointment] = useState(null);
   const [loadingAppointment, setLoadingAppointment] = useState(false);
   const [canPurchasePackages, setCanPurchasePackages] = useState(false);
+  const [homeSections, setHomeSections] = useState([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -70,6 +79,23 @@ export default function LandingLayout() {
       setCanPurchasePackages(false);
     }
   }, [isAuthenticated, user]);
+
+  // Fetch home sections (campaigns) when on home page
+  useEffect(() => {
+    if (pathname === "/") {
+      getProductTypes()
+        .then((types) => {
+          // Filter out dedicated sections to prevent duplicates
+          const DEDICATED_SECTIONS = ["body", "facial", "complementarios"];
+          setHomeSections(types.filter((t) => !DEDICATED_SECTIONS.includes(t.product_type)));
+        })
+        .catch(() => {
+          setHomeSections([]);
+        });
+    } else {
+      setHomeSections([]);
+    }
+  }, [pathname]);
 
   // Load appointment when menu opens and user is authenticated
   useEffect(() => {
@@ -106,6 +132,11 @@ export default function LandingLayout() {
     logout();
     navigate("/");
     setAppointment(null);
+  };
+
+  const scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setMobileMenuOpen(false);
   };
 
   // Filter out cinturón landing page links for socios
@@ -227,6 +258,46 @@ export default function LandingLayout() {
                 </ListItem>
               );
             })}
+
+            {/* Home page section links */}
+            {pathname === "/" && (
+              <>
+                <Divider sx={{ my: 1 }} />
+                <ListSubheader sx={{ bgcolor: "transparent", color: "#2e7d32", fontWeight: 700, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                  En esta página
+                </ListSubheader>
+                {STATIC_HOME_SECTIONS.map(({ label, id }) => (
+                  <ListItem key={id} disablePadding>
+                    <ListItemButton
+                      onClick={() => scrollToSection(id)}
+                      sx={{
+                        color: "#2e7d32",
+                        py: 1,
+                      }}
+                    >
+                      <Typography variant="body2">{label}</Typography>
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+                {homeSections.map((campaign) => (
+                  <ListItem key={campaign.product_type} disablePadding>
+                    <ListItemButton
+                      onClick={() => scrollToSection(campaign.product_type)}
+                      sx={{
+                        color: "#2e7d32",
+                        py: 1,
+                      }}
+                    >
+                      <Typography variant="body2">
+                        {campaign.product_label ||
+                          campaign.product_type.charAt(0).toUpperCase() +
+                            campaign.product_type.slice(1)}
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </>
+            )}
 
             {isAuthenticated && (
               <>

@@ -280,7 +280,7 @@ export default function HomePage() {
       {/* Body Treatments Section */}
       {!treatmentsLoading && !treatmentsError && (
         <>
-          <Container component="section" sx={{py: {xs: 3, md: 4}}}>
+          <Container component="section" id="estetica-corporal" sx={{py: {xs: 3, md: 4}}}>
             <Typography
               variant={isMobile ? "h4" : "h3"}
               align="center"
@@ -340,7 +340,7 @@ export default function HomePage() {
 
           {/* Facial Treatments Section */}
           <Box sx={{bgcolor: "grey.50", py: {xs: 3, md: 4}}}>
-            <Container component="section">
+            <Container component="section" id="estetica-facial">
               <Typography
                 variant={isMobile ? "h4" : "h3"}
                 align="center"
@@ -401,7 +401,7 @@ export default function HomePage() {
             const hasGenderSplit = campaignTreatments.some((t) => t.gender);
 
             return (
-              <Box key={productType} sx={{py: {xs: 3, md: 4}}}>
+              <Box key={productType} id={productType} sx={{py: {xs: 3, md: 4}}}>
                 <Container component="section">
                   <Typography
                     variant={isMobile ? "h4" : "h3"}
@@ -515,7 +515,7 @@ export default function HomePage() {
 
           {/* Complementarios Section - only show if treatments exist */}
           {complementaryTreatments.length > 0 && (
-            <Container component="section" sx={{py: {xs: 3, md: 4}}}>
+            <Container component="section" id="complementarios" sx={{py: {xs: 3, md: 4}}}>
               <Typography
                 variant={isMobile ? "h4" : "h3"}
                 align="center"
