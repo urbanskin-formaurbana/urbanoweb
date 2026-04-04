@@ -42,17 +42,41 @@ const adminService = {
     return apiCall('/admin/message-templates', { method: 'GET' });
   },
 
-  async createMessageTemplate(name, message) {
+  async createMessageTemplate(nameOrPayload, messageArg) {
+    const payload =
+      typeof nameOrPayload === 'object' && nameOrPayload !== null
+        ? {
+            name: nameOrPayload.name,
+            message: nameOrPayload.message,
+            usage_type: nameOrPayload.usage_type,
+            product_category: nameOrPayload.product_category,
+          }
+        : {
+            name: nameOrPayload,
+            message: messageArg,
+          };
     return apiCall('/admin/message-templates', {
       method: 'POST',
-      body: JSON.stringify({ name, message }),
+      body: JSON.stringify(payload),
     });
   },
 
-  async updateMessageTemplate(templateId, name, message) {
+  async updateMessageTemplate(templateId, nameOrPayload, messageArg) {
+    const payload =
+      typeof nameOrPayload === 'object' && nameOrPayload !== null
+        ? {
+            name: nameOrPayload.name,
+            message: nameOrPayload.message,
+            usage_type: nameOrPayload.usage_type,
+            product_category: nameOrPayload.product_category,
+          }
+        : {
+            name: nameOrPayload,
+            message: messageArg,
+          };
     return apiCall(`/admin/message-templates/${templateId}`, {
       method: 'PUT',
-      body: JSON.stringify({ name, message }),
+      body: JSON.stringify(payload),
     });
   },
 

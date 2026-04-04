@@ -38,6 +38,12 @@ import paymentService from '../../../services/payment_service';
 import CreateAppointmentModal from '../../../components/CreateAppointmentModal';
 import DateTimeSlotPicker from '../../../components/DateTimeSlotPicker';
 import { filterSlotsForEmployee } from '../../../utils/slotUtils';
+import {
+  TEMPLATE_USAGES,
+  formatTemplateMessage,
+  normalizeTemplate,
+  resolveConfirmationTemplate,
+} from '../../../utils/messageTemplates';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -91,46 +97,6 @@ function formatPhoneForWhatsApp(phone) {
   return digits.length >= 7 && digits.length <= 15 ? digits : null;
 }
 
-function buildConfirmationMessage(appointment) {
-  const phone = formatPhoneForWhatsApp(appointment.customer_phone);
-  if (!phone) return null;
-
-  // Convert UTC to America/Montevideo timezone and format date
-  const utcDate = dayjs.utc(appointment.scheduled_at);
-  const localDate = utcDate.tz('America/Montevideo');
-
-  // Check if appointment is tomorrow
-  const today = dayjs().tz('America/Montevideo');
-  const tomorrow = today.add(1, 'day');
-  const appointmentDate = localDate.clone().startOf('day');
-
-  let dateStr;
-  if (appointmentDate.isSame(tomorrow, 'day')) {
-    dateStr = 'Mañana';
-  } else {
-    dateStr = localDate.format('dddd, D [de] MMMM');
-  }
-
-  // Format time as "HHhs" (e.g., "11hs")
-  const timeStr = localDate.format('HH[hs]');
-
-  const message = `¡Hola, como estas?
-
-Te espero para tu ${appointment.treatment_name}:
-
-Cuándo: ${dateStr}
-A qué hora: ${timeStr}
-Dónde: Convención y 18 de julio (Galería Libertador local 80)
-
-Recomendaciones:
-• Consumir mínimo 2 litros de agua antes de la sesión.
-• Luego tomar un TE VERDE.
-
-Por favor, llega puntual para que podamos trabajar sin contratiempos y garantizarte la mejor atención.`;
-
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-}
-
 function formatAppointmentDate(isoString) {
   // Convert UTC to America/Montevideo timezone
   const utcDate = dayjs.utc(isoString);
@@ -143,20 +109,6 @@ function formatAppointmentTime(isoString) {
   const utcDate = dayjs.utc(isoString);
   const localDate = utcDate.tz('America/Montevideo');
   return localDate.format('HH:mm');
-}
-
-function formatTemplateMessage(template, appointment) {
-  // Convert UTC to America/Montevideo timezone
-  const utcDate = dayjs.utc(appointment.scheduled_at);
-  const localDate = utcDate.tz('America/Montevideo');
-  const dateStr = localDate.format('dddd, D [de] MMMM');
-  const timeStr = localDate.format('HH:mm');
-
-  return template.message
-    .replace(/{{nombre}}/g, appointment.customer_name)
-    .replace(/{{tratamiento}}/g, appointment.treatment_name)
-    .replace(/{{fecha}}/g, dateStr)
-    .replace(/{{hora}}/g, timeStr);
 }
 
 function formatPaymentMethodLabel(method) {
@@ -233,7 +185,7 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
   };
 
   const handleWhatsappTemplateSelect = (template) => {
-    const formattedMessage = formatTemplateMessage(template, appointment);
+    const formattedMessage = formatTemplateMessage(template.message, appointment);
     const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(formattedMessage)}`;
     window.open(waLink, '_blank', 'noopener,noreferrer');
     handleWhatsappMenuClose();
@@ -537,6 +489,14 @@ export default function AppointmentsTab({ activeTab }) {
   const [remainderAmount, setRemainderAmount] = useState('');
   const [savingRemainder, setSavingRemainder] = useState(false);
   const [pendingDeposits, setPendingDeposits] = useState([]);
+  const normalizedTemplates = useMemo(
+    () => (templates || []).map(normalizeTemplate).filter(Boolean),
+    [templates]
+  );
+  const manualTemplates = useMemo(
+    () => normalizedTemplates.filter((template) => template.usage_type === TEMPLATE_USAGES.MANUAL_SEND),
+    [normalizedTemplates]
+  );
 
   // Payments/PAGOS tab state
 
@@ -605,10 +565,35 @@ export default function AppointmentsTab({ activeTab }) {
 
   const handleConfirmAppointment = async (appointmentId) => {
     const existingAppointment = appointments.find(a => a.id === appointmentId);
-    const whatsappUrl = existingAppointment ? buildConfirmationMessage(existingAppointment) : null;
+    const phone = existingAppointment
+      ? formatPhoneForWhatsApp(existingAppointment.customer_phone)
+      : null;
 
-    if (whatsappUrl) {
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    if (existingAppointment && phone) {
+      const confirmationTemplate = resolveConfirmationTemplate(
+        normalizedTemplates,
+        existingAppointment.treatment_category
+      );
+
+      if (!confirmationTemplate) {
+        setError(
+          'No hay plantilla de confirmación para este producto ni plantilla por defecto. Configúrala en Plantillas.'
+        );
+        return;
+      }
+
+      const formattedMessage = formatTemplateMessage(
+        confirmationTemplate.message,
+        existingAppointment
+      );
+
+      if (!formattedMessage.trim()) {
+        setError('La plantilla de confirmación seleccionada está vacía');
+        return;
+      }
+
+      const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(formattedMessage)}`;
+      window.open(waLink, '_blank', 'noopener,noreferrer');
     }
 
     setConfirming(appointmentId);
@@ -820,7 +805,7 @@ export default function AppointmentsTab({ activeTab }) {
                 appointment={appointment}
                 onConfirm={handleConfirmAppointment}
                 confirming={confirming}
-                templates={templates}
+                templates={manualTemplates}
                 onReschedule={handleRescheduleClick}
                 onComplete={handleCompleteClick}
                 onNoShow={handleNoShowClick}
