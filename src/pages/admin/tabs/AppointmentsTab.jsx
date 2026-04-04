@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Stack,
   Typography,
@@ -24,7 +24,7 @@ import {
   Radio,
 } from '@mui/material';
 import DepositRemainderModal from '../../../components/DepositRemainderModal';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -34,9 +34,10 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import WarningIcon from '@mui/icons-material/Warning';
 import adminService from '../../../services/admin_service';
-import appointmentService from '../../../services/appointment_service';
 import paymentService from '../../../services/payment_service';
 import CreateAppointmentModal from '../../../components/CreateAppointmentModal';
+import DateTimeSlotPicker from '../../../components/DateTimeSlotPicker';
+import { filterSlotsForEmployee } from '../../../utils/slotUtils';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -162,11 +163,19 @@ function formatPaymentMethodLabel(method) {
   return PAYMENT_METHOD_LABELS[method] || method || 'No definido';
 }
 
-function filterSlotsForEmployee(slots) {
-  const now = dayjs().tz('America/Montevideo');
-  return slots.filter(slot =>
-    dayjs.utc(slot).tz('America/Montevideo').isAfter(now)
-  );
+const REGULAR_CATEGORIES = new Set(['body', 'facial', 'complementarios']);
+
+function treatmentFromAppointment(appt) {
+  if (!appt) return null;
+  const category = appt.treatment_category ?? null;
+  const itemType = appt.treatment_item_type ?? null;
+  return {
+    // If item_type not in API response yet, infer from category:
+    // any category that isn't a regular one (body/facial/complementarios) is a campaign
+    item_type: itemType ?? (category && !REGULAR_CATEGORIES.has(category) ? category : null),
+    category,
+    duration_minutes: appt.duration_minutes ?? 90,
+  };
 }
 
 function AppointmentCard({ appointment, onConfirm, confirming, templates, onReschedule, onComplete, onNoShow, onConfirmPayment, onOpenDepositRemainder, pendingDeposit }) {
@@ -507,8 +516,10 @@ export default function AppointmentsTab({ activeTab }) {
   const [rescheduleDate, setRescheduleDate] = useState(null);
   const [rescheduleTime, setRescheduleTime] = useState(null);
   const [rescheduling, setRescheduling] = useState(false);
-  const [availableRescheduleSlots, setAvailableRescheduleSlots] = useState([]);
-  const [loadingRescheduleSlots, setLoadingRescheduleSlots] = useState(false);
+  const rescheduleTreatment = useMemo(
+    () => treatmentFromAppointment(selectedAppointmentForReschedule),
+    [selectedAppointmentForReschedule]
+  );
 
   // Complete appointment modal state
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
@@ -547,34 +558,6 @@ export default function AppointmentsTab({ activeTab }) {
     }
   };
 
-  // Load available slots when reschedule date changes
-  useEffect(() => {
-    if (!rescheduleDate) {
-      setAvailableRescheduleSlots([]);
-      return;
-    }
-
-    const loadSlots = async () => {
-      setLoadingRescheduleSlots(true);
-      try {
-        const slotStrings = await appointmentService.getAvailableSlots(
-          rescheduleDate.toDate(),
-          selectedAppointmentForReschedule?.duration_minutes || 90,
-          selectedAppointmentForReschedule?.id
-        );
-        let slots = slotStrings.map((slotStr) => dayjs(slotStr));
-        slots = filterSlotsForEmployee(slots);
-        setAvailableRescheduleSlots(slots);
-      } catch (err) {
-        console.error('Error loading reschedule slots:', err);
-        setAvailableRescheduleSlots([]);
-      } finally {
-        setLoadingRescheduleSlots(false);
-      }
-    };
-
-    loadSlots();
-  }, [rescheduleDate, selectedAppointmentForReschedule]);
 
   // Prevent icon buttons from receiving focus when dialog is open
   useEffect(() => {
@@ -887,70 +870,17 @@ export default function AppointmentsTab({ activeTab }) {
                   </Typography>
                 </Box>
 
-                {/* Date Picker */}
-                <DatePicker
-                  label="Nueva fecha"
-                  value={rescheduleDate}
-                  onChange={setRescheduleDate}
-                  autoFocus
-                  disablePast
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      InputProps: {
-                        readOnly: true,
-                        onBlur: () => {
-                          if (document.activeElement instanceof HTMLElement) {
-                            document.activeElement.blur();
-                          }
-                        },
-                      },
-                    },
-                    popper: {
-                      disablePortal: true,
-                      modifiers: [{ name: 'flip', enabled: false }],
-                    },
-                    openPickerButton: {
-                      tabIndex: -1,
-                    },
-                  }}
-                  reduceAnimations
-                  disableClearable
+                {/* Date & Time Slot Picker */}
+                <DateTimeSlotPicker
+                  treatment={rescheduleTreatment}
+                  paymentMode={null}
+                  filterSlots={filterSlotsForEmployee}
+                  selectedDate={rescheduleDate}
+                  onDateChange={setRescheduleDate}
+                  selectedTime={rescheduleTime}
+                  onTimeChange={setRescheduleTime}
+                  excludeAppointmentId={selectedAppointmentForReschedule?.id}
                 />
-
-                {/* Time Slots Grid */}
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Nueva hora
-                  </Typography>
-                  {!rescheduleDate ? (
-                    <Typography variant="body2" color="text.secondary">
-                      Selecciona una fecha para ver horarios disponibles
-                    </Typography>
-                  ) : loadingRescheduleSlots ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                      <CircularProgress size={32} />
-                    </Box>
-                  ) : availableRescheduleSlots.length > 0 ? (
-                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, maxHeight: '250px', overflowY: 'auto', pr: 1 }}>
-                      {availableRescheduleSlots.map((slot) => (
-                        <Button
-                          key={slot.format('HH:mm')}
-                          variant={rescheduleTime?.format('HH:mm') === slot.format('HH:mm') ? 'contained' : 'outlined'}
-                          onClick={() => setRescheduleTime(slot)}
-                          size="small"
-                          sx={{ py: 1, fontSize: '0.85rem' }}
-                        >
-                          {slot.format('HH:mm')}
-                        </Button>
-                      ))}
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" color="error">
-                      No hay horarios disponibles para esta fecha
-                    </Typography>
-                  )}
-                </Box>
               </Stack>
             </LocalizationProvider>
           )}

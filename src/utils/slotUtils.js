@@ -94,7 +94,7 @@ export async function fetchAllCampaignSlots(treatment, paymentMode) {
  * Handles both campaign (laser, hifu) and regular treatments
  * Returns: raw ISO datetime strings
  */
-export async function fetchAvailableSlots(date, treatment, paymentMode) {
+export async function fetchAvailableSlots(date, treatment, paymentMode, excludeAppointmentId = null) {
   if (!treatment) return [];
 
   try {
@@ -111,7 +111,7 @@ export async function fetchAvailableSlots(date, treatment, paymentMode) {
       );
     } else {
       const duration = getSlotDuration(treatment, paymentMode);
-      return appointmentService.getAvailableSlots(date, duration);
+      return appointmentService.getAvailableSlots(date, duration, excludeAppointmentId);
     }
   } catch (err) {
     console.error('Error fetching available slots:', err);
