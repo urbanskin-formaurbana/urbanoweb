@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -19,14 +19,10 @@ import {
   TableRow,
   Paper,
   CircularProgress,
-  Grid,
   Checkbox,
   FormGroup,
   FormControlLabel,
-  IconButton,
   Chip,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import dayjs from 'dayjs';
@@ -75,6 +71,10 @@ export default function CampaignAdminTab({ productType, productLabel }) {
     endTime: '20:00',
   });
 
+  // Bulk delete state
+  const [selectedSlotIds, setSelectedSlotIds] = useState(new Set());
+  const [confirmBulkDeleteOpen, setConfirmBulkDeleteOpen] = useState(false);
+
   // Waitlist state
   const [waitlist, setWaitlist] = useState([]);  // Open waitlist (next campaign)
   const [campaignWaitlist, setCampaignWaitlist] = useState([]);  // This campaign
@@ -99,9 +99,11 @@ export default function CampaignAdminTab({ productType, productLabel }) {
         if (activeCampaign) {
           setCampaign(activeCampaign);
           setSlots(activeCampaign.slots || []);
+          setSelectedSlotIds(new Set());
         } else {
           setCampaign(null);
           setSlots([]);
+          setSelectedSlotIds(new Set());
         }
       } catch (err) {
         throw err;
@@ -197,16 +199,45 @@ export default function CampaignAdminTab({ productType, productLabel }) {
     }
   }
 
-  async function handleDeleteSlot(slotId) {
-    if (!window.confirm('¿Eliminar este turno?')) return;
+  function handleToggleSlot(slotId) {
+    setSelectedSlotIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(slotId)) {
+        next.delete(slotId);
+      } else {
+        next.add(slotId);
+      }
+      return next;
+    });
+  }
+
+  function handleSelectAll() {
+    const unbookedSlots = slots.filter((s) => !s.is_booked);
+    const allUnbookedSelected = unbookedSlots.length > 0 && unbookedSlots.every((s) => selectedSlotIds.has(s._id));
+
+    if (allUnbookedSelected) {
+      setSelectedSlotIds(new Set());
+    } else {
+      setSelectedSlotIds(new Set(unbookedSlots.map((s) => s._id)));
+    }
+  }
+
+  async function handleBulkDeleteSlots() {
+    const count = selectedSlotIds.size;
+    setConfirmBulkDeleteOpen(false);
 
     try {
       setLoading(true);
-      await campaignService.deleteSlot(campaign._id, slotId);
-      setSuccess('Turno eliminado');
+      await Promise.all(
+        [...selectedSlotIds].map((slotId) =>
+          campaignService.deleteSlot(campaign._id, slotId)
+        )
+      );
+      setSelectedSlotIds(new Set());
+      setSuccess(`${count} turno${count !== 1 ? 's' : ''} eliminado${count !== 1 ? 's' : ''}`);
       await loadCampaignAndSlots();
     } catch (err) {
-      setError(`Error al eliminar turno: ${err.message}`);
+      setError(`Error al eliminar turnos: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -443,21 +474,59 @@ export default function CampaignAdminTab({ productType, productLabel }) {
               Generar Turnos por Rango
             </Button>
 
+            {selectedSlotIds.size > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  variant="contained"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setConfirmBulkDeleteOpen(true)}
+                >
+                  Eliminar seleccionados ({selectedSlotIds.size})
+                </Button>
+              </Box>
+            )}
+
             {/* Slots table */}
             <TableContainer component={Paper}>
               <Table size="small">
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        indeterminate={
+                          selectedSlotIds.size > 0 &&
+                          !slots
+                            .filter((s) => !s.is_booked)
+                            .every((s) => selectedSlotIds.has(s._id))
+                        }
+                        checked={
+                          slots.filter((s) => !s.is_booked).length > 0 &&
+                          slots
+                            .filter((s) => !s.is_booked)
+                            .every((s) => selectedSlotIds.has(s._id))
+                        }
+                        onChange={handleSelectAll}
+                        disabled={slots.filter((s) => !s.is_booked).length === 0}
+                      />
+                    </TableCell>
                     <TableCell>Fecha y Hora</TableCell>
                     <TableCell>Estado</TableCell>
                     <TableCell>Cliente / Tratamiento</TableCell>
-                    <TableCell>Acción</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {slots.length > 0 ? (
                     slots.map((slot) => (
                       <TableRow key={slot._id}>
+                        <TableCell padding="checkbox">
+                          {!slot.is_booked && (
+                            <Checkbox
+                              checked={selectedSlotIds.has(slot._id)}
+                              onChange={() => handleToggleSlot(slot._id)}
+                            />
+                          )}
+                        </TableCell>
                         <TableCell>{formatDateTime(slot.starts_at)}</TableCell>
                         <TableCell>
                           <Chip
@@ -471,22 +540,11 @@ export default function CampaignAdminTab({ productType, productLabel }) {
                             ? `${slot.customer_name} - ${slot.treatment_name}`
                             : '-'}
                         </TableCell>
-                        <TableCell>
-                          {!slot.is_booked && (
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteSlot(slot._id)}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          )}
-                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={4} align="center">
+                      <TableCell colSpan={5} align="center">
                         No hay turnos. Crea algunos para comenzar.
                       </TableCell>
                     </TableRow>
@@ -664,6 +722,31 @@ export default function CampaignAdminTab({ productType, productLabel }) {
           <Button onClick={() => setBulkSlotsOpen(false)}>Cancelar</Button>
           <Button onClick={handleAddBulkSlots} variant="contained" color="primary">
             Generar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk Delete Confirm Dialog */}
+      <Dialog open={confirmBulkDeleteOpen} onClose={() => setConfirmBulkDeleteOpen(false)}>
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Eliminar {selectedSlotIds.size} turno
+            {selectedSlotIds.size !== 1 ? 's' : ''} seleccionado
+            {selectedSlotIds.size !== 1 ? 's' : ''}?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Solo se eliminarán los turnos disponibles (sin reserva).
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmBulkDeleteOpen(false)}>Cancelar</Button>
+          <Button
+            onClick={handleBulkDeleteSlots}
+            variant="contained"
+            color="error"
+          >
+            Eliminar
           </Button>
         </DialogActions>
       </Dialog>
