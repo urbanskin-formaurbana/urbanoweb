@@ -44,6 +44,7 @@ import {
   normalizeTemplate,
   resolveConfirmationTemplate,
 } from '../../../utils/messageTemplates';
+import logger from '../../../utils/logger';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -514,7 +515,10 @@ export default function AppointmentsTab({ activeTab }) {
       const response = await paymentService.getPendingDeposits();
       setPendingDeposits(response.deposits || []);
     } catch (err) {
-      console.error('Error loading pending deposits:', err);
+      // Only log if it's not a session expiration error
+      if (!err.message?.includes('Session expired')) {
+        logger.error('Error loading pending deposits', err);
+      }
     }
   };
 
@@ -542,7 +546,7 @@ export default function AppointmentsTab({ activeTab }) {
     } catch (err) {
       // Only log if it's not a session expiration error
       if (!err.message?.includes('Session expired')) {
-        console.error('Error loading appointments:', err);
+        logger.error('Error loading appointments', err);
       }
       setError('No se pudieron cargar las citas');
     } finally {
@@ -558,7 +562,7 @@ export default function AppointmentsTab({ activeTab }) {
     } catch (err) {
       // Only log if it's not a session expiration error
       if (!err.message?.includes('Session expired')) {
-        console.error('Error loading templates:', err);
+        logger.error('Error loading templates', err);
       }
     }
   };
@@ -603,7 +607,7 @@ export default function AppointmentsTab({ activeTab }) {
       setSuccessMessage('Cita confirmada correctamente.');
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (err) {
-      console.error('Error confirming appointment:', err);
+      logger.error('Error confirming appointment', err);
       setError('No se pudo confirmar la cita');
     } finally {
       setConfirming(null);
@@ -651,7 +655,7 @@ export default function AppointmentsTab({ activeTab }) {
       setSelectedAppointmentForReschedule(null);
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err) {
-      console.error('Error rescheduling appointment:', err);
+      logger.error('Error rescheduling appointment', err);
       setError('No se pudo reagendar la cita');
     } finally {
       setRescheduling(false);
@@ -682,7 +686,7 @@ export default function AppointmentsTab({ activeTab }) {
       setSuccessMessage('Cita marcada como no presentado');
       loadAppointments();
     } catch (error) {
-      console.error('Error marking no-show:', error);
+      logger.error('Error marking no-show', error);
       setError('Error al marcar como no presentado');
     }
   };
@@ -694,7 +698,7 @@ export default function AppointmentsTab({ activeTab }) {
       setSuccessMessage(`Pago confirmado (${paymentData.method})`);
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (error) {
-      console.error('Error confirming payment:', error);
+      logger.error('Error confirming payment', error);
       setError('No se pudo confirmar el pago');
     }
   };
@@ -721,7 +725,7 @@ export default function AppointmentsTab({ activeTab }) {
       closeCompleteModal();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      console.error('Error completing appointment:', err);
+      logger.error('Error completing appointment', err);
       setError('No se pudo completar la cita');
     } finally {
       setCompleting(false);
@@ -761,7 +765,7 @@ export default function AppointmentsTab({ activeTab }) {
       await Promise.all([loadAppointments(), loadPendingDeposits()]);
       handleRemainderModalClose();
     } catch (err) {
-      console.error('Error adding deposit remainder:', err);
+      logger.error('Error adding deposit remainder', err);
       setError('No se pudo registrar el cobro');
     } finally {
       setSavingRemainder(false);

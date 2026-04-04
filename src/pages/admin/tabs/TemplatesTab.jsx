@@ -31,6 +31,7 @@ import {
   normalizeTemplate,
   toCategoryKey,
 } from '../../../utils/messageTemplates';
+import logger from '../../../utils/logger';
 
 const DEFAULT_CATEGORY_OPTION = '__default__';
 
@@ -197,7 +198,10 @@ export default function TemplatesTab() {
       const response = await adminService.getMessageTemplates();
       setTemplates(response.templates || []);
     } catch (err) {
-      console.error('Error loading templates:', err);
+      // Only log if it's not a session expiration error
+      if (!err.message?.includes('Session expired')) {
+        logger.error('Error loading templates', err);
+      }
       setError('No se pudieron cargar las plantillas');
     }
   };
@@ -207,7 +211,10 @@ export default function TemplatesTab() {
       const configs = await adminService.getCategoryConfigs();
       setCategoryConfigs(configs || []);
     } catch (err) {
-      console.error('Error loading category configs:', err);
+      // Only log if it's not a session expiration error
+      if (!err.message?.includes('Session expired')) {
+        logger.error('Error loading category configs', err);
+      }
     }
   };
 
@@ -264,7 +271,7 @@ export default function TemplatesTab() {
       await loadTemplates();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      console.error('Error creating template:', err);
+      logger.error('Error creating template', err);
       setError('No se pudo crear la plantilla');
     } finally {
       setCreatingTemplate(false);
@@ -279,7 +286,7 @@ export default function TemplatesTab() {
         await loadTemplates();
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
-        console.error('Error deleting template:', err);
+        logger.error('Error deleting template', err);
         setError('No se pudo eliminar la plantilla');
       }
     }
@@ -343,7 +350,7 @@ export default function TemplatesTab() {
       await loadTemplates();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      console.error('Error updating template:', err);
+      logger.error('Error updating template', err);
       setError('No se pudo actualizar la plantilla');
     } finally {
       setUpdatingTemplate(false);

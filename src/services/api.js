@@ -4,6 +4,8 @@
  * Uses VITE_API_URL from environment variables
  */
 
+import logger from '../utils/logger';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:8443/api/v1';
 
 /**
@@ -58,7 +60,7 @@ export async function apiCall(endpoint, options = {}) {
     return await response.json();
   } catch (error) {
     if (!suppressErrorLog && !error._silent) {
-      console.error(`API Error [${endpoint}]:`, error);
+      logger.error(`API Error [${endpoint}]`, error);
     }
     throw error;
   }
