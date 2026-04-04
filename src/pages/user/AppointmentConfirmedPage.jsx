@@ -221,7 +221,7 @@ export default function AppointmentConfirmedPage() {
               <ol style={{ margin: '0', paddingLeft: '20px' }}>
                 <li><strong>Dentro de 24 horas:</strong> Nuestros esteticistas revisarán tu solicitud</li>
                 <li><strong>Confirmación:</strong> Recibirás una confirmación con la fecha y hora final por {method === 'whatsapp' ? 'WhatsApp' : 'correo'}</li>
-                <li><strong>Calendario:</strong> Si lo tienes, se agregará a tu calendario de Google</li>
+                <li><strong>Calendario:</strong> Cuando confirmemos tu cita, podrás agregarla manualmente a tu Google Calendar</li>
                 <li><strong>Recordatorios:</strong> Te enviaremos recordatorios 24 horas y 1 hora antes</li>
               </ol>
             </Typography>

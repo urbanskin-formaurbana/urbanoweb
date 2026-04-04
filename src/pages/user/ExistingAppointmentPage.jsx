@@ -68,7 +68,7 @@ export default function ExistingAppointmentPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const {user, logout} = useAuth();
-  const { whatsappPhone } = useBusiness();
+  const {whatsappPhone, businessEmail} = useBusiness();
 
   const appointment = location.state?.appointment;
 
@@ -183,6 +183,41 @@ export default function ExistingAppointmentPage() {
     }
   };
 
+  const appointmentId = appointmentData.id || appointmentData._id;
+  const isCalendarTracked = Boolean(appointmentData.calendar_added_by_user_at);
+  const canShowCalendarCTA = !isPending && !isAwaitingPayment;
+
+  const buildGoogleCalendarUrl = () => {
+    if (!appointmentData.scheduled_at) {
+      return null;
+    }
+
+    const start = dayjs.utc(appointmentData.scheduled_at);
+    const durationMinutes = appointmentData.duration_minutes || 30;
+    const end = start.add(durationMinutes, "minute");
+    const treatmentName = appointmentData.treatment_name || "Servicio de estética";
+    const title = appointmentData.is_evaluation
+      ? `Sesión de evaluación - ${treatmentName}`
+      : treatmentName;
+    const details = [
+      `Referencia de cita: #${appointmentId || "N/A"}`,
+      businessEmail ? `Email: ${businessEmail}` : null,
+      whatsappPhone ? `WhatsApp: +${whatsappPhone}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const params = new URLSearchParams({
+      action: "TEMPLATE",
+      text: title,
+      dates: `${start.format("YYYYMMDDTHHmmss")}Z/${end.format("YYYYMMDDTHHmmss")}Z`,
+      location: "Montevideo Centro",
+      details,
+    });
+
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+  };
+
   const handleWhatsAppContact = () => {
     const message = `Hola FORMA Urbana, tengo una consulta sobre mi cita #${appointment.id}`;
     const whatsappLink = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
@@ -196,6 +231,44 @@ export default function ExistingAppointmentPage() {
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  const handleAddToGoogleCalendar = async () => {
+    const calendarUrl = buildGoogleCalendarUrl();
+    if (!calendarUrl) {
+      setSnackbarMessage("No pudimos generar el enlace de calendario para esta cita");
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    window.open(calendarUrl, "_blank", "noopener,noreferrer");
+
+    if (!appointmentId) {
+      setSnackbarMessage("No pudimos registrar esta acción en tu cuenta");
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    try {
+      const updated = await appointmentService.markCalendarAdded(appointmentId);
+      const trackedAt =
+        updated?.calendar_added_by_user_at ||
+        updated?.appointment?.calendar_added_by_user_at ||
+        dayjs().toISOString();
+
+      setAppointmentData((prev) => ({
+        ...prev,
+        calendar_added_by_user_at: trackedAt,
+      }));
+    } catch {
+      setSnackbarMessage(
+        "Abrimos Google Calendar, pero no pudimos guardar el estado en tu cuenta. Puedes intentarlo nuevamente.",
+      );
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
+    }
   };
 
   // Comprobante upload handler
@@ -697,8 +770,8 @@ export default function ExistingAppointmentPage() {
                     con la fecha y hora final por WhatsApp
                   </li>
                   <li>
-                    <strong>Calendario:</strong> Se agregará a tu calendario de
-                    Google
+                    <strong>Calendario:</strong> Cuando tu cita quede confirmada,
+                    podrás agregarla manualmente a tu Google Calendar
                   </li>
                   <li>
                     <strong>Recordatorios:</strong> Te enviaremos recordatorios
@@ -712,13 +785,26 @@ export default function ExistingAppointmentPage() {
           <Card sx={{mb: 4, bgcolor: "success.light"}}>
             <CardContent>
               <Typography variant="body2" color="text.secondary">
-                Tu cita ha sido agregada a tu calendario de Google. Recibirás
-                recordatorios automáticos 24 horas y 1 hora antes de tu cita.
+                Agrega esta cita a tu Google Calendar para tenerla en tu agenda
+                del teléfono y recibir recordatorios de Google.
               </Typography>
 
-              {appointmentData.google_calendar_event_id && (
+              {canShowCalendarCTA && (
+                <Button
+                  variant="contained"
+                  color="success"
+                  sx={{mt: 2}}
+                  onClick={handleAddToGoogleCalendar}
+                >
+                  {isCalendarTracked
+                    ? "Abrir en Google Calendar nuevamente"
+                    : "Agregar a Google Calendar"}
+                </Button>
+              )}
+
+              {isCalendarTracked && (
                 <Alert severity="success" sx={{mt: 2}}>
-                  ✓ Se sincronizó con tu calendario de Google
+                  ✓ Ya agregaste esta cita a Google Calendar
                 </Alert>
               )}
             </CardContent>
@@ -917,9 +1003,17 @@ export default function ExistingAppointmentPage() {
           open={snackbarOpen}
           autoHideDuration={6000}
           onClose={() => setSnackbarOpen(false)}
-          message={snackbarMessage}
           anchorOrigin={{vertical: "bottom", horizontal: "center"}}
-        />
+        >
+          <Alert
+            onClose={() => setSnackbarOpen(false)}
+            severity={snackbarSeverity}
+            variant="filled"
+            sx={{width: "100%"}}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Container>
     </>
   );

@@ -162,6 +162,24 @@ export const appointmentService = {
   },
 
   /**
+   * Mark appointment as manually added by customer to Google Calendar
+   * @param {string} appointmentId - Appointment ID
+   * @returns {Promise<object>} - Updated appointment details
+   */
+  async markCalendarAdded(appointmentId) {
+    try {
+      const response = await apiCall(`/appointments/${appointmentId}/calendar-added`, {
+        method: 'PATCH',
+        body: JSON.stringify({ added: true }),
+      });
+      return response;
+    } catch (err) {
+      console.error('Error marking calendar added:', err);
+      throw err;
+    }
+  },
+
+  /**
    * Get available packages for a treatment
    * @param {string} slug - Treatment slug
    * @returns {Promise<object>} - { packages: [...] }
