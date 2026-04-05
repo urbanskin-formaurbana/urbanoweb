@@ -151,6 +151,15 @@ export default function ExistingAppointmentPage() {
     }
   }, [appointment, navigate]);
 
+  // Fetch fresh appointment data on mount to get treatment_category_label and other enriched fields
+  useEffect(() => {
+    const id = appointment?._id || appointment?.id;
+    if (!id) return;
+    appointmentService.getAppointmentById(id).then((fresh) => {
+      if (fresh) setAppointmentData(fresh);
+    }).catch(() => {});
+  }, []);
+
   // Memoize treatment object so DateTimeSlotPicker doesn't re-fetch campaign slots on every render
   const rescheduleTreatment = useMemo(
     () => treatmentFromAppointment(appointmentData),
@@ -490,25 +499,14 @@ export default function ExistingAppointmentPage() {
                 <Typography variant="caption" color="text.secondary">
                   Servicio
                 </Typography>
-                {appointmentData.treatment_category ? (
-                  <Box sx={{mt: 0.5}}>
-                    <Typography variant="body2" color="text.secondary">
-                      {appointmentData.purchased_package_id
-                        ? "Paquete"
-                        : "Zona"}
-                    </Typography>
-                    <Typography variant="body1" sx={{fontWeight: "bold"}}>
-                      {appointmentData.treatment_name || "Servicio de estética"}
-                    </Typography>
-                  </Box>
-                ) : (
-                  <Typography variant="body1" sx={{fontWeight: "bold"}}>
-                    {appointmentData.is_evaluation
+                <Typography variant="body1" sx={{fontWeight: "bold"}}>
+                  {appointmentData.treatment_category_label
+                    ? `${appointmentData.treatment_category_label} - ${appointmentData.treatment_name || "Servicio de estética"}`
+                    : appointmentData.is_evaluation
                       ? `Sesión de evaluación — ${appointmentData.treatment_name || "Servicio de estética"}`
                       : appointmentData.treatment_name ||
                         "Servicio de estética"}
-                  </Typography>
-                )}
+                </Typography>
               </Box>
 
               <Divider />
