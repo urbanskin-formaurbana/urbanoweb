@@ -7,6 +7,8 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.locale('es');
 
+const APPOINTMENT_TIMEZONE = 'America/Montevideo';
+
 export const TEMPLATE_USAGES = {
   MANUAL_SEND: 'manual_send',
   APPOINTMENT_CONFIRMATION: 'appointment_confirmation',
@@ -97,13 +99,49 @@ export function resolveConfirmationTemplate(templates, appointmentCategory) {
   return confirmationTemplates.find((template) => !template.product_category) || null;
 }
 
+function normalizeLooseTimeValue(value) {
+  if (typeof value !== 'string' && typeof value !== 'number') return null;
+  const text = String(value).trim();
+  if (!text) return null;
+
+  const parsedDateTime = dayjs.utc(text);
+  if (parsedDateTime.isValid()) {
+    return parsedDateTime.tz(APPOINTMENT_TIMEZONE).format('HH:mm');
+  }
+
+  const match = text.match(/^(\d{1,2})(?::(\d{1,2}))?(?::\d{1,2})?$/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = match[2] !== undefined ? Number(match[2]) : 0;
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+function resolveAppointmentTime(appointment) {
+  const utcDate = dayjs.utc(appointment?.scheduled_at);
+  if (utcDate.isValid()) {
+    return utcDate.tz(APPOINTMENT_TIMEZONE).format('HH:mm');
+  }
+
+  const fallbackTimeKeys = ['time', 'hora', 'scheduled_time', 'appointment_time'];
+  for (const key of fallbackTimeKeys) {
+    const normalized = normalizeLooseTimeValue(appointment?.[key]);
+    if (normalized) return normalized;
+  }
+
+  return '';
+}
+
 export function formatTemplateMessage(templateMessage, appointment, categoryConfigs = []) {
   if (!templateMessage) return '';
 
   const utcDate = dayjs.utc(appointment.scheduled_at);
-  const localDate = utcDate.tz('America/Montevideo');
-  const dateStr = localDate.format('dddd, D [de] MMMM');
-  const timeStr = localDate.format('HH:mm');
+  const localDate = utcDate.tz(APPOINTMENT_TIMEZONE);
+  const dateStr = localDate.isValid() ? localDate.format('dddd, D [de] MMMM') : '';
+  const timeStr = resolveAppointmentTime(appointment);
   const categoryLabel = resolveCategoryLabel(appointment.treatment_category, categoryConfigs);
 
   return templateMessage
