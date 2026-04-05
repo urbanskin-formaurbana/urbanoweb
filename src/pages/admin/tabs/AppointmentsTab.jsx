@@ -131,7 +131,7 @@ function treatmentFromAppointment(appt) {
   };
 }
 
-function AppointmentCard({ appointment, onConfirm, confirming, templates, onReschedule, onComplete, onNoShow, onConfirmPayment, onOpenDepositRemainder, pendingDeposit }) {
+function AppointmentCard({ appointment, onConfirm, confirming, templates, categoryConfigs, onReschedule, onComplete, onNoShow, onConfirmPayment, onOpenDepositRemainder, pendingDeposit }) {
   const statusColor = STATUS_COLORS[appointment.status] || 'default';
   const statusLabel = STATUS_LABELS[appointment.status] || appointment.status;
   const borderColor = {
@@ -186,7 +186,7 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, onResc
   };
 
   const handleWhatsappTemplateSelect = (template) => {
-    const formattedMessage = formatTemplateMessage(template.message, appointment);
+    const formattedMessage = formatTemplateMessage(template.message, appointment, categoryConfigs);
     const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(formattedMessage)}`;
     window.open(waLink, '_blank', 'noopener,noreferrer');
     handleWhatsappMenuClose();
@@ -458,6 +458,7 @@ function closeDialogSafely(closerFn) {
 export default function AppointmentsTab({ activeTab }) {
   const [appointments, setAppointments] = useState([]);
   const [templates, setTemplates] = useState([]);
+  const [categoryConfigs, setCategoryConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [confirming, setConfirming] = useState(null);
@@ -509,6 +510,10 @@ export default function AppointmentsTab({ activeTab }) {
     loadAppointments();
     loadPendingDeposits();
   }, [currentStatus]);
+
+  useEffect(() => {
+    loadCategoryConfigs();
+  }, []);
 
   const loadPendingDeposits = async () => {
     try {
@@ -567,6 +572,17 @@ export default function AppointmentsTab({ activeTab }) {
     }
   };
 
+  const loadCategoryConfigs = async () => {
+    try {
+      const configs = await adminService.getCategoryConfigs();
+      setCategoryConfigs(configs || []);
+    } catch (err) {
+      if (!err.message?.includes('Session expired')) {
+        logger.error('Error loading category configs', err);
+      }
+    }
+  };
+
   const handleConfirmAppointment = async (appointmentId) => {
     const existingAppointment = appointments.find(a => a.id === appointmentId);
     const phone = existingAppointment
@@ -588,7 +604,8 @@ export default function AppointmentsTab({ activeTab }) {
 
       const formattedMessage = formatTemplateMessage(
         confirmationTemplate.message,
-        existingAppointment
+        existingAppointment,
+        categoryConfigs
       );
 
       if (!formattedMessage.trim()) {
@@ -810,6 +827,7 @@ export default function AppointmentsTab({ activeTab }) {
                 onConfirm={handleConfirmAppointment}
                 confirming={confirming}
                 templates={manualTemplates}
+                categoryConfigs={categoryConfigs}
                 onReschedule={handleRescheduleClick}
                 onComplete={handleCompleteClick}
                 onNoShow={handleNoShowClick}

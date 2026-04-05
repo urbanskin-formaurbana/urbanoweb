@@ -23,6 +23,12 @@ export const BUILTIN_CATEGORY_LABELS = {
   complementarios: 'Complementarios',
 };
 
+const DEDICATED_SECTION_LABELS = {
+  body: 'Tratamiento Corporal',
+  facial: 'Tratamiento Facial',
+  complementarios: 'Tratamiento Complementario',
+};
+
 export function formatCategoryLabel(category) {
   if (!category) return '';
   return category
@@ -55,6 +61,25 @@ export function toCategoryKey(value) {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
 }
 
+function resolveCategoryLabel(category, categoryConfigs = []) {
+  const categoryKey = toCategoryKey(category);
+  if (!categoryKey) return '';
+
+  if (DEDICATED_SECTION_LABELS[categoryKey]) {
+    return DEDICATED_SECTION_LABELS[categoryKey];
+  }
+
+  const configMatch = (categoryConfigs || []).find(
+    (config) => toCategoryKey(config?.category) === categoryKey
+  );
+
+  if (typeof configMatch?.label === 'string' && configMatch.label.trim()) {
+    return configMatch.label.trim();
+  }
+
+  return category || '';
+}
+
 export function resolveConfirmationTemplate(templates, appointmentCategory) {
   const normalizedTemplates = (templates || [])
     .map(normalizeTemplate)
@@ -72,19 +97,20 @@ export function resolveConfirmationTemplate(templates, appointmentCategory) {
   return confirmationTemplates.find((template) => !template.product_category) || null;
 }
 
-export function formatTemplateMessage(templateMessage, appointment) {
+export function formatTemplateMessage(templateMessage, appointment, categoryConfigs = []) {
   if (!templateMessage) return '';
 
   const utcDate = dayjs.utc(appointment.scheduled_at);
   const localDate = utcDate.tz('America/Montevideo');
   const dateStr = localDate.format('dddd, D [de] MMMM');
   const timeStr = localDate.format('HH:mm');
+  const categoryLabel = resolveCategoryLabel(appointment.treatment_category, categoryConfigs);
 
   return templateMessage
     .replace(/{{nombre}}/g, appointment.customer_name || '')
     .replace(/{{tratamiento}}/g, appointment.treatment_name || '')
     .replace(/{{fecha}}/g, dateStr)
     .replace(/{{hora}}/g, timeStr)
-    .replace(/{{categoria}}/g, appointment.treatment_category || '')
-    .replace(/{{producto}}/g, appointment.treatment_category || '');
+    .replace(/{{categoria}}/g, categoryLabel)
+    .replace(/{{producto}}/g, categoryLabel);
 }
