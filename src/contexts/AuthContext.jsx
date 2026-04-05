@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import authService from '../services/auth_service';
+import { getTimeUntilExpiry } from '../utils/jwt';
+import logger from '../utils/logger';
 
 const AuthContext = createContext({
   user: null,
@@ -17,6 +19,19 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loginMethod, setLoginMethod] = useState(null); // 'google' or 'whatsapp'
+
+  const lastActivityRef = useRef(Date.now());
+  const inactivityTimerRef = useRef(null);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('login_method');
+    setUser(null);
+    setIsAuthenticated(false);
+    setLoginMethod(null);
+  }, []);
 
   // Check if user is already logged in on mount
   useEffect(() => {
@@ -40,6 +55,68 @@ export const AuthProvider = ({ children }) => {
     window.addEventListener('auth:logout', handleForceLogout);
     return () => window.removeEventListener('auth:logout', handleForceLogout);
   }, []);
+
+  // Inactivity Manager: Track user activity and handle token refresh + logout on inactivity
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Clean up timers if not authenticated
+      if (inactivityTimerRef.current) clearInterval(inactivityTimerRef.current);
+      return;
+    }
+
+    // Track user activity
+    const handleActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    const activityEvents = ['click', 'keydown', 'touchstart', 'mousemove'];
+    activityEvents.forEach(event => {
+      window.addEventListener(event, handleActivity);
+    });
+
+    // Check inactivity and refresh token every 60 seconds
+    inactivityTimerRef.current = setInterval(async () => {
+      const now = Date.now();
+      const timeSinceLastActivity = now - lastActivityRef.current;
+      const INACTIVITY_THRESHOLD = 20 * 60 * 1000; // 20 minutes
+      const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // Refresh if expiring within 5 minutes
+
+      // Log out if inactive for 20 minutes
+      if (timeSinceLastActivity > INACTIVITY_THRESHOLD) {
+        logger.debug('Session expired due to inactivity');
+        logout();
+        return;
+      }
+
+      // If user is active, check if token needs refresh
+      if (timeSinceLastActivity < INACTIVITY_THRESHOLD) {
+        const accessToken = localStorage.getItem('access_token');
+        if (accessToken) {
+          const timeUntilExpiry = getTimeUntilExpiry(accessToken);
+          if (timeUntilExpiry !== null && timeUntilExpiry < TOKEN_REFRESH_THRESHOLD) {
+            try {
+              const refreshResponse = await authService.refreshToken();
+              authService.saveTokens(refreshResponse);
+              console.log('Token refreshed due to activity');
+            } catch (error) {
+              logger.error('Token refresh failed:', error);
+              // If refresh fails, log out the user
+              logout();
+            }
+          }
+        }
+      }
+    }, 60000); // Check every 60 seconds
+
+    return () => {
+      // Clean up event listeners
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, handleActivity);
+      });
+      // Clean up interval
+      if (inactivityTimerRef.current) clearInterval(inactivityTimerRef.current);
+    };
+  }, [isAuthenticated, logout]);
 
   const loginWithGoogle = useCallback(async (idToken) => {
     try {
@@ -84,7 +161,7 @@ export const AuthProvider = ({ children }) => {
       setLoginMethod('google');
       return true;
     } catch (error) {
-      console.error('Google login error:', error);
+      logger.error('Google login error:', error);
       throw error;
     }
   }, []);
@@ -103,7 +180,7 @@ export const AuthProvider = ({ children }) => {
 
       return await response.json();
     } catch (error) {
-      console.error('Send OTP error:', error);
+      logger.error('Send OTP error:', error);
       throw error;
     }
   }, []);
@@ -151,19 +228,9 @@ export const AuthProvider = ({ children }) => {
       setLoginMethod('whatsapp');
       return true;
     } catch (error) {
-      console.error('Verify OTP error:', error);
+      logger.error('Verify OTP error:', error);
       throw error;
     }
-  }, []);
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('login_method');
-    setUser(null);
-    setIsAuthenticated(false);
-    setLoginMethod(null);
   }, []);
 
   const value = {
