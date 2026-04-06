@@ -307,7 +307,7 @@ export default function HomePage() {
 
             <Grid container spacing={3} justifyContent="center">
               {bodyTreatments.map((treatment) => (
-                <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 4}}>
+                <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 6}}>
                   <Card
                     sx={{
                       height: "100%",
@@ -424,7 +424,7 @@ export default function HomePage() {
 
               <Grid container spacing={3} justifyContent="center">
                 {facialTreatments.map((treatment) => (
-                  <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 4}}>
+                  <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 6}}>
                     <Card
                       sx={{
                         height: "100%",
@@ -606,7 +606,7 @@ export default function HomePage() {
                           ].map(({gender, label}) => {
                             const genderMinPrice = getMinPriceByGender(gender);
                             return (
-                              <Grid key={gender} size={{xs: 12, sm: 6, md: 4}}>
+                              <Grid key={gender} size={{xs: 12, sm: 6, md: 6}}>
                                 <Card
                                   sx={{
                                     height: "100%",
@@ -668,7 +668,7 @@ export default function HomePage() {
                             );
                           })
                         ) : (
-                          <Grid size={{xs: 12, sm: 6, md: 4}}>
+                          <Grid size={{xs: 12, sm: 6, md: 6}}>
                             <Card
                               sx={{
                                 height: "100%",
@@ -755,7 +755,7 @@ export default function HomePage() {
 
               <Grid container spacing={3} justifyContent="center">
                 {complementaryTreatments.map((treatment) => (
-                  <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 4}}>
+                  <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 6}}>
                     <Card
                       sx={{
                         height: "100%",
