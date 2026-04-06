@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
 import LandingLayout from '../layouts/LandingLayout.jsx'
-import PromoLandingLayout from '../layouts/PromoLandingLayout.jsx'
 import NotFound from '../pages/NotFound.jsx'
 import { LANDINGS } from '../pages/_registry.js'
 import React from 'react'
@@ -23,10 +22,7 @@ import CinturonAcero from '../pages/landing/CinturonAcero.jsx'
 // Module-scope lazy declarations - stable references across renders
 const HomePage = React.lazy(() => import('../pages/landing/HomePage.jsx'))
 
-const promoPath = '/oferta-apertura'
-const promoLanding = LANDINGS.find((l) => l.path === promoPath)
-const PromoPage = promoLanding ? React.lazy(promoLanding.import) : null
-const regularLandings = LANDINGS.filter((l) => l.path !== promoPath).map(
+const regularLandings = LANDINGS.map(
   ({ path, import: importer }) => ({ path, Page: React.lazy(importer) })
 )
 
@@ -68,24 +64,6 @@ export default function AppRoutes() {
         <Route path="/booking/failure" element={<ProtectedUserRoute><BookingFailurePage /></ProtectedUserRoute>} />
         <Route path="/booking/pending" element={<ProtectedUserRoute><BookingPendingPage /></ProtectedUserRoute>} />
       </Route>
-      {PromoPage && (
-        <Route element={<PromoLandingLayout />}>
-          <Route
-            path={promoLanding.path}
-            element={
-              <React.Suspense
-                fallback={
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                    <CircularProgress />
-                  </Box>
-                }
-              >
-                <PromoPage />
-              </React.Suspense>
-            }
-          />
-        </Route>
-      )}
       <Route
         path="/admin"
         element={
