@@ -25,6 +25,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import CampaignAdminTab from '../../../components/CampaignAdminTab';
 import campaignService from '../../../services/campaign_service';
 import adminService from '../../../services/admin_service';
+import RichTextDescriptionEditor from '../../../components/RichTextDescriptionEditor';
+import { Typography } from '@mui/material';
 
 export default function CampaignsTab() {
   const theme = useTheme();
@@ -41,7 +43,10 @@ export default function CampaignsTab() {
   const [productLabel, setProductLabel] = useState('');
   const [productDescription, setProductDescription] = useState('');
   const [isGenderSplit, setIsGenderSplit] = useState(false);
+  const [productImageUrl, setProductImageUrl] = useState('');
   const [savingProduct, setSavingProduct] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [editingProductType, setEditingProductType] = useState(null);
 
   useEffect(() => {
     loadProductTypes();
@@ -88,6 +93,8 @@ export default function CampaignsTab() {
     setProductLabel(selected.product_label || '');
     setProductDescription(selected.product_description || '');
     setIsGenderSplit(selected.is_gender_split || false);
+    setProductImageUrl(selected.image_url || '');
+    setEditingProductType(selected.product_type);
     setProductDialogOpen(true);
   };
 
@@ -99,7 +106,8 @@ export default function CampaignsTab() {
         productType.trim().toLowerCase(),
         productLabel.trim(),
         productDescription.trim(),
-        isGenderSplit
+        isGenderSplit,
+        productImageUrl
       );
 
       if (!isEditMode) {
@@ -169,19 +177,57 @@ export default function CampaignsTab() {
                 fullWidth
                 disabled={isEditMode}
               />
-              <TextField
-                label="Descripción (para la sección en la home)"
+              <RichTextDescriptionEditor
                 value={productDescription}
-                onChange={(e) => setProductDescription(e.target.value)}
-                placeholder="ej: Tratamiento innovador para reducir grasa localizada"
-                multiline
-                rows={3}
-                fullWidth
+                onChange={setProductDescription}
+                label="Descripción (para la sección en la home)"
               />
               <FormControlLabel
                 control={<Switch checked={isGenderSplit} onChange={(e) => setIsGenderSplit(e.target.checked)} />}
                 label="Dividir por género (Hombres / Mujeres)"
               />
+              {isEditMode && (
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                    Imagen de la campaña
+                  </Typography>
+                  {productImageUrl && (
+                    <Box
+                      component="img"
+                      src={productImageUrl}
+                      alt="Imagen actual"
+                      sx={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 1, mb: 1, display: 'block' }}
+                    />
+                  )}
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    size="small"
+                    disabled={uploadingImage}
+                  >
+                    {uploadingImage ? <CircularProgress size={18} sx={{ mr: 1 }} /> : null}
+                    {uploadingImage ? 'Subiendo...' : productImageUrl ? 'Cambiar imagen' : 'Subir imagen'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file || !editingProductType) return;
+                        setUploadingImage(true);
+                        try {
+                          const result = await adminService.uploadCategoryImage(editingProductType, file);
+                          setProductImageUrl(result.image_url);
+                        } catch (err) {
+                          console.error('Error uploading image:', err);
+                        } finally {
+                          setUploadingImage(false);
+                        }
+                      }}
+                    />
+                  </Button>
+                </Box>
+              )}
             </Stack>
           </DialogContent>
           <DialogActions>

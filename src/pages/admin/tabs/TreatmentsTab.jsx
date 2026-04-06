@@ -27,6 +27,8 @@ import {
   ToggleButton,
 } from "@mui/material";
 import adminService from "../../../services/admin_service";
+import RichTextDescriptionEditor from "../../../components/RichTextDescriptionEditor";
+import {isHtml} from "../../../utils/richText";
 
 function closeDialogSafely(closerFn) {
   if (document.activeElement instanceof HTMLElement) {
@@ -86,6 +88,7 @@ export default function TreatmentsTab() {
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [creatingTreatment, setCreatingTreatment] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Edit treatment dialog state
   const [editTreatmentOpen, setEditTreatmentOpen] = useState(false);
@@ -283,6 +286,7 @@ export default function TreatmentsTab() {
       gender: treatment.gender || "",
       item_type: treatment.item_type || "",
       is_active: treatment.is_active,
+      image_url: treatment.image_url || "",
     });
     setEditTreatmentOpen(true);
   };
@@ -557,13 +561,21 @@ export default function TreatmentsTab() {
                       </Typography>
                     )}
                     {treatment.description && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{mt: 0.5, mb: 1}}
-                      >
-                        {treatment.description}
-                      </Typography>
+                      isHtml(treatment.description) ? (
+                        <Box
+                          component="div"
+                          sx={{mt: 0.5, mb: 1, fontSize: '0.875rem', color: 'text.secondary'}}
+                          dangerouslySetInnerHTML={{__html: treatment.description}}
+                        />
+                      ) : (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{mt: 0.5, mb: 1}}
+                        >
+                          {treatment.description}
+                        </Typography>
+                      )
                     )}
                     <Typography variant="body2" color="text.secondary">
                       {treatment.duration_minutes} min · $
@@ -749,20 +761,14 @@ export default function TreatmentsTab() {
               onChange={handleCreateTreatmentSlugChange}
               helperText="Se genera automáticamente del nombre"
             />
-            <TextField
-              label="Descripción"
-              size="small"
-              fullWidth
-              multiline
-              rows={3}
+            <RichTextDescriptionEditor
               value={createTreatmentForm.description}
-              onChange={(e) =>
+              onChange={(html) =>
                 setCreateTreatmentForm((f) => ({
                   ...f,
-                  description: e.target.value,
+                  description: html,
                 }))
               }
-              placeholder="Breve descripción del tratamiento (opcional)"
             />
             <TextField
               label="Duración (minutos)"
@@ -976,21 +982,60 @@ export default function TreatmentsTab() {
                 ))}
               </Select>
             </FormControl>
-            <TextField
-              label="Descripción"
-              size="small"
-              fullWidth
-              multiline
-              rows={3}
+            <RichTextDescriptionEditor
+              key={editingTreatment?.id}
               value={editTreatmentForm.description}
-              onChange={(e) =>
+              onChange={(html) =>
                 setEditTreatmentForm((f) => ({
                   ...f,
-                  description: e.target.value,
+                  description: html,
                 }))
               }
-              placeholder="Breve descripción del tratamiento (opcional)"
             />
+            {/* Image Upload Section */}
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                Imagen del tratamiento
+              </Typography>
+              {editTreatmentForm.image_url && (
+                <Box
+                  component="img"
+                  src={editTreatmentForm.image_url}
+                  alt="Imagen actual"
+                  sx={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 1, mb: 1, display: 'block' }}
+                />
+              )}
+              <Button
+                component="label"
+                variant="outlined"
+                size="small"
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? <CircularProgress size={18} sx={{ mr: 1 }} /> : null}
+                {uploadingImage ? 'Subiendo...' : editTreatmentForm.image_url ? 'Cambiar imagen' : 'Subir imagen'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file || !editingTreatment) return;
+                    setUploadingImage(true);
+                    try {
+                      const result = await adminService.uploadTreatmentImage(editingTreatment.id, file);
+                      setEditTreatmentForm((f) => ({ ...f, image_url: result.image_url }));
+                      setSuccessMessage('Imagen subida exitosamente');
+                      setTimeout(() => setSuccessMessage(''), 3000);
+                    } catch (err) {
+                      console.error('Error uploading image:', err);
+                      setError('No se pudo subir la imagen');
+                    } finally {
+                      setUploadingImage(false);
+                    }
+                  }}
+                />
+              </Button>
+            </Box>
             <TextField
               label="Duración (minutos)"
               size="small"

@@ -25,6 +25,7 @@ import LoginModal from "../../components/LoginModal.jsx";
 import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
 import CampaignModal from "../../components/CampaignModal.jsx";
 import {useAuth} from "../../contexts/AuthContext.jsx";
+import {isHtml} from "../../utils/richText.js";
 
 export default function HomePage() {
   const theme = useTheme();
@@ -191,12 +192,18 @@ export default function HomePage() {
           // Customer paid but didn't schedule - skip payment, go directly to scheduling
           paymentService.savePaymentId(unscheduledPayment._id);
           navigate("/schedule", {
-            state: {treatment: {name: treatment.name, slug: treatment.slug}, productType: "facial"},
+            state: {
+              treatment: {name: treatment.name, slug: treatment.slug},
+              productType: "facial",
+            },
           });
         } else {
           // No payment or payment already has appointment - proceed to payment
           navigate("/payment", {
-            state: {treatment: {name: treatment.name, slug: treatment.slug}, productType: "facial"},
+            state: {
+              treatment: {name: treatment.name, slug: treatment.slug},
+              productType: "facial",
+            },
           });
         }
       }
@@ -280,7 +287,11 @@ export default function HomePage() {
       {/* Body Treatments Section */}
       {!treatmentsLoading && !treatmentsError && (
         <>
-          <Container component="section" id="estetica-corporal" sx={{py: {xs: 3, md: 4}}}>
+          <Container
+            component="section"
+            id="estetica-corporal"
+            sx={{py: {xs: 3, md: 4}}}
+          >
             <Typography
               variant={isMobile ? "h4" : "h3"}
               align="center"
@@ -311,27 +322,84 @@ export default function HomePage() {
                     }}
                     onClick={() => handleBodyTreatmentClick(treatment)}
                   >
-                    <CardContent sx={{flexGrow: 1}}>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        sx={{fontWeight: "bold"}}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: {xs: "column", sm: "row"},
+                      }}
+                    >
+                      {treatment.image_url && (
+                        <Box
+                          component="img"
+                          src={treatment.image_url}
+                          alt={treatment.name}
+                          sx={{
+                            width: {xs: "100%", sm: 200},
+                            height: {xs: 180, sm: "auto"},
+                            objectFit: "cover",
+                            flexShrink: 0,
+                            borderRadius: {
+                              xs: "4px 4px 0 0",
+                              sm: "4px 0 0 4px",
+                            },
+                          }}
+                        />
+                      )}
+                      <CardContent
+                        sx={{
+                          flexGrow: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
                       >
-                        {treatment.name}
-                      </Typography>
-                      {treatment.subtitle && (
+                        <Typography
+                          variant="h6"
+                          gutterBottom
+                          sx={{fontWeight: "bold"}}
+                        >
+                          {treatment.name}
+                        </Typography>
+                        {treatment.subtitle && (
+                          <Typography
+                            variant="body2"
+                            color="success.main"
+                            gutterBottom
+                          >
+                            {treatment.subtitle}
+                          </Typography>
+                        )}
+                        {treatment.description &&
+                          (isHtml(treatment.description) ? (
+                            <Box
+                              component="div"
+                              dangerouslySetInnerHTML={{
+                                __html: treatment.description,
+                              }}
+                              sx={{
+                                fontSize: "0.875rem",
+                                color: "text.secondary",
+                                mb: 1,
+                                "& p": {mt: 0, mb: 0.5},
+                                "& ul, & ol": {pl: 2, mt: 0},
+                              }}
+                            />
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{mb: 1}}
+                            >
+                              {treatment.description}
+                            </Typography>
+                          ))}
                         <Typography
                           variant="body2"
-                          color="success.main"
-                          gutterBottom
+                          sx={{fontWeight: "medium", mt: "auto"}}
                         >
-                          {treatment.subtitle}
+                          Precio: ${treatment.price}
                         </Typography>
-                      )}
-                      <Typography variant="body2" color="text.secondary">
-                        {treatment.description}
-                      </Typography>
-                    </CardContent>
+                      </CardContent>
+                    </Box>
                   </Card>
                 </Grid>
               ))}
@@ -371,18 +439,75 @@ export default function HomePage() {
                       }}
                       onClick={() => handleFacialTreatmentClick(treatment)}
                     >
-                      <CardContent sx={{flexGrow: 1}}>
-                        <Typography
-                          variant="h6"
-                          gutterBottom
-                          sx={{fontWeight: "bold"}}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: {xs: "column", sm: "row"},
+                        }}
+                      >
+                        {treatment.image_url && (
+                          <Box
+                            component="img"
+                            src={treatment.image_url}
+                            alt={treatment.name}
+                            sx={{
+                              width: {xs: "100%", sm: 200},
+                              height: {xs: 180, sm: "auto"},
+                              objectFit: "cover",
+                              flexShrink: 0,
+                              borderRadius: {
+                                xs: "4px 4px 0 0",
+                                sm: "4px 0 0 4px",
+                              },
+                            }}
+                          />
+                        )}
+                        <CardContent
+                          sx={{
+                            flexGrow: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
                         >
-                          {treatment.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {treatment.description}
-                        </Typography>
-                      </CardContent>
+                          <Typography
+                            variant="h6"
+                            gutterBottom
+                            sx={{fontWeight: "bold"}}
+                          >
+                            {treatment.name}
+                          </Typography>
+                          {treatment.description &&
+                            (isHtml(treatment.description) ? (
+                              <Box
+                                component="div"
+                                dangerouslySetInnerHTML={{
+                                  __html: treatment.description,
+                                }}
+                                sx={{
+                                  fontSize: "0.875rem",
+                                  color: "text.secondary",
+                                  mb: 1,
+                                  "& p": {mt: 0, mb: 0.5},
+                                  "& ul, & ol": {pl: 2, mt: 0},
+                                }}
+                              />
+                            ) : (
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{mb: 1}}
+                              >
+                                {treatment.description}
+                              </Typography>
+                            ))}
+                          <Typography
+                            variant="body2"
+                            sx={{fontWeight: "medium", mt: "auto"}}
+                          >
+                            Precio: ${treatment.price}
+                          </Typography>
+                        </CardContent>
+                      </Box>
                     </Card>
                   </Grid>
                 ))}
@@ -403,6 +528,21 @@ export default function HomePage() {
             return (
               <Box key={productType} id={productType} sx={{py: {xs: 3, md: 4}}}>
                 <Container component="section">
+                  {campaign.image_url && (
+                    <Box
+                      component="img"
+                      src={campaign.image_url}
+                      alt={campaign.product_label}
+                      sx={{
+                        width: "100%",
+                        height: 400,
+                        objectFit: "cover",
+                        borderRadius: 1,
+                        mb: 3,
+                        display: "block",
+                      }}
+                    />
+                  )}
                   <Typography
                     variant={isMobile ? "h4" : "h3"}
                     align="center"
@@ -413,101 +553,181 @@ export default function HomePage() {
                       productType.charAt(0).toUpperCase() +
                         productType.slice(1)}
                   </Typography>
-                  {campaign.product_description && (
-                    <Typography
-                      align="center"
-                      sx={{mb: 3, color: "text.secondary"}}
-                    >
-                      {campaign.product_description}
-                    </Typography>
-                  )}
-
-                  <Grid container spacing={3} justifyContent="center">
-                    {hasGenderSplit ? (
-                      [
-                        {gender: "hombres", label: "Hombres"},
-                        {gender: "mujeres", label: "Mujeres"},
-                      ].map(({gender, label}) => (
-                        <Grid key={gender} size={{xs: 12, sm: 6, md: 4}}>
-                          <Card
-                            sx={{
-                              height: "100%",
-                              display: "flex",
-                              flexDirection: "column",
-                              cursor: "pointer",
-                              transition: "transform 0.2s, box-shadow 0.2s",
-                              "&:hover": {
-                                transform: "translateY(-4px)",
-                                boxShadow: 3,
-                              },
-                            }}
-                            onClick={() => {
-                              setCampaignModals((prev) => ({
-                                ...prev,
-                                [`${productType}-${gender}`]: true,
-                              }));
-                            }}
-                          >
-                            <CardContent sx={{flexGrow: 1}}>
-                              <Typography
-                                variant="h5"
-                                gutterBottom
-                                sx={{fontWeight: "bold", textAlign: "center"}}
-                              >
-                                {label}
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{textAlign: "center"}}
-                              >
-                                Ver zonas y paquetes disponibles
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))
+                  {campaign.product_description &&
+                    (isHtml(campaign.product_description) ? (
+                      <Box
+                        component="div"
+                        dangerouslySetInnerHTML={{
+                          __html: campaign.product_description,
+                        }}
+                        sx={{
+                          mb: 3,
+                          color: "text.secondary",
+                          textAlign: "center",
+                          "& p": {mt: 0, mb: 0.5},
+                          "& ul, & ol": {
+                            display: "inline-block",
+                            textAlign: "left",
+                          },
+                        }}
+                      />
                     ) : (
-                      <Grid size={{xs: 12, sm: 6, md: 4}}>
-                        <Card
-                          sx={{
-                            height: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                            cursor: "pointer",
-                            transition: "transform 0.2s, box-shadow 0.2s",
-                            "&:hover": {
-                              transform: "translateY(-4px)",
-                              boxShadow: 3,
-                            },
-                          }}
-                          onClick={() => {
-                            setCampaignModals((prev) => ({
-                              ...prev,
-                              [productType]: true,
-                            }));
-                          }}
-                        >
-                          <CardContent sx={{flexGrow: 1}}>
-                            <Typography
-                              variant="h5"
-                              gutterBottom
-                              sx={{fontWeight: "bold", textAlign: "center"}}
+                      <Typography
+                        align="center"
+                        sx={{mb: 3, color: "text.secondary"}}
+                      >
+                        {campaign.product_description}
+                      </Typography>
+                    ))}
+
+                  {/* Calculate minimum price for this campaign */}
+                  {(() => {
+                    // For gender-split, calculate min price per gender; otherwise overall min
+                    const getMinPriceByGender = (gender) => {
+                      const genderTreatments = campaignTreatments.filter((t) => t.gender === gender);
+                      if (genderTreatments.length === 0) return null;
+                      const minPrice = Math.min(...genderTreatments.map((t) => t.price || Infinity));
+                      return minPrice === Infinity ? null : minPrice;
+                    };
+
+                    const overallMinPrice = (() => {
+                      const minPrice = Math.min(
+                        ...campaignTreatments.map((t) => t.price || Infinity),
+                      );
+                      return minPrice === Infinity ? null : minPrice;
+                    })();
+
+                    return (
+                      <Grid container spacing={3} justifyContent="center">
+                        {hasGenderSplit ? (
+                          [
+                            {gender: "hombres", label: "Hombres"},
+                            {gender: "mujeres", label: "Mujeres"},
+                          ].map(({gender, label}) => {
+                            const genderMinPrice = getMinPriceByGender(gender);
+                            return (
+                              <Grid key={gender} size={{xs: 12, sm: 6, md: 4}}>
+                                <Card
+                                  sx={{
+                                    height: "100%",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    cursor: "pointer",
+                                    transition: "transform 0.2s, box-shadow 0.2s",
+                                    "&:hover": {
+                                      transform: "translateY(-4px)",
+                                      boxShadow: 3,
+                                    },
+                                  }}
+                                  onClick={() => {
+                                    setCampaignModals((prev) => ({
+                                      ...prev,
+                                      [`${productType}-${gender}`]: true,
+                                    }));
+                                  }}
+                                >
+                                  <CardContent
+                                    sx={{
+                                      flexGrow: 1,
+                                      display: "flex",
+                                      flexDirection: "column",
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="h5"
+                                      gutterBottom
+                                      sx={{
+                                        fontWeight: "bold",
+                                        textAlign: "center",
+                                      }}
+                                    >
+                                      {label}
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      color="text.secondary"
+                                      sx={{textAlign: "center", mb: 1}}
+                                    >
+                                      Ver zonas y paquetes disponibles
+                                    </Typography>
+                                    {genderMinPrice && (
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontWeight: "medium",
+                                          textAlign: "center",
+                                          mt: "auto",
+                                        }}
+                                      >
+                                        Desde: ${genderMinPrice}
+                                      </Typography>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                              </Grid>
+                            );
+                          })
+                        ) : (
+                          <Grid size={{xs: 12, sm: 6, md: 4}}>
+                            <Card
+                              sx={{
+                                height: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                cursor: "pointer",
+                                transition: "transform 0.2s, box-shadow 0.2s",
+                                "&:hover": {
+                                  transform: "translateY(-4px)",
+                                  boxShadow: 3,
+                                },
+                              }}
+                              onClick={() => {
+                                setCampaignModals((prev) => ({
+                                  ...prev,
+                                  [productType]: true,
+                                }));
+                              }}
                             >
-                              Consultar disponibilidad
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{textAlign: "center"}}
-                            >
-                              Zonas y paquetes personalizados
-                            </Typography>
-                          </CardContent>
-                        </Card>
+                              <CardContent
+                                sx={{
+                                  flexGrow: 1,
+                                  display: "flex",
+                                  flexDirection: "column",
+                                }}
+                              >
+                                <Typography
+                                  variant="h5"
+                                  gutterBottom
+                                  sx={{fontWeight: "bold", textAlign: "center"}}
+                                >
+                                  Consultar disponibilidad
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{textAlign: "center", mb: 1}}
+                                >
+                                  Zonas y paquetes personalizados
+                                </Typography>
+                                {overallMinPrice && (
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      fontWeight: "medium",
+                                      textAlign: "center",
+                                      mt: "auto",
+                                    }}
+                                  >
+                                    Desde: ${overallMinPrice}
+                                  </Typography>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        )}
                       </Grid>
-                    )}
-                  </Grid>
+                    );
+                  })()}
                 </Container>
               </Box>
             );
@@ -515,7 +735,11 @@ export default function HomePage() {
 
           {/* Complementarios Section - only show if treatments exist */}
           {complementaryTreatments.length > 0 && (
-            <Container component="section" id="complementarios" sx={{py: {xs: 3, md: 4}}}>
+            <Container
+              component="section"
+              id="complementarios"
+              sx={{py: {xs: 3, md: 4}}}
+            >
               <Typography
                 variant={isMobile ? "h4" : "h3"}
                 align="center"
@@ -546,27 +770,84 @@ export default function HomePage() {
                       }}
                       onClick={() => handleFacialTreatmentClick(treatment)}
                     >
-                      <CardContent sx={{flexGrow: 1}}>
-                        <Typography
-                          variant="h6"
-                          gutterBottom
-                          sx={{fontWeight: "bold"}}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: {xs: "column", sm: "row"},
+                        }}
+                      >
+                        {treatment.image_url && (
+                          <Box
+                            component="img"
+                            src={treatment.image_url}
+                            alt={treatment.name}
+                            sx={{
+                              width: {xs: "100%", sm: 200},
+                              height: {xs: 180, sm: "auto"},
+                              objectFit: "cover",
+                              flexShrink: 0,
+                              borderRadius: {
+                                xs: "4px 4px 0 0",
+                                sm: "4px 0 0 4px",
+                              },
+                            }}
+                          />
+                        )}
+                        <CardContent
+                          sx={{
+                            flexGrow: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
                         >
-                          {treatment.name}
-                        </Typography>
-                        {treatment.subtitle && (
+                          <Typography
+                            variant="h6"
+                            gutterBottom
+                            sx={{fontWeight: "bold"}}
+                          >
+                            {treatment.name}
+                          </Typography>
+                          {treatment.subtitle && (
+                            <Typography
+                              variant="body2"
+                              color="success.main"
+                              gutterBottom
+                            >
+                              {treatment.subtitle}
+                            </Typography>
+                          )}
+                          {treatment.description &&
+                            (isHtml(treatment.description) ? (
+                              <Box
+                                component="div"
+                                dangerouslySetInnerHTML={{
+                                  __html: treatment.description,
+                                }}
+                                sx={{
+                                  fontSize: "0.875rem",
+                                  color: "text.secondary",
+                                  mb: 1,
+                                  "& p": {mt: 0, mb: 0.5},
+                                  "& ul, & ol": {pl: 2, mt: 0},
+                                }}
+                              />
+                            ) : (
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{mb: 1}}
+                              >
+                                {treatment.description}
+                              </Typography>
+                            ))}
                           <Typography
                             variant="body2"
-                            color="success.main"
-                            gutterBottom
+                            sx={{fontWeight: "medium", mt: "auto"}}
                           >
-                            {treatment.subtitle}
+                            Precio: ${treatment.price}
                           </Typography>
-                        )}
-                        <Typography variant="body2" color="text.secondary">
-                          {treatment.description}
-                        </Typography>
-                      </CardContent>
+                        </CardContent>
+                      </Box>
                     </Card>
                   </Grid>
                 ))}

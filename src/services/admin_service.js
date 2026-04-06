@@ -187,11 +187,50 @@ const adminService = {
     return apiCall('/category-configs', { method: 'GET' });
   },
 
-  async upsertCategoryConfig(category, label, description, isGenderSplit = false) {
+  async upsertCategoryConfig(category, label, description, isGenderSplit = false, imageUrl = null) {
+    const body = { label, description, is_gender_split: isGenderSplit };
+    if (imageUrl) {
+      body.image_url = imageUrl;
+    }
     return apiCall(`/category-configs/${category}`, {
       method: 'PUT',
-      body: JSON.stringify({ label, description, is_gender_split: isGenderSplit }),
+      body: JSON.stringify(body),
     });
+  },
+
+  // Image uploads
+  async uploadTreatmentImage(treatmentId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = localStorage.getItem('access_token');
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://localhost:8443/api/v1';
+    const response = await fetch(`${baseUrl}/admin/treatments/${treatmentId}/image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ detail: response.statusText }));
+      throw new Error(err.detail || 'Image upload failed');
+    }
+    return response.json();
+  },
+
+  async uploadCategoryImage(category, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = localStorage.getItem('access_token');
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://localhost:8443/api/v1';
+    const response = await fetch(`${baseUrl}/category-configs/${category}/image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ detail: response.statusText }));
+      throw new Error(err.detail || 'Image upload failed');
+    }
+    return response.json();
   },
 };
 
