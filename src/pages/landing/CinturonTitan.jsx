@@ -111,20 +111,10 @@ export default function CinturonTitan() {
         // Customer has pending or confirmed appointment
         navigate("/my-appointments");
       } else {
-        // No existing appointment - check if customer already paid but hasn't scheduled yet
-        const unscheduledPayment = await paymentService.getUnscheduledPayment();
-        if (unscheduledPayment) {
-          // Customer paid but didn't schedule - skip payment, go directly to scheduling
-          paymentService.savePaymentId(unscheduledPayment._id);
-          navigate("/schedule", {
-            state: { treatment: { name: "Cinturón de Titán", slug: "titan" } }
-          });
-        } else {
-          // No payment or payment already has appointment - proceed to payment
-          navigate("/payment", {
-            state: { treatment: { name: "Cinturón de Titán", slug: "titan" }, isEvaluation: true }
-          });
-        }
+        // No existing appointment - go to scheduling
+        navigate("/schedule", {
+          state: { treatment: { name: "Cinturón de Titán", slug: "titan" }, isEvaluation: true, campaignItemType: "titan" }
+        });
       }
     } catch (err) {
       console.error("Error checking appointments:", err);
@@ -144,21 +134,12 @@ export default function CinturonTitan() {
         return;
       }
 
-      const unscheduledPayment = await paymentService.getUnscheduledPayment();
-      if (unscheduledPayment) {
-        paymentService.savePaymentId(unscheduledPayment._id);
-        navigate("/schedule", {
-          state: {
-            treatment: { name: "Cinturón de Titán", slug: "titan" },
-          },
-        });
-        return;
-      }
 
-      navigate("/payment", {
+      navigate("/schedule", {
         state: {
           treatment: { name: "Cinturón de Titán", slug: "titan" },
           selectedPackageId: packageId,
+          campaignItemType: "titan",
         },
       });
     } catch (err) {
@@ -177,12 +158,12 @@ export default function CinturonTitan() {
       if (can_purchase_packages) {
         setPurchaseDialogOpen(true);
       } else {
-        navigate("/payment", {
-          state: { treatment: { name: "Cinturón de Titán", slug: "titan" }, isEvaluation: true }
+        navigate("/schedule", {
+          state: { treatment: { name: "Cinturón de Titán", slug: "titan" }, isEvaluation: true, campaignItemType: "titan" }
         });
       }
     } catch {
-      navigate("/payment", {
+      navigate("/schedule", {
         state: { treatment: { name: "Cinturón de Titán", slug: "titan" }, isEvaluation: true }
       });
     }

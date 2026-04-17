@@ -119,7 +119,7 @@ function CampaignModal({
 
       setHasCampaign(true);
       onClose();
-      navigate("/payment", {
+      navigate("/schedule", {
         state: {
           treatment: { name: item.name, slug: item.slug, item_type: item.item_type, category: productType },
           selectedPackageId: null,

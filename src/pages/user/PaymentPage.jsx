@@ -81,11 +81,15 @@ export default function PaymentPage() {
       slug: "evaluation",
     }
   );
+  const appointmentData = location.state?.appointmentData || null;
+  const appointmentId = location.state?.appointmentId || null; // For backward compatibility (cuponera)
+  const selectedPaymentMethod = location.state?.selectedPaymentMethod || "tarjeta";
   const selectedPackageId = location.state?.selectedPackageId || null;
   const isEvaluation = location.state?.isEvaluation ?? false;
   const campaignItemType = location.state?.campaignItemType || location.state?.campaignItemType || null;
   const productType = location.state?.productType || null;
-  const [paymentMethod, setPaymentMethod] = useState("tarjeta"); // tarjeta | efectivo | transferencia | deposito
+  const [paymentMethod, setPaymentMethod] = useState(selectedPaymentMethod); // tarjeta | efectivo | transferencia | deposito
+  const [createdAppointmentId, setCreatedAppointmentId] = useState(appointmentId);
   const [bankDetails, setBankDetails] = useState({
     bank_name: "",
     account_number: "",
@@ -185,11 +189,11 @@ export default function PaymentPage() {
   useEffect(() => {
     if (paymentStatus === "approved") {
       const timer = setTimeout(() => {
-        navigate("/schedule", {state: {treatment, campaignItemType, paymentMethod: "tarjeta", productType}});
+        navigate("/my-appointments");
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [paymentStatus, navigate, treatment]);
+  }, [paymentStatus, navigate]);
 
   // Redirect employees to admin panel
   useEffect(() => {
@@ -205,32 +209,12 @@ export default function PaymentPage() {
     }
   }, [loading, user]);
 
-  // Check for existing appointments and completed payments when user is authenticated
-  // Also check after login modal closes to ensure context is fully loaded
-  // Only check for customers, not employees
+  // Fallback: if no appointmentData or appointmentId, redirect to schedule
   useEffect(() => {
-    if (!loading && user && !showLoginModal && user?.user_type !== "employee") {
-      // First check if user has an existing appointment (pending or confirmed)
-      appointmentService
-        .getCustomerAppointments()
-        .then((appointment) => {
-          if (appointment) {
-            // User has an existing appointment, redirect to appointments overview
-            navigate("/my-appointments");
-          } else {
-            // No existing appointment, check for completed payment without appointment
-            return paymentService.getUnscheduledPayment();
-          }
-        })
-        .then((payment) => {
-          if (payment) {
-            paymentService.savePaymentId(payment._id);
-            navigate("/schedule", {state: {treatment, isEvaluation, campaignItemType}});
-          }
-        })
-        .catch(() => {}); // Fail silently
+    if (!loading && user && !appointmentData && !appointmentId && !selectedPackageId && user?.user_type !== "employee") {
+      navigate("/schedule", {state: {treatment, isEvaluation, campaignItemType}});
     }
-  }, [loading, user, showLoginModal, navigate, treatment]);
+  }, [loading, user, appointmentData, appointmentId, selectedPackageId, user?.user_type, navigate, treatment, isEvaluation, campaignItemType]);
 
   // Fetch profile data when user is loaded
   useEffect(() => {
@@ -368,8 +352,33 @@ export default function PaymentPage() {
     }
   };
 
-  const handlePaymentSuccess = (paymentId) => {
+  const handlePaymentSuccess = async (paymentId) => {
     paymentService.savePaymentId(paymentId);
+
+    // Create appointment if appointmentData provided (new schedule-first flow)
+    let appointmentIdToLink = appointmentId || createdAppointmentId;
+    if (appointmentData && !appointmentIdToLink) {
+      try {
+        const result = await appointmentService.createAppointment(appointmentData);
+        appointmentIdToLink = result.appointment_id;
+        setCreatedAppointmentId(appointmentIdToLink);
+      } catch (err) {
+        console.error("Failed to create appointment:", err);
+        setError("Error al crear la cita");
+        return;
+      }
+    }
+
+    // Link payment to appointment
+    if (appointmentIdToLink) {
+      try {
+        await paymentService.linkIntentToAppointment(paymentId, appointmentIdToLink);
+      } catch (err) {
+        console.warn("Failed to link payment to appointment:", err);
+        // Non-fatal: admin can link manually if needed
+      }
+    }
+
     setProfileLocked(true); // Gray out all fields after payment success
     setPaymentStatus("approved");
   };
@@ -427,16 +436,32 @@ export default function PaymentPage() {
         }
       }
 
-      setProfileLocked(true);
-      navigate("/schedule", {
-        state: {
-          treatment,
-          campaignItemType,
-          productType,
-          paymentMethod: method,
-          intentPaymentId: intent.payment_id  // Link the intent for later
+      // Create appointment if appointmentData provided (new schedule-first flow)
+      let appointmentIdToLink = appointmentId || createdAppointmentId;
+      if (appointmentData && !appointmentIdToLink) {
+        try {
+          const result = await appointmentService.createAppointment(appointmentData);
+          appointmentIdToLink = result.appointment_id;
+          setCreatedAppointmentId(appointmentIdToLink);
+        } catch (err) {
+          console.error("Failed to create appointment:", err);
+          setError("Error al crear la cita");
+          return;
         }
-      });
+      }
+
+      // Link payment intent to appointment
+      if (appointmentIdToLink) {
+        try {
+          await paymentService.linkIntentToAppointment(intent.payment_id, appointmentIdToLink);
+        } catch (err) {
+          console.warn('Failed to link intent to appointment:', err);
+          // Non-fatal: admin can link manually if needed
+        }
+      }
+
+      setProfileLocked(true);
+      navigate("/my-appointments");
     } catch (err) {
       setError(err.message || 'Error creating payment intent');
     } finally {
@@ -473,7 +498,7 @@ export default function PaymentPage() {
     return false;
   };
 
-  const steps = ["Autenticación", "Pago", "Agendar cita"];
+  const steps = ["Autenticación", "Agendar cita", "Pago"];
 
   return (
     <>
@@ -484,29 +509,7 @@ export default function PaymentPage() {
       />
 
       <Container>
-        {/* Treatment Description Section */}
-        {treatmentDescription && !loadingDescription && (
-          <Card sx={{mb: 3, bgcolor: "info.light"}}>
-            <CardContent>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{fontWeight: "bold", color: "info.main"}}
-              >
-                Sobre este tratamiento
-              </Typography>
-              <Typography variant="body2">{treatmentDescription}</Typography>
-            </CardContent>
-          </Card>
-        )}
-
-        {loadingDescription && (
-          <Box sx={{display: "flex", justifyContent: "center", mb: 3}}>
-            <CircularProgress size={24} />
-          </Box>
-        )}
-
-        <Stepper activeStep={1} sx={{mb: 2}}>
+        <Stepper activeStep={2} sx={{mb: 2}}>
           {steps.map((label) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
@@ -539,20 +542,22 @@ export default function PaymentPage() {
                   {basePrice != null ? `$${basePrice}` : "..."}
                 </Typography>
               </Box>
-              <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                <Typography variant="body2" color="text.secondary">
-                  Costo de procesamiento
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{whiteSpace: "nowrap"}}
-                >
-                  {totalPrice != null && basePrice != null
-                    ? `$${(totalPrice - basePrice).toFixed(2)}`
-                    : "..."}
-                </Typography>
-              </Box>
+              {paymentMethod === "tarjeta" && (
+                <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                  <Typography variant="body2" color="text.secondary">
+                    Costo de procesamiento
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{whiteSpace: "nowrap"}}
+                  >
+                    {totalPrice != null && basePrice != null
+                      ? `$${(totalPrice - basePrice).toFixed(2)}`
+                      : "..."}
+                  </Typography>
+                </Box>
+              )}
               <Box
                 sx={{pt: 1, borderTop: "1px solid", borderColor: "divider"}}
               />
@@ -571,8 +576,8 @@ export default function PaymentPage() {
                   color="success.main"
                   sx={{fontWeight: "bold", whiteSpace: "nowrap"}}
                 >
-                  {totalPrice != null ? (
-                    `$${totalPrice} UYU`
+                  {basePrice != null ? (
+                    `$${paymentMethod === "tarjeta" ? totalPrice : basePrice} UYU`
                   ) : (
                     <CircularProgress size={20} />
                   )}
@@ -867,92 +872,12 @@ export default function PaymentPage() {
               <Typography variant="h6" sx={{mb: 2, fontWeight: "bold"}}>
                 Método de Pago
               </Typography>
-              <Stack spacing={2}>
-                <Box
-                  onClick={() => setPaymentMethod("tarjeta")}
-                  sx={{
-                    p: 2,
-                    border: "2px solid",
-                    borderColor: paymentMethod === "tarjeta" ? "success.main" : "divider",
-                    borderRadius: 1,
-                    cursor: "pointer",
-                    bgcolor: paymentMethod === "tarjeta" ? "success.light" : "transparent",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <Typography variant="body1" sx={{fontWeight: paymentMethod === "tarjeta" ? "bold" : "normal"}}>
-                    💳 Tarjeta / Saldo en MercadoPago
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    ${totalPrice} (incluye costo de procesamiento)
-                  </Typography>
-                </Box>
-
-                <Box
-                  onClick={() => setPaymentMethod("transferencia")}
-                  sx={{
-                    p: 2,
-                    border: "2px solid",
-                    borderColor: paymentMethod === "transferencia" ? "success.main" : "divider",
-                    borderRadius: 1,
-                    cursor: "pointer",
-                    bgcolor: paymentMethod === "transferencia" ? "success.light" : "transparent",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <Typography variant="body1" sx={{fontWeight: paymentMethod === "transferencia" ? "bold" : "normal"}}>
-                    🏦 Transferencia Bancaria
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    ${basePrice} (sin costo de procesamiento)
-                  </Typography>
-                </Box>
-
-                {user?.can_purchase_packages && (
-                  <Box
-                    onClick={() => setPaymentMethod("efectivo")}
-                    sx={{
-                      p: 2,
-                      border: "2px solid",
-                      borderColor: paymentMethod === "efectivo" ? "success.main" : "divider",
-                      borderRadius: 1,
-                      cursor: "pointer",
-                      bgcolor: paymentMethod === "efectivo" ? "success.light" : "transparent",
-                      transition: "all 0.2s",
-                    }}
-                  >
-                    <Typography variant="body1" sx={{fontWeight: paymentMethod === "efectivo" ? "bold" : "normal"}}>
-                      💵 Efectivo
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      ${basePrice} (pagar al momento de la sesión)
-                    </Typography>
-                  </Box>
-                )}
-
-                {!user?.can_purchase_packages && (campaignItemType || productType) && (
-                  <Box
-                    onClick={() => setPaymentMethod("deposito")}
-                    sx={{
-                      p: 2,
-                      border: "2px solid",
-                      borderColor: paymentMethod === "deposito" ? "success.main" : "divider",
-                      borderRadius: 1,
-                      cursor: "pointer",
-                      bgcolor: paymentMethod === "deposito" ? "success.light" : "transparent",
-                      transition: "all 0.2s",
-                    }}
-                  >
-                    <Typography variant="body1" sx={{fontWeight: paymentMethod === "deposito" ? "bold" : "normal"}}>
-                      💎 Reserva con ${formatMoney(effectiveDepositAmount)}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      ${formatMoney(effectiveDepositAmount)} ahora + $
-                      {formatMoney(depositRemainderAmount)} en efectivo/transferencia
-                    </Typography>
-                  </Box>
-                )}
-              </Stack>
+              <Typography variant="body2" color="text.secondary">
+                {paymentMethod === "tarjeta" && "💳 Tarjeta / MercadoPago"}
+                {paymentMethod === "transferencia" && "🏦 Transferencia Bancaria"}
+                {paymentMethod === "efectivo" && "💵 Efectivo"}
+                {paymentMethod === "deposito" && "💎 Depósito + Efectivo"}
+              </Typography>
             </CardContent>
           </Card>
         )}
@@ -1197,7 +1122,19 @@ export default function PaymentPage() {
         {paymentStatus !== "approved" && paymentStatus !== "pending" && (
           <Button
             variant="outlined"
-            onClick={() => navigate(-1)}
+            onClick={() =>
+              navigate("/schedule", {
+                state: {
+                  treatment,
+                  campaignItemType,
+                  productType,
+                  isEvaluation,
+                  selectedPaymentMethod: paymentMethod,
+                  selectedDate: location.state?.selectedDate,
+                  selectedTime: location.state?.selectedTime,
+                },
+              })
+            }
             disabled={paymentStatus === "processing"}
             sx={{mt: 4}}
           >

@@ -187,6 +187,27 @@ export const appointmentService = {
   async getTreatmentPackages(slug) {
     return apiCall(`/treatments/${slug}/packages`);
   },
+
+  /**
+   * Delete an unconfirmed appointment that hasn't been paid
+   * @param {string} appointmentId - ID of appointment to delete
+   * @param {string} reason - Reason for cancellation (default: "Cliente canceló la solicitud")
+   * @returns {Promise<object>} - Deletion confirmation
+   */
+  async deleteAppointment(appointmentId, reason = "Cliente canceló la solicitud") {
+    try {
+      const response = await apiCall(
+        `/appointments/${appointmentId}?reason=${encodeURIComponent(reason)}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      return response;
+    } catch (err) {
+      console.error('Error deleting appointment:', err);
+      throw err;
+    }
+  },
 };
 
 export default appointmentService;

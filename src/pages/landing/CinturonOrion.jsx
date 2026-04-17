@@ -111,20 +111,10 @@ export default function CinturonOrion() {
         // Customer has pending or confirmed appointment
         navigate("/my-appointments");
       } else {
-        // No existing appointment - check if customer already paid but hasn't scheduled yet
-        const unscheduledPayment = await paymentService.getUnscheduledPayment();
-        if (unscheduledPayment) {
-          // Customer paid but didn't schedule - skip payment, go directly to scheduling
-          paymentService.savePaymentId(unscheduledPayment._id);
-          navigate("/schedule", {
-            state: { treatment: { name: "Cinturón de Orión", slug: "orion" } }
-          });
-        } else {
-          // No payment or payment already has appointment - proceed to payment
-          navigate("/payment", {
-            state: { treatment: { name: "Cinturón de Orión", slug: "orion" }, isEvaluation: true }
-          });
-        }
+        // No existing appointment - go to scheduling
+        navigate("/schedule", {
+          state: { treatment: { name: "Cinturón de Orión", slug: "orion" }, isEvaluation: true, campaignItemType: "orion" }
+        });
       }
     } catch (err) {
       console.error("Error checking appointments:", err);
@@ -144,21 +134,11 @@ export default function CinturonOrion() {
         return;
       }
 
-      const unscheduledPayment = await paymentService.getUnscheduledPayment();
-      if (unscheduledPayment) {
-        paymentService.savePaymentId(unscheduledPayment._id);
-        navigate("/schedule", {
-          state: {
-            treatment: { name: "Cinturón de Orión", slug: "orion" },
-          },
-        });
-        return;
-      }
-
-      navigate("/payment", {
+      navigate("/schedule", {
         state: {
           treatment: { name: "Cinturón de Orión", slug: "orion" },
           selectedPackageId: packageId,
+          campaignItemType: "orion",
         },
       });
     } catch (err) {
@@ -177,12 +157,12 @@ export default function CinturonOrion() {
       if (can_purchase_packages) {
         setPurchaseDialogOpen(true);
       } else {
-        navigate("/payment", {
-          state: { treatment: { name: "Cinturón de Orión", slug: "orion" }, isEvaluation: true }
+        navigate("/schedule", {
+          state: { treatment: { name: "Cinturón de Orión", slug: "orion" }, isEvaluation: true, campaignItemType: "orion" }
         });
       }
     } catch {
-      navigate("/payment", {
+      navigate("/schedule", {
         state: { treatment: { name: "Cinturón de Orión", slug: "orion" }, isEvaluation: true }
       });
     }

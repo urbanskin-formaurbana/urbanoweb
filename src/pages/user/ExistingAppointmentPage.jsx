@@ -118,6 +118,10 @@ export default function ExistingAppointmentPage() {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const fileInputRef = useRef(null);
 
+  // Delete confirmation state
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   // Bank details state
   const [bankDetails, setBankDetails] = useState({
     bank_name: "",
@@ -354,6 +358,32 @@ export default function ExistingAppointmentPage() {
       setSnackbarOpen(true);
     } finally {
       setUploadingComprobante(false);
+    }
+  };
+
+  // Delete appointment handler
+  const handleDeleteClick = () => {
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    try {
+      await appointmentService.deleteAppointment(appointmentId);
+      setSnackbarMessage("Cita eliminada correctamente");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    } catch (err) {
+      setSnackbarMessage("Error al eliminar la cita");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      console.error("Error deleting appointment:", err);
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
     }
   };
 
@@ -800,6 +830,16 @@ export default function ExistingAppointmentPage() {
               Reagendar turno
             </Button>
           )}
+          {isPending && isAwaitingPayment && (
+            <Button
+              fullWidth
+              variant="contained"
+              color="error"
+              onClick={handleDeleteClick}
+            >
+              Eliminar solicitud
+            </Button>
+          )}
           <Button fullWidth variant="outlined" onClick={handleLogout}>
             Cerrar sesión
           </Button>
@@ -863,6 +903,37 @@ export default function ExistingAppointmentPage() {
                 }
               >
                 {rescheduling ? "Reagendando..." : "Confirmar"}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <Dialog
+            open={deleteConfirmOpen}
+            onClose={() => setDeleteConfirmOpen(false)}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle sx={{fontWeight: 'bold', color: 'error.main'}}>
+              Eliminar cita
+            </DialogTitle>
+            <DialogContent sx={{pt: 2}}>
+              <Typography>
+                ¿Estás seguro de que deseas eliminar esta solicitud de cita? Esta acción no se puede deshacer.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteConfirmOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleDeleteConfirm}
+                variant="contained"
+                color="error"
+                disabled={deleting}
+                startIcon={deleting ? <CircularProgress size={20} /> : undefined}
+              >
+                {deleting ? "Eliminando..." : "Sí, eliminar"}
               </Button>
             </DialogActions>
           </Dialog>

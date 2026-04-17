@@ -175,6 +175,7 @@ export default function DateTimeSlotPicker({
   const [loadingCampaignSlots, setLoadingCampaignSlots] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotCache, setSlotCache] = useState({}); // Cache for fetched slots by date
 
   const isCampaign = isCampaignTreatment(treatment);
 
@@ -242,7 +243,12 @@ export default function DateTimeSlotPicker({
       return;
     }
 
-    // Regular treatment: fetch from API
+    // Regular treatment: check cache first, then fetch from API
+    if (slotCache[dateKey]) {
+      setAvailableSlots(slotCache[dateKey]);
+      return;
+    }
+
     let cancelled = false;
     setLoadingSlots(true);
 
@@ -258,6 +264,8 @@ export default function DateTimeSlotPicker({
           dayjs.utc(s).tz('America/Montevideo'),
         );
         setAvailableSlots(slots);
+        // Cache the result for this date
+        setSlotCache((prev) => ({ ...prev, [dateKey]: slots }));
       })
       .catch(() => {
         if (!cancelled) setAvailableSlots([]);
@@ -267,7 +275,7 @@ export default function DateTimeSlotPicker({
       });
 
     return () => { cancelled = true; };
-  }, [dateKey, isCampaign, allCampaignSlots, filterSlots, selectedDate, treatment, excludeAppointmentId]);
+  }, [dateKey, isCampaign, allCampaignSlots, filterSlots, selectedDate, treatment, excludeAppointmentId, slotCache]);
 
   return (
     <Grid container spacing={3}>

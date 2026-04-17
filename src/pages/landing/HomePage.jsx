@@ -133,27 +133,15 @@ export default function HomePage() {
         return;
       }
 
-      const unscheduledPayment = await paymentService.getUnscheduledPayment();
-      if (unscheduledPayment) {
-        paymentService.savePaymentId(unscheduledPayment._id);
-        navigate("/schedule", {
-          state: {
-            treatment: {
-              name: selectedTreatmentForPurchase.name,
-              slug: selectedTreatmentForPurchase.slug,
-            },
-          },
-        });
-        return;
-      }
 
-      navigate("/payment", {
+      navigate("/schedule", {
         state: {
           treatment: {
             name: selectedTreatmentForPurchase.name,
             slug: selectedTreatmentForPurchase.slug,
           },
           selectedPackageId: packageId,
+          productType: "body",
         },
       });
     } catch (err) {
@@ -186,26 +174,10 @@ export default function HomePage() {
         // Customer has pending or confirmed appointment
         navigate("/my-appointments");
       } else {
-        // No existing appointment - check if customer already paid but hasn't scheduled yet
-        const unscheduledPayment = await paymentService.getUnscheduledPayment();
-        if (unscheduledPayment) {
-          // Customer paid but didn't schedule - skip payment, go directly to scheduling
-          paymentService.savePaymentId(unscheduledPayment._id);
-          navigate("/schedule", {
-            state: {
-              treatment: {name: treatment.name, slug: treatment.slug},
-              productType: "facial",
-            },
-          });
-        } else {
-          // No payment or payment already has appointment - proceed to payment
-          navigate("/payment", {
-            state: {
-              treatment: {name: treatment.name, slug: treatment.slug},
-              productType: "facial",
-            },
-          });
-        }
+        // No existing appointment - go to scheduling
+        navigate("/schedule", {
+          state: { treatment, productType: "body" }
+        });
       }
     } catch (err) {
       console.error("Error checking appointments:", err);

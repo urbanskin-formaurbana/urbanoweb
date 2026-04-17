@@ -1,4 +1,4 @@
-import {useState, useMemo} from "react";
+import {useState, useMemo, useEffect, useCallback} from "react";
 import {
   Container,
   Box,
@@ -12,17 +12,17 @@ import {
   Step,
   StepLabel,
   Stack,
+  Grid,
 } from "@mui/material";
 import {useNavigate, useLocation} from "react-router-dom";
 import {useAuth} from "../../contexts/AuthContext";
+import LoginModal from "../../components/LoginModal";
 import appointmentService from "../../services/appointment_service";
-import paymentService from "../../services/payment_service";
-import transferReceiptStore from "../../utils/transferReceiptStore";
+import treatmentService from "../../services/treatment_service";
+import authService from "../../services/auth_service";
 import {filterSlotsForCustomer} from "../../utils/slotUtils";
 import DateTimeSlotPicker from "../../components/DateTimeSlotPicker";
-import {
-  LocalizationProvider,
-} from "@mui/x-date-pickers";
+import {LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -35,6 +35,22 @@ dayjs.extend(timezone);
 dayjs.locale("es");
 
 const SESSION_DURATION = 30; // minutes
+const DEFAULT_DEPOSIT_AMOUNT = 500;
+
+function formatMoney(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "0";
+  if (Number.isInteger(parsed)) return parsed.toString();
+  return parsed.toFixed(2);
+}
+
+function getValidDepositAmount(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_DEPOSIT_AMOUNT;
+  }
+  return parsed;
+}
 
 export default function SchedulingPage() {
   const navigate = useNavigate();
@@ -44,52 +60,127 @@ export default function SchedulingPage() {
   const [selectedTime, setSelectedTime] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("tarjeta");
+  const [treatmentDescription, setTreatmentDescription] = useState(null);
+  const [basePrice, setBasePrice] = useState(null);
+  const [duration, setDuration] = useState(null);
+  const [loadingDescription, setLoadingDescription] = useState(false);
+  const [canPurchasePackages, setCanPurchasePackages] = useState(false);
 
   const productType = location.state?.productType; // preserve for navigation back to payment
   const rawTreatment = location.state?.treatment || {
     name: "Evaluación",
     slug: "evaluation",
   };
+
+  // Restore previously selected date/time if coming back from payment
+  const restoredDate = location.state?.selectedDate;
+  const restoredTime = location.state?.selectedTime;
+  const restoredPaymentMethod = location.state?.selectedPaymentMethod;
   // Ensure campaign treatments always have category set, using productType as fallback
   // useMemo prevents a new object reference on every render (which would cause infinite useEffect loops)
-  const treatment = useMemo(() => ({
-    ...rawTreatment,
-    category: rawTreatment.category || productType,
-  }), [rawTreatment.name, rawTreatment.slug, rawTreatment.item_type, rawTreatment.category, productType]);
-  const paymentId = location.state?.paymentId;
+  const treatment = useMemo(
+    () => ({
+      ...rawTreatment,
+      category: rawTreatment.category || productType,
+    }),
+    [
+      rawTreatment.name,
+      rawTreatment.slug,
+      rawTreatment.item_type,
+      rawTreatment.category,
+      productType,
+    ],
+  );
   const purchasedPackageId = location.state?.purchased_package_id;
   const sessionInfo = location.state?.sessionInfo; // { sessionNumber, remainingSessions, totalSessions }
   const isEvaluation = location.state?.isEvaluation ?? false;
-  const paymentMethod = location.state?.paymentMethod || "tarjeta"; // tarjeta | efectivo | transferencia | deposito
   const campaignItemType = location.state?.campaignItemType; // preserve for navigation back to payment
-  const intentPaymentId = location.state?.intentPaymentId; // Link to payment intent if created at PaymentPage
-  const isPackageMode = !!purchasedPackageId && !paymentId; // subsequent session scheduling
-  const isCashOrTransferMode =
-    paymentMethod === "efectivo" || paymentMethod === "transferencia"; // payment pending flow
+  const isPackageMode = !!purchasedPackageId; // subsequent session scheduling
 
-  if (!user) {
-    return (
-      <Container sx={{py: 4, textAlign: "center"}}>
-        <Alert severity="warning">Por favor, inicia sesión primero</Alert>
-        <Button variant="contained" onClick={() => navigate("/")} sx={{mt: 2}}>
-          Volver
-        </Button>
-      </Container>
-    );
-  }
+  // Calculate deposit amounts for display
+  const parsedBasePrice = Number(basePrice);
+  const hasValidBasePrice = Number.isFinite(parsedBasePrice);
+  const normalizedDepositAmount = getValidDepositAmount(DEFAULT_DEPOSIT_AMOUNT);
+  const effectiveDepositAmount = hasValidBasePrice
+    ? Math.min(normalizedDepositAmount, Math.max(parsedBasePrice, 0))
+    : normalizedDepositAmount;
+  const depositRemainderAmount = Math.max(
+    (hasValidBasePrice ? parsedBasePrice : 0) - effectiveDepositAmount,
+    0,
+  );
 
+  // Memoize filter function to prevent unnecessary API calls
+  const memoizedFilterSlots = useCallback(filterSlotsForCustomer, []);
+
+  // Restore previously selected date/time/payment method if coming back from payment
+  useEffect(() => {
+    if (restoredDate && restoredTime) {
+      setSelectedDate(dayjs(restoredDate, "YYYY-MM-DD"));
+      setSelectedTime(dayjs(restoredTime, "HH:mm"));
+    }
+    if (restoredPaymentMethod) {
+      setPaymentMethod(restoredPaymentMethod);
+    }
+  }, []);
+
+  // Load purchase eligibility
+  useEffect(() => {
+    if (user) {
+      authService
+        .getPurchaseEligibility()
+        .then((data) => {
+          setCanPurchasePackages(data.can_purchase_packages ?? false);
+        })
+        .catch(() => {
+          setCanPurchasePackages(false);
+        });
+    }
+  }, [user]);
+
+  // Load treatment description and price
+  useEffect(() => {
+    if (treatment.slug && treatment.slug !== "evaluation") {
+      setLoadingDescription(true);
+      treatmentService
+        .getTreatmentPackages(treatment.slug)
+        .then((data) => {
+          // If evaluation, use evaluation description; otherwise use treatment description
+          if (isEvaluation) {
+            setTreatmentDescription(
+              "Nuestros especialistas necesitan evaluar tu caso particular para orientarte hacia los servicios más adecuados para ti. Esta sesión de evaluación no garantiza el inicio de un tratamiento con nosotros.",
+            );
+          } else if (data?.description) {
+            setTreatmentDescription(data.description);
+          }
+
+          // Get base price (without processing fee)
+          if (isEvaluation && data?.evaluation_price != null) {
+            setBasePrice(data.evaluation_price);
+          } else if (data?.single_session_price != null) {
+            setBasePrice(data.single_session_price);
+          }
+
+          // Get duration
+          if (data?.duration_minutes) {
+            setDuration(data.duration_minutes);
+          }
+        })
+        .catch(() => {
+          // Non-fatal: description and price just won't display
+        })
+        .finally(() => setLoadingDescription(false));
+    } else if (treatment.slug === "evaluation") {
+      setTreatmentDescription(
+        "Nuestros especialistas necesitan evaluar tu caso particular para orientarte hacia los servicios más adecuados para ti. Esta sesión de evaluación no garantiza el inicio de un tratamiento con nosotros.",
+      );
+    }
+  }, [treatment.slug, isEvaluation]);
 
   const handleCreateAppointment = async () => {
     if (!selectedDate || !selectedTime) {
       setError("Por favor selecciona fecha y hora");
-      return;
-    }
-
-    // Check if payment was completed (not required for package mode or cash/transfer)
-    let paymentIdToUse = paymentService.getPaymentId();
-    if (!paymentIdToUse && !isPackageMode && !isCashOrTransferMode) {
-      setError("Payment ID not found. Please complete the payment first.");
-      navigate("/payment", {state: {treatment, campaignItemType, productType}});
       return;
     }
 
@@ -105,66 +196,34 @@ export default function SchedulingPage() {
         .utc()
         .toISOString();
 
-      // Create appointment via API
+      // Build appointment data (will be created on PaymentPage after payment confirmation)
       const appointmentData = {
         treatment_id: treatment.slug,
         scheduled_at,
         is_evaluation: isEvaluation,
+        ...(purchasedPackageId && { purchased_package_id: purchasedPackageId }),
       };
 
-      // Add payment_id if available
-      if (paymentIdToUse) {
-        appointmentData.payment_id = paymentIdToUse;
-      } else if (intentPaymentId) {
-        // Link payment intent at creation time (transfer/deposit flow)
-        appointmentData.payment_id = intentPaymentId;
-      } else if (isCashOrTransferMode) {
-        // Fallback for cash/transfer without intent (admin-created flow)
-        appointmentData.payment_method_expected = paymentMethod;
+      // Navigate based on mode
+      if (isPackageMode) {
+        // Cuponera mode: create appointment immediately (no payment needed)
+        const result = await appointmentService.createAppointment(appointmentData);
+        navigate("/my-appointments");
+      } else {
+        // Regular mode: go to payment page, appointment will be created after payment
+        navigate("/payment", {
+          state: {
+            treatment,
+            campaignItemType,
+            productType,
+            isEvaluation,
+            appointmentData, // Pass data to create appointment later
+            selectedPaymentMethod: paymentMethod,
+            selectedDate: selectedDate.format("YYYY-MM-DD"),
+            selectedTime: selectedTime.format("HH:mm"),
+          },
+        });
       }
-
-      // If we have a purchased_package_id from location state, include it
-      if (purchasedPackageId) {
-        appointmentData.purchased_package_id = purchasedPackageId;
-      }
-
-      const result =
-        await appointmentService.createAppointment(appointmentData);
-
-      // Build appointment details for ExistingAppointmentPage
-      const appointmentDuration = isEvaluation
-        ? 30
-        : treatment.duration_minutes || SESSION_DURATION;
-      const appointmentDetails = {
-        id: result.appointment_id,
-        scheduled_at: scheduled_at,
-        duration_minutes: appointmentDuration,
-        treatment_name: treatment.name,
-        treatment_slug: treatment.slug,
-        item_type: treatment.item_type || null,
-        customer: user.name,
-        payment_id: paymentIdToUse,
-        status: result.status,
-        payment_status: isCashOrTransferMode ? "awaiting_payment" : "paid",
-        payment_method_expected: isCashOrTransferMode ? paymentMethod : null,
-        is_evaluation: isEvaluation,
-        session_number: result.session_number,
-        remaining_sessions: result.remaining_sessions,
-        purchased_package_id: purchasedPackageId || null,
-      };
-
-      // Clear payment ID from storage after successful appointment creation (only for online flow)
-      if (!isPackageMode) {
-        paymentService.clearPaymentId();
-      }
-
-      // Clear transfer receipt from store if any
-      if (intentPaymentId) {
-        transferReceiptStore.file = null;
-      }
-
-      // Navigate to appointments overview
-      navigate("/my-appointments");
     } catch (err) {
       setError(err.message || "Error creating appointment");
     } finally {
@@ -172,12 +231,29 @@ export default function SchedulingPage() {
     }
   };
 
-  const steps = ["Autenticación", "Pago", "Agendar cita"];
-  const activeStep = 2;
+  const steps = ["Autenticación", "Agendar cita", "Pago"];
+  const activeStep = 1;
+
+  if (!user) {
+    return (
+      <>
+        <LoginModal
+          open={true}
+          onClose={() => navigate("/")}
+          onSuccess={() => setShowLoginModal(false)}
+        />
+      </>
+    );
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
       <>
+        <LoginModal
+          open={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onSuccess={() => setShowLoginModal(false)}
+        />
         <Box
           sx={{
             bgcolor: "success.light",
@@ -217,28 +293,85 @@ export default function SchedulingPage() {
             </Alert>
           )}
 
-          {/* Treatment Info */}
+          {/* Treatment Info - Consolidated */}
           <Card sx={{mb: 3}}>
             <CardContent>
-              <Typography variant="h6" gutterBottom sx={{fontWeight: "bold"}}>
-                {treatment.name}
-              </Typography>
+              {/* Session Info Badge */}
               {sessionInfo && (
                 <Typography
-                  variant="subtitle2"
+                  variant="caption"
                   color="success.main"
-                  sx={{fontWeight: "bold", mb: 1}}
+                  sx={{fontWeight: "bold", mb: 2, display: "block"}}
                 >
                   Sesión {sessionInfo.sessionNumber} de{" "}
                   {sessionInfo.totalSessions}
                 </Typography>
               )}
-              <Typography variant="body2" color="text.secondary">
-                Duración: {SESSION_DURATION} minutos
+
+              {/* Treatment Title */}
+              <Typography
+                variant="h5"
+                gutterBottom
+                sx={{fontWeight: "bold", mb: 2}}
+              >
+                {treatment.name}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
-                Ubicación: Montevideo Centro
-              </Typography>
+
+              {/* Loading Description */}
+              {loadingDescription && (
+                <Box sx={{display: "flex", justifyContent: "center", my: 2}}>
+                  <CircularProgress size={24} />
+                </Box>
+              )}
+
+              {/* Treatment Description */}
+              {treatmentDescription && !loadingDescription && (
+                <Box
+                  sx={{
+                    mb: 2,
+                    "& p": {margin: 0, marginBottom: 1},
+                    "& ul, & ol": {marginBottom: 1, paddingLeft: 2},
+                    "& blockquote": {
+                      borderLeft: "4px solid",
+                      borderColor: "divider",
+                      paddingLeft: 2,
+                      marginLeft: 0,
+                      color: "text.secondary",
+                      marginBottom: 1,
+                    },
+                  }}
+                  dangerouslySetInnerHTML={{__html: treatmentDescription}}
+                />
+              )}
+
+              {/* Duration, Location, Price */}
+              <Stack
+                spacing={1}
+                sx={{
+                  mt: 2,
+                  pt: 2,
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                {(duration || !loadingDescription) && (
+                  <Typography variant="body2">
+                    <strong>⏱️ Duración aproximada:</strong>{" "}
+                    {duration || SESSION_DURATION} minutos
+                  </Typography>
+                )}
+                <Typography variant="body2">
+                  <strong>📍 Ubicación:</strong> Montevideo Centro
+                </Typography>
+                {basePrice && (
+                  <Typography
+                    variant="body2"
+                    sx={{color: "success.main", fontWeight: "bold"}}
+                  >
+                    <strong>Precio:</strong> ${basePrice}
+                  </Typography>
+                )}
+              </Stack>
             </CardContent>
           </Card>
 
@@ -247,7 +380,7 @@ export default function SchedulingPage() {
             <DateTimeSlotPicker
               treatment={treatment}
               paymentMode={isEvaluation ? "evaluacion" : null}
-              filterSlots={filterSlotsForCustomer}
+              filterSlots={memoizedFilterSlots}
               selectedDate={selectedDate}
               onDateChange={setSelectedDate}
               selectedTime={selectedTime}
@@ -255,37 +388,191 @@ export default function SchedulingPage() {
             />
           </Box>
 
-          {/* Summary */}
+          {/* Payment Method Selection */}
           {selectedDate && selectedTime && (
-            <Card sx={{mb: 4, bgcolor: "success.light"}}>
+            <Card sx={{mb: 4}}>
               <CardContent>
                 <Typography
                   variant="h6"
-                  sx={{fontWeight: "bold", color: "success.main"}}
+                  gutterBottom
+                  sx={{fontWeight: "bold", mb: 3}}
                 >
-                  ✓ Cita seleccionada
+                  Método de pago
                 </Typography>
-                <Stack spacing={1} sx={{mt: 2}}>
-                  <Typography variant="body2">
-                    <strong>Fecha:</strong>{" "}
-                    {selectedDate.format("dddd, D [de] MMMM [de] YYYY")}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Hora:</strong> {selectedTime.format("HH:mm")}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Duración:</strong> {SESSION_DURATION} minutos
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Ubicación:</strong> Montevideo Centro
-                  </Typography>
-                </Stack>
+                <Grid container spacing={2}>
+                  {/* Tarjeta / MercadoPago */}
+                  <Grid size={{xs: 12, sm: 6}}>
+                    <Box
+                      onClick={() => setPaymentMethod("tarjeta")}
+                      sx={{
+                        p: 2,
+                        border: "2px solid",
+                        borderColor:
+                          paymentMethod === "tarjeta"
+                            ? "success.main"
+                            : "divider",
+                        borderRadius: 1,
+                        bgcolor:
+                          paymentMethod === "tarjeta"
+                            ? "success.light"
+                            : "transparent",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        "&:hover": {borderColor: "success.main"},
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontWeight:
+                            paymentMethod === "tarjeta" ? "bold" : "normal",
+                        }}
+                      >
+                        💳 Tarjeta / MercadoPago
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{display: "block", mt: 0.5}}
+                      >
+                        +7.29% procesamiento
+                      </Typography>
+                    </Box>
+                  </Grid>
+
+                  {/* Transferencia */}
+                  <Grid size={{xs: 12, sm: 6}}>
+                    <Box
+                      onClick={() => setPaymentMethod("transferencia")}
+                      sx={{
+                        p: 2,
+                        border: "2px solid",
+                        borderColor:
+                          paymentMethod === "transferencia"
+                            ? "success.main"
+                            : "divider",
+                        borderRadius: 1,
+                        bgcolor:
+                          paymentMethod === "transferencia"
+                            ? "success.light"
+                            : "transparent",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        "&:hover": {borderColor: "success.main"},
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontWeight:
+                            paymentMethod === "transferencia"
+                              ? "bold"
+                              : "normal",
+                        }}
+                      >
+                        🏦 Transferencia Bancaria
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{display: "block", mt: 0.5}}
+                      >
+                        Sin costo adicional
+                      </Typography>
+                    </Box>
+                  </Grid>
+
+                  {/* Efectivo - only for socios */}
+                  {canPurchasePackages && (
+                    <Grid size={{xs: 12, sm: 6}}>
+                      <Box
+                        onClick={() => setPaymentMethod("efectivo")}
+                        sx={{
+                          p: 2,
+                          border: "2px solid",
+                          borderColor:
+                            paymentMethod === "efectivo"
+                              ? "success.main"
+                              : "divider",
+                          borderRadius: 1,
+                          bgcolor:
+                            paymentMethod === "efectivo"
+                              ? "success.light"
+                              : "transparent",
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                          "&:hover": {borderColor: "success.main"},
+                        }}
+                      >
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight:
+                              paymentMethod === "efectivo" ? "bold" : "normal",
+                          }}
+                        >
+                          💵 Efectivo
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{display: "block", mt: 0.5}}
+                        >
+                          Sin costo adicional
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+
+                  {/* Depósito - only for non-socios on campaign treatments */}
+                  {(campaignItemType || productType) && basePrice && (
+                    <Grid size={{xs: 12, sm: 6}}>
+                      <Box
+                        onClick={() => setPaymentMethod("deposito")}
+                        sx={{
+                          p: 2,
+                          border: "2px solid",
+                          borderColor:
+                            paymentMethod === "deposito"
+                              ? "success.main"
+                              : "divider",
+                          borderRadius: 1,
+                          bgcolor:
+                            paymentMethod === "deposito"
+                              ? "success.light"
+                              : "transparent",
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                          "&:hover": {borderColor: "success.main"},
+                        }}
+                      >
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight:
+                              paymentMethod === "deposito" ? "bold" : "normal",
+                          }}
+                        >
+                          💎 Reserva con ${formatMoney(effectiveDepositAmount)}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{display: "block", mt: 0.5}}
+                        >
+                          ${formatMoney(effectiveDepositAmount)} ahora + $
+                          {formatMoney(depositRemainderAmount)} en la cita
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
               </CardContent>
             </Card>
           )}
 
           {/* Important Notes */}
-          <Card sx={{mb: 4, bgcolor: "info.light"}}>
+          <Card sx={{mb: 4}}>
             <CardContent>
               <Typography variant="subtitle2" sx={{fontWeight: "bold", mb: 1}}>
                 Información importante

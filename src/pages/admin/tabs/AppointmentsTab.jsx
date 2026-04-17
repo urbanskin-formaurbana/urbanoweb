@@ -485,6 +485,10 @@ export default function AppointmentsTab({ activeTab }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // Deposit remainder modal state
+
+  // Payment confirmation modal state (for awaiting_payment appointments)
+  const [paymentConfirmationModalOpen, setPaymentConfirmationModalOpen] = useState(false);
+  const [appointmentForPaymentConfirm, setAppointmentForPaymentConfirm] = useState(null);
   const [depositRemainderModalOpen, setDepositRemainderModalOpen] = useState(false);
   const [selectedDeposit, setSelectedDeposit] = useState(null);
   const [remainderMethod, setRemainderMethod] = useState('efectivo');
@@ -585,6 +589,15 @@ export default function AppointmentsTab({ activeTab }) {
 
   const handleConfirmAppointment = async (appointmentId) => {
     const existingAppointment = appointments.find(a => a.id === appointmentId);
+
+    // Check if appointment has awaiting payment - show confirmation modal first
+    if (existingAppointment?.payment_status === 'awaiting_payment') {
+      setAppointmentForPaymentConfirm(existingAppointment);
+      setPaymentConfirmationModalOpen(true);
+      return;
+    }
+
+    // Normal confirmation flow
     const phone = existingAppointment
       ? formatPhoneForWhatsApp(existingAppointment.customer_phone)
       : null;
@@ -693,6 +706,56 @@ export default function AppointmentsTab({ activeTab }) {
     setSelectedAppointmentForCompletion(null);
     setCompletionFeedback('');
   });
+
+  const handlePaymentConfirmation = async (payAtSession) => {
+    if (!appointmentForPaymentConfirm) return;
+
+    setPaymentConfirmationModalOpen(false);
+
+    if (payAtSession) {
+      // User will pay at session - confirm appointment as normal
+      const appointmentId = appointmentForPaymentConfirm.id;
+      const phone = formatPhoneForWhatsApp(appointmentForPaymentConfirm.customer_phone);
+
+      if (phone) {
+        const confirmationTemplate = resolveConfirmationTemplate(
+          normalizedTemplates,
+          appointmentForPaymentConfirm.treatment_category
+        );
+
+        if (confirmationTemplate) {
+          const formattedMessage = formatTemplateMessage(
+            confirmationTemplate.message,
+            appointmentForPaymentConfirm,
+            categoryConfigs
+          );
+
+          if (formattedMessage.trim()) {
+            const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(formattedMessage)}`;
+            window.open(waLink, '_blank', 'noopener,noreferrer');
+          }
+        }
+      }
+
+      setConfirming(appointmentId);
+      try {
+        await adminService.confirmAppointment(appointmentId);
+        setAppointments(prev => prev.filter(appt => appt.id !== appointmentId));
+        setSuccessMessage('Cita confirmada correctamente. Pago en sesión.');
+        setTimeout(() => setSuccessMessage(''), 5000);
+      } catch (err) {
+        logger.error('Error confirming appointment', err);
+        setError('No se pudo confirmar la cita');
+      } finally {
+        setConfirming(null);
+      }
+    } else {
+      // Need to process payment first - for now show error
+      setError('Procesamiento de pago no implementado aún');
+    }
+
+    setAppointmentForPaymentConfirm(null);
+  };
 
   const handleNoShowClick = async (appointment) => {
     if (!window.confirm(`¿Marcar la cita de ${appointment.customer_name} como no presentado?`)) {
@@ -978,6 +1041,38 @@ export default function AppointmentsTab({ activeTab }) {
         onCreated={handleAppointmentCreated}
         prefilledCustomer={null}
       />
+
+      {/* Payment Confirmation Modal - for awaiting_payment appointments */}
+      <Dialog
+        open={paymentConfirmationModalOpen}
+        onClose={() => setPaymentConfirmationModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{fontWeight: 'bold', color: 'warning.main'}}>
+          ¿Pago en la sesión?
+        </DialogTitle>
+        <DialogContent sx={{pt: 2}}>
+          <Typography>
+            {appointmentForPaymentConfirm?.customer_name}, la cita aún no tiene pago confirmado.
+          </Typography>
+          <Typography sx={{mt: 2}}>
+            ¿Esta persona pagará durante la sesión?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handlePaymentConfirmation(false)}>
+            No, procesar pago primero
+          </Button>
+          <Button
+            onClick={() => handlePaymentConfirmation(true)}
+            variant="contained"
+            color="success"
+          >
+            Sí, paga en la sesión
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </>
   );

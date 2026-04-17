@@ -111,20 +111,10 @@ export default function CinturonAcero() {
         // Customer has pending or confirmed appointment
         navigate("/my-appointments");
       } else {
-        // No existing appointment - check if customer already paid but hasn't scheduled yet
-        const unscheduledPayment = await paymentService.getUnscheduledPayment();
-        if (unscheduledPayment) {
-          // Customer paid but didn't schedule - skip payment, go directly to scheduling
-          paymentService.savePaymentId(unscheduledPayment._id);
-          navigate("/schedule", {
-            state: { treatment: { name: "Cinturón de Acero", slug: "acero" } }
-          });
-        } else {
-          // No payment or payment already has appointment - proceed to payment
-          navigate("/payment", {
-            state: { treatment: { name: "Cinturón de Acero", slug: "acero" }, isEvaluation: true }
-          });
-        }
+        // No existing appointment - go to scheduling
+        navigate("/schedule", {
+          state: { treatment: { name: "Cinturón de Acero", slug: "acero" }, isEvaluation: true, campaignItemType: "acero" }
+        });
       }
     } catch (err) {
       console.error("Error checking appointments:", err);
@@ -144,21 +134,12 @@ export default function CinturonAcero() {
         return;
       }
 
-      const unscheduledPayment = await paymentService.getUnscheduledPayment();
-      if (unscheduledPayment) {
-        paymentService.savePaymentId(unscheduledPayment._id);
-        navigate("/schedule", {
-          state: {
-            treatment: { name: "Cinturón de Acero", slug: "acero" },
-          },
-        });
-        return;
-      }
 
-      navigate("/payment", {
+      navigate("/schedule", {
         state: {
           treatment: { name: "Cinturón de Acero", slug: "acero" },
           selectedPackageId: packageId,
+          campaignItemType: "acero",
         },
       });
     } catch (err) {
@@ -177,12 +158,12 @@ export default function CinturonAcero() {
       if (can_purchase_packages) {
         setPurchaseDialogOpen(true);
       } else {
-        navigate("/payment", {
-          state: { treatment: { name: "Cinturón de Acero", slug: "acero" }, isEvaluation: true }
+        navigate("/schedule", {
+          state: { treatment: { name: "Cinturón de Acero", slug: "acero" }, isEvaluation: true, campaignItemType: "acero" }
         });
       }
     } catch {
-      navigate("/payment", {
+      navigate("/schedule", {
         state: { treatment: { name: "Cinturón de Acero", slug: "acero" }, isEvaluation: true }
       });
     }
