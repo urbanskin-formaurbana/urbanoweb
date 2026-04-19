@@ -129,22 +129,24 @@ export default function HomePage() {
     window.scrollTo({ top: y, behavior: "smooth" });
   };
 
-  const handleBodyTreatmentClick = (treatment) => {
+  const handleTreatmentClick = (treatment, productType = "body") => {
     if (!isAuthenticated) {
-      navigate(treatment.route);
+      setLoginModalOpen(true);
       return;
     }
     if (user?.user_type === "employee") {
       navigate("/admin");
       return;
     }
-    if (!canPurchasePackages) {
-      navigate(treatment.route);
+
+    // Only show purchase dialog for body treatments when user can purchase packages
+    if (productType === "body" && canPurchasePackages) {
+      setSelectedTreatmentForPurchase(treatment);
+      setPurchaseDialogOpen(true);
       return;
     }
 
-    setSelectedTreatmentForPurchase(treatment);
-    setPurchaseDialogOpen(true);
+    navigate("/schedule", { state: { treatment, productType } });
   };
 
   const handlePurchaseConfirm = (packageId) => {
@@ -155,19 +157,6 @@ export default function HomePage() {
         productType: "body",
       },
     });
-  };
-
-  const handleFacialTreatmentClick = (treatment) => {
-    if (!isAuthenticated) {
-      setLoginModalOpen(true);
-      return;
-    }
-    if (user?.user_type === "employee") {
-      navigate("/admin");
-      return;
-    }
-
-    navigate("/schedule", { state: { treatment, productType: "body" } });
   };
 
   return (
@@ -208,7 +197,7 @@ export default function HomePage() {
               </div>
               <div className="fu-grid">
                 {bodyTreatments.map((treatment) => (
-                  <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleBodyTreatmentClick(treatment)} />
+                  <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleTreatmentClick(treatment, "body")} />
                 ))}
               </div>
             </div>
@@ -223,7 +212,7 @@ export default function HomePage() {
               </div>
               <div className="fu-grid">
                 {facialTreatments.map((treatment) => (
-                  <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleFacialTreatmentClick(treatment)} />
+                  <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleTreatmentClick(treatment, "facial")} />
                 ))}
               </div>
             </div>
@@ -321,7 +310,7 @@ export default function HomePage() {
                 </div>
                 <div className="fu-grid">
                   {complementaryTreatments.map((treatment) => (
-                    <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleFacialTreatmentClick(treatment)} />
+                    <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleTreatmentClick(treatment, "complementarios")} />
                   ))}
                 </div>
               </div>
