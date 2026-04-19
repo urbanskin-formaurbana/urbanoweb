@@ -26,6 +26,7 @@ import CampaignAdminTab from '../../../components/CampaignAdminTab';
 import campaignService from '../../../services/campaign_service';
 import adminService from '../../../services/admin_service';
 import RichTextDescriptionEditor from '../../../components/RichTextDescriptionEditor';
+import CategoryImageUpload from '../../../components/CategoryImageUpload';
 import { Typography } from '@mui/material';
 
 export default function CampaignsTab() {
@@ -44,8 +45,9 @@ export default function CampaignsTab() {
   const [productDescription, setProductDescription] = useState('');
   const [isGenderSplit, setIsGenderSplit] = useState(false);
   const [productImageUrl, setProductImageUrl] = useState('');
+  const [productImageUrlHombres, setProductImageUrlHombres] = useState('');
+  const [productImageUrlMujeres, setProductImageUrlMujeres] = useState('');
   const [savingProduct, setSavingProduct] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [editingProductType, setEditingProductType] = useState(null);
 
   useEffect(() => {
@@ -81,6 +83,9 @@ export default function CampaignsTab() {
     setProductLabel('');
     setProductDescription('');
     setIsGenderSplit(false);
+    setProductImageUrl('');
+    setProductImageUrlHombres('');
+    setProductImageUrlMujeres('');
     setProductDialogOpen(true);
   };
 
@@ -93,6 +98,8 @@ export default function CampaignsTab() {
     setProductDescription(selected.product_description || '');
     setIsGenderSplit(selected.is_gender_split || false);
     setProductImageUrl(selected.image_url || '');
+    setProductImageUrlHombres(selected.image_url_hombres || '');
+    setProductImageUrlMujeres(selected.image_url_mujeres || '');
     setEditingProductType(selected.product_type);
     setProductDialogOpen(true);
   };
@@ -123,6 +130,7 @@ export default function CampaignsTab() {
       setSavingProduct(false);
     }
   };
+
 
   if (loadingProductTypes) {
     return (
@@ -185,45 +193,16 @@ export default function CampaignsTab() {
                 label="Dividir por género (Hombres / Mujeres)"
               />
               {isEditMode && (
-                <Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                    Imagen de la campaña
-                  </Typography>
-                  {productImageUrl && (
-                    <Box
-                      component="img"
-                      src={productImageUrl}
-                      alt="Imagen actual"
-                      sx={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 1, mb: 1, display: 'block' }}
-                    />
-                  )}
-                  <Button
-                    component="label"
-                    variant="outlined"
-                    size="small"
-                    disabled={uploadingImage}
-                  >
-                    {uploadingImage ? <CircularProgress size={18} sx={{ mr: 1 }} /> : null}
-                    {uploadingImage ? 'Subiendo...' : productImageUrl ? 'Cambiar imagen' : 'Subir imagen'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      hidden
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file || !editingProductType) return;
-                        setUploadingImage(true);
-                        try {
-                          const result = await adminService.uploadCategoryImage(editingProductType, file);
-                          setProductImageUrl(result.image_url);
-                        } catch (err) {
-                        } finally {
-                          setUploadingImage(false);
-                        }
-                      }}
-                    />
-                  </Button>
-                </Box>
+                <CategoryImageUpload
+                  isGenderSplit={isGenderSplit}
+                  productImageUrl={productImageUrl}
+                  productImageUrlHombres={productImageUrlHombres}
+                  productImageUrlMujeres={productImageUrlMujeres}
+                  editingProductType={editingProductType}
+                  onImageChange={setProductImageUrl}
+                  onImageChangeHombres={setProductImageUrlHombres}
+                  onImageChangeMujeres={setProductImageUrlMujeres}
+                />
               )}
             </Stack>
           </DialogContent>
@@ -333,19 +312,27 @@ export default function CampaignsTab() {
               fullWidth
               disabled={isEditMode}
             />
-            <TextField
-              label="Descripción (para la sección en la home)"
+            <RichTextDescriptionEditor
               value={productDescription}
-              onChange={(e) => setProductDescription(e.target.value)}
-              placeholder="ej: Tratamiento innovador para reducir grasa localizada"
-              multiline
-              rows={3}
-              fullWidth
+              onChange={setProductDescription}
+              label="Descripción (para la sección en la home)"
             />
             <FormControlLabel
               control={<Switch checked={isGenderSplit} onChange={(e) => setIsGenderSplit(e.target.checked)} />}
               label="Dividir por género (Hombres / Mujeres)"
             />
+            {isEditMode && (
+              <CategoryImageUpload
+                isGenderSplit={isGenderSplit}
+                productImageUrl={productImageUrl}
+                productImageUrlHombres={productImageUrlHombres}
+                productImageUrlMujeres={productImageUrlMujeres}
+                editingProductType={editingProductType}
+                onImageChange={setProductImageUrl}
+                onImageChangeHombres={setProductImageUrlHombres}
+                onImageChangeMujeres={setProductImageUrlMujeres}
+              />
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>

@@ -265,6 +265,7 @@ export default function HomePage() {
                         {hasGenderSplit ? (
                           [{ gender: "hombres", label: "Hombres" }, { gender: "mujeres", label: "Mujeres" }].map(({ gender, label }) => {
                             const genderMinPrice = getMinPriceByGender(gender);
+                            const imageField = gender === "hombres" ? campaign.image_url_hombres : campaign.image_url_mujeres;
                             return (
                               <TreatmentCard
                                 key={gender}
@@ -273,7 +274,7 @@ export default function HomePage() {
                                   subtitle: "Ver zonas y paquetes disponibles",
                                   name: label,
                                   price: genderMinPrice || 0,
-                                  image_url: null,
+                                  image_url: imageField || null,
                                 }}
                                 onClick={() => setCampaignModals((prev) => ({ ...prev, [`${productType}-${gender}`]: true }))}
                               />
@@ -286,7 +287,7 @@ export default function HomePage() {
                               subtitle: "Zonas y paquetes personalizados",
                               name: "Consultar disponibilidad",
                               price: overallMinPrice || 0,
-                              image_url: null,
+                              image_url: campaign.image_url || null,
                             }}
                             onClick={() => setCampaignModals((prev) => ({ ...prev, [productType]: true }))}
                           />

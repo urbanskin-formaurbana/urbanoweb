@@ -216,12 +216,13 @@ const adminService = {
     return response.json();
   },
 
-  async uploadCategoryImage(category, file) {
+  async uploadCategoryImage(category, file, gender = null) {
     const formData = new FormData();
     formData.append('file', file);
     const token = localStorage.getItem('access_token');
     const baseUrl = import.meta.env.VITE_API_URL || 'https://localhost:8443/api/v1';
-    const response = await fetch(`${baseUrl}/category-configs/${category}/image`, {
+    const genderParam = gender ? `?gender=${gender}` : '';
+    const response = await fetch(`${baseUrl}/category-configs/${category}/image${genderParam}`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData,
