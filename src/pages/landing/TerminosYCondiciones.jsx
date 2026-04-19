@@ -1,3 +1,4 @@
+import {useEffect} from "react";
 import SEO from "../../components/SEO.jsx";
 import {
   Box,
@@ -11,6 +12,10 @@ import { useTheme } from "@mui/material/styles";
 export default function TerminosYCondiciones() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
 
   return (
     <>

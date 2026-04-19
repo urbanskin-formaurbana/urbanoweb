@@ -1,0 +1,56 @@
+import LandingIcon from "./LandingIcon.jsx";
+
+function formatPrice(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "0";
+  return parsed.toLocaleString("es-UY");
+}
+
+function formatDuration(treatment) {
+  if (treatment?.duration) return treatment.duration;
+  if (typeof treatment?.duration_minutes === "number") return `${treatment.duration_minutes} min`;
+  return null;
+}
+
+export default function TreatmentCard({ treatment, onClick }) {
+  const duration = formatDuration(treatment);
+
+  return (
+    <article
+      className="fu-tcard"
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+    >
+      <div className="fu-tcard__media">
+        {treatment.image_url ? (
+          <img src={treatment.image_url} alt={treatment.name} loading="lazy" />
+        ) : (
+          <div className="fu-tcard__media-placeholder">Sin imagen</div>
+        )}
+
+        {duration && <span className="fu-tcard__tag">{duration}</span>}
+      </div>
+
+      <div className="fu-tcard__body">
+        {treatment.subtitle && <div className="fu-tcard__sub">{treatment.subtitle}</div>}
+        <h3 className="fu-tcard__name">{treatment.name}</h3>
+
+        <div className="fu-tcard__foot">
+          <div className="fu-tcard__price">
+            <small>Sesión</small>${formatPrice(treatment.price)}
+          </div>
+          <span className="fu-tcard__go">
+            Ver <LandingIcon name="arrow_forward" size={16} color="currentColor" />
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}

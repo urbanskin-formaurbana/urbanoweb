@@ -1,292 +1,429 @@
-import { useEffect, useState } from 'react';
-import {
-  Container,
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Stack,
-  Divider,
-  Alert
-} from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useBusiness } from '../../contexts/BusinessContext';
-import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import {useEffect} from "react";
+import {Container, Box, Typography, Button, Stack} from "@mui/material";
+import {useNavigate, useLocation} from "react-router-dom";
+import {useAuth} from "../../contexts/AuthContext";
+import {useBusiness} from "../../contexts/BusinessContext";
+import HourglassTopIcon from "@mui/icons-material/HourglassTop";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EventIcon from "@mui/icons-material/Event";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import SpaIcon from "@mui/icons-material/Spa";
+import PaymentsIcon from "@mui/icons-material/Payments";
+import PlaceIcon from "@mui/icons-material/Place";
+import ChatIcon from "@mui/icons-material/Chat";
+import FlowStepper from "../../components/booking/FlowStepper.jsx";
+import AppointmentStatusBanner from "../../components/AppointmentStatusBanner";
+import AppointmentDetailFields from "../../components/AppointmentDetailFields";
+
+const PANEL = {
+  bgcolor: "#fff",
+  border: "1px solid #e0e0e0",
+  borderRadius: "12px",
+  p: 3,
+  mb: 3,
+};
+
+function paymentLabel(method) {
+  const labels = {
+    tarjeta: "Tarjeta (MercadoPago)",
+    seña: "Seña online",
+    transferencia: "Transferencia bancaria",
+    efectivo: "Efectivo en clínica",
+    deposito: "Seña online",
+  };
+  return labels[method] || method;
+}
 
 export default function AppointmentConfirmedPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
-  const { whatsappPhone, businessEmail } = useBusiness();
-  const [showWhatsAppMessage, setShowWhatsAppMessage] = useState(false);
-
-  const appointment = location.state?.appointment;
-  const method = location.state?.loginMethod;
+  const {user} = useAuth();
+  const {whatsappPhone, businessEmail} = useBusiness();
 
   useEffect(() => {
-    if (method === 'whatsapp') {
-      setShowWhatsAppMessage(true);
-      // In production, would send WhatsApp message here
-    }
-  }, [method]);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
+
+  const appointment = location.state?.appointment;
 
   if (!appointment) {
     return (
-      <Container sx={{ py: 4, textAlign: 'center' }}>
-        <Alert severity="warning">
-          No hay información de cita disponible
-        </Alert>
-        <Button variant="contained" onClick={() => navigate('/')} sx={{ mt: 2 }}>
+      <Container sx={{py: 4, textAlign: "center"}}>
+        <Typography color="error">No hay información de cita disponible</Typography>
+        <Button variant="contained" onClick={() => navigate("/")} sx={{mt: 2}}>
           Volver a inicio
         </Button>
       </Container>
     );
   }
 
-  const handleGoHome = () => {
-    navigate('/');
-  };
+  const isTransfer = appointment.method === "transferencia";
+  const isPaidOnline = appointment.method === "tarjeta" || appointment.method === "seña" || appointment.method === "deposito";
+  const isCash = appointment.method === "efectivo";
+  const contactMethod = user?.email ? "email" : "whatsapp";
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const reqId = (appointment.id || "")
+    .replace("appt-", "FU-")
+    .slice(0, 16)
+    .toUpperCase();
+
+  const whatsappDisplay = whatsappPhone
+    ? `+${whatsappPhone.slice(0, 3)} ${whatsappPhone.slice(3, 4)} ${whatsappPhone.slice(4, 7)} ${whatsappPhone.slice(7)}`
+    : "+598 98 123 456";
+
+  const statusNote = isTransfer
+    ? " · esperando comprobante de transferencia"
+    : isPaidOnline
+    ? " · pago recibido"
+    : isCash
+    ? " · pagás al llegar"
+    : "";
 
   return (
-    <>
-      <Box sx={{ bgcolor: 'info.light', color: 'info.contrastText', py: 3, mb: 4 }}>
-        <Container>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+    <Box sx={{minHeight: "100vh", bgcolor: "#fafaf7"}}>
+      {/* Banner */}
+      <Box sx={{bgcolor: "#14331b", color: "#fff", py: {xs: 4, md: 5}}}>
+        <Container maxWidth="md">
+          <Typography
+            sx={{
+              fontFamily: "'Work Sans'",
+              fontWeight: 700,
+              fontSize: {xs: 22, md: 28},
+              color: "#fff",
+              mb: 1,
+            }}
+          >
             Solicitud de cita recibida
           </Typography>
-          <Typography variant="body1">
-            Hemos registrado tu evaluación. Te contactaremos pronto.
+          <Typography sx={{color: "rgba(255,255,255,0.75)", fontSize: 15}}>
+            Registramos tu reserva. Nuestro equipo la revisa y te confirma pronto.
           </Typography>
         </Container>
       </Box>
 
-      <Container sx={{ py: 4 }}>
-        {/* Status Message */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <HourglassTopIcon sx={{ fontSize: 80, color: 'info.main', mb: 2 }} />
-          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+      <Container maxWidth="md" sx={{py: 4}}>
+        <FlowStepper active={2} />
+
+        {/* Hero */}
+        <Box sx={{textAlign: "center", mb: 4}}>
+          <HourglassTopIcon sx={{fontSize: 56, color: "#2e7d32", mb: 2}} />
+          <Typography
+            sx={{
+              fontFamily: "'Work Sans'",
+              fontWeight: 700,
+              fontSize: {xs: 20, md: 24},
+              color: "#141414",
+              mb: 1.5,
+            }}
+          >
             Tu solicitud está en revisión
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Nuestros esteticistas revisarán tu disponibilidad y se comunicarán contigo pronto para confirmar.
+          <Typography
+            sx={{
+              fontSize: 15,
+              color: "#5b5b5b",
+              maxWidth: 540,
+              mx: "auto",
+              lineHeight: 1.65,
+            }}
+          >
+            Nuestras esteticistas revisan la disponibilidad y confirman tu horario.
+            Suele tardar menos de 24hs hábiles.
           </Typography>
         </Box>
 
-        {/* Status Badge */}
-        <Alert severity="info" sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2">
-            <strong>Estado:</strong> Pendiente de confirmación
+        {/* Status bar */}
+        <Box sx={{mb: 4}}>
+          <AppointmentStatusBanner status="pending" isAwaitingPayment={false} paymentMethodExpected={null} />
+          <Typography sx={{fontSize: 14, color: "#141414"}}>
+            <Box component="span" sx={{fontWeight: 700}}>Estado:</Box> Pendiente de confirmación por el equipo{statusNote}
           </Typography>
-        </Alert>
+        </Box>
 
-        {/* Appointment Details */}
-        <Card sx={{ mb: 4 }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
+        {/* 2-col grid */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {xs: "1fr", md: "1fr 1fr"},
+            gap: 3,
+            mb: 4,
+          }}
+        >
+          {/* Details panel */}
+          <Box sx={{...PANEL, mb: 0}}>
+            <Typography
+              sx={{fontFamily: "'Work Sans'", fontWeight: 700, fontSize: 16, color: "#141414", mb: 2}}
+            >
               Detalles de tu solicitud
             </Typography>
 
-            <Stack spacing={3}>
+            <AppointmentDetailFields
+              fields={[
+                {
+                  icon: <EventIcon />,
+                  label: "Fecha solicitada",
+                  value: appointment.date,
+                },
+                {
+                  icon: <ScheduleIcon />,
+                  label: "Hora solicitada",
+                  value: appointment.time,
+                },
+                {
+                  icon: <SpaIcon />,
+                  label: "Servicio",
+                  value: appointment.isEvaluation
+                    ? `Sesión de evaluación — ${appointment.treatment}`
+                    : appointment.treatment,
+                },
+                {
+                  icon: <PaymentsIcon />,
+                  label: "Pago",
+                  value: paymentLabel(appointment.method),
+                },
+              ]}
+            />
+
+            {/* Request ID */}
+            <Box sx={{pt: 1.5}}>
+              <Typography sx={{fontSize: 12, color: "#8a8a8a", mb: 0.5}}>N.º de solicitud</Typography>
+              <Box
+                component="code"
+                sx={{
+                  fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                  fontSize: 13,
+                  bgcolor: "#f2f2f2",
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: "4px",
+                  color: "#141414",
+                }}
+              >
+                {reqId || appointment.id}
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Contact panel */}
+          <Box sx={{...PANEL, mb: 0}}>
+            <Typography
+              sx={{fontFamily: "'Work Sans'", fontWeight: 700, fontSize: 16, color: "#141414", mb: 2}}
+            >
+              Cómo te vamos a contactar
+            </Typography>
+
+            <Box sx={{display: "flex", alignItems: "flex-start", gap: 2}}>
+              {contactMethod === "email" ? (
+                <EmailIcon sx={{color: "#2e7d32", fontSize: 22, mt: "2px", flexShrink: 0}} />
+              ) : (
+                <PhoneIcon sx={{color: "#2e7d32", fontSize: 22, mt: "2px", flexShrink: 0}} />
+              )}
               <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <CalendarMonthIcon color="info" fontSize="small" />
-                  <Typography variant="caption" color="text.secondary">
-                    Fecha solicitada
-                  </Typography>
-                </Box>
-                <Typography variant="body1" sx={{ fontWeight: 'bold', pl: 4 }}>
-                  {appointment.date}
+                <Typography sx={{fontWeight: 700, fontSize: 15, color: "#141414", mb: 0.5}}>
+                  {contactMethod === "email" ? "Correo electrónico" : "WhatsApp"}
+                </Typography>
+                <Typography sx={{fontSize: 15, color: "#141414", mb: 1}}>
+                  {contactMethod === "email"
+                    ? user?.email || "tu correo"
+                    : user?.phone
+                    ? `+${user.phone}`
+                    : "tu WhatsApp"}
+                </Typography>
+                <Typography sx={{fontSize: 13, color: "#5b5b5b", lineHeight: 1.5}}>
+                  Te avisamos cuando la cita quede confirmada o si necesitamos proponer otro horario.
                 </Typography>
               </Box>
+            </Box>
+          </Box>
+        </Box>
 
-              <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <AccessTimeIcon color="info" fontSize="small" />
-                  <Typography variant="caption" color="text.secondary">
-                    Hora solicitada
-                  </Typography>
-                </Box>
-                <Typography variant="body1" sx={{ fontWeight: 'bold', pl: 4 }}>
-                  {appointment.time}
-                </Typography>
-              </Box>
+        {/* Steps */}
+        <Box sx={{...PANEL}}>
+          <Typography
+            sx={{fontFamily: "'Work Sans'", fontWeight: 700, fontSize: 16, color: "#141414", mb: 2.5}}
+          >
+            Próximos pasos
+          </Typography>
 
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Duración estimada
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                  {appointment.duration} minutos
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Servicio
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                  {appointment.isEvaluation ? `Sesión de Evaluación - ${appointment.treatment}` : appointment.treatment}
-                </Typography>
-              </Box>
-
-              <Divider />
-
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Número de solicitud
-                </Typography>
-                <Typography
-                  variant="body2"
+          <Box component="ol" sx={{listStyle: "none", p: 0, m: 0, display: "flex", flexDirection: "column", gap: 2}}>
+            {[
+              {
+                num: "1",
+                title: "Dentro de las próximas 24hs hábiles",
+                body: "Nuestras esteticistas revisan tu solicitud y te confirman la disponibilidad.",
+                warn: false,
+              },
+              {
+                num: "2",
+                title: "Confirmación",
+                body: `Te enviamos la confirmación con fecha y hora final por ${contactMethod === "email" ? "correo" : "WhatsApp"}.`,
+                warn: false,
+              },
+              {
+                num: "3",
+                title: "Calendario y recordatorios",
+                body: "Vas a poder agregar la cita a tu calendario. Te enviamos recordatorios 24hs y 1hr antes.",
+                warn: false,
+              },
+              ...(isTransfer
+                ? [
+                    {
+                      num: "!",
+                      title: "Subí el comprobante",
+                      body: 'En "Mis sesiones" podés adjuntar el comprobante de transferencia. Confirmamos apenas lo recibimos.',
+                      warn: true,
+                    },
+                  ]
+                : []),
+            ].map(({num, title, body, warn}) => (
+              <Box component="li" key={num} sx={{display: "flex", gap: 2, alignItems: "flex-start"}}>
+                <Box
                   sx={{
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    p: 1,
-                    bgcolor: 'grey.100',
-                    borderRadius: 1,
-                    mt: 1
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    bgcolor: warn ? "#c77700" : "#14331b",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "'Work Sans'",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    flexShrink: 0,
+                    mt: "2px",
                   }}
                 >
-                  {appointment.id}
-                </Typography>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        {/* Contact Information */}
-        <Card sx={{ mb: 4 }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Cómo nos pondremos en contacto
-            </Typography>
-
-            <Stack spacing={2}>
-              {method === 'whatsapp' ? (
-                <>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <PhoneIcon color="info" />
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                        WhatsApp
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Te contactaremos por WhatsApp para confirmar o ajustar el horario
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {showWhatsAppMessage && (
-                    <Box sx={{ p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
-                      <Typography variant="caption" color="success.dark">
-                        ✓ Hemos registrado tu número {user?.phone}
-                      </Typography>
-                    </Box>
-                  )}
-                </>
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <EmailIcon color="info" />
-                  <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                      Correo electrónico
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Te contactaremos al correo {user?.email} para confirmar o ajustar el horario
-                    </Typography>
-                  </Box>
+                  {num}
                 </Box>
-              )}
-            </Stack>
-          </CardContent>
-        </Card>
+                <Box>
+                  <Typography sx={{fontWeight: 700, fontSize: 14, color: "#141414", mb: 0.5}}>
+                    {title}
+                  </Typography>
+                  <Typography sx={{fontSize: 14, color: "#5b5b5b", lineHeight: 1.55}}>
+                    {body}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
 
-        {/* Important Information */}
-        <Card sx={{ mb: 4, bgcolor: 'warning.light' }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Próximos pasos
-            </Typography>
-
-            <Typography variant="body2" component="div" color="text.secondary">
-              <ol style={{ margin: '0', paddingLeft: '20px' }}>
-                <li><strong>Dentro de 24 horas:</strong> Nuestros esteticistas revisarán tu solicitud</li>
-                <li><strong>Confirmación:</strong> Recibirás una confirmación con la fecha y hora final por {method === 'whatsapp' ? 'WhatsApp' : 'correo'}</li>
-                <li><strong>Calendario:</strong> Cuando confirmemos tu cita, podrás agregarla manualmente a tu Google Calendar</li>
-                <li><strong>Recordatorios:</strong> Te enviaremos recordatorios 24 horas y 1 hora antes</li>
-              </ol>
-            </Typography>
-          </CardContent>
-        </Card>
-
-        {/* What if reschedule is needed */}
-        <Card sx={{ mb: 4, bgcolor: 'grey.50' }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+        {/* Aside cards */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {xs: "1fr", md: "1fr 1fr"},
+            gap: 3,
+            mb: 4,
+          }}
+        >
+          <Box
+            sx={{
+              bgcolor: "#f2f8f3",
+              border: "1px solid #c8e6c9",
+              borderRadius: "12px",
+              p: 3,
+            }}
+          >
+            <Typography sx={{fontWeight: 700, fontSize: 15, color: "#141414", mb: 1}}>
               ¿Necesitamos cambiar el horario?
             </Typography>
-
-            <Typography variant="body2" color="text.secondary">
-              Si el horario que solicitaste no está disponible, nuestros esteticistas te contactarán para ofrecerte alternativas.
-              Por favor responde dentro de 24 horas para confirmar la nueva fecha.
+            <Typography sx={{fontSize: 14, color: "#5b5b5b", lineHeight: 1.55}}>
+              Si el horario solicitado no está disponible, te contactamos con alternativas. Respondé dentro de 24hs para confirmar la nueva fecha.
             </Typography>
-          </CardContent>
-        </Card>
+          </Box>
 
-        {/* Contact Support */}
-        <Card sx={{ mb: 4, bgcolor: 'grey.50' }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              ¿Necesitas ayuda o deseas cambiar tu solicitud?
-            </Typography>
-
-            <Stack spacing={1}>
-              <Typography variant="body2" color="text.secondary">
-                📧 {businessEmail}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                💬 WhatsApp: {whatsappPhone ? `+${whatsappPhone.slice(0, 3)} ${whatsappPhone.slice(3, 4)} ${whatsappPhone.slice(4, 7)} ${whatsappPhone.slice(7)}` : '+598 98 123 456'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                📍 Montevideo Centro
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                <strong>Número de solicitud (para referencia):</strong> {appointment.id}
-              </Typography>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        {/* Action Buttons */}
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={handleLogout}
+          <Box
+            sx={{
+              bgcolor: "#f2f8f3",
+              border: "1px solid #c8e6c9",
+              borderRadius: "12px",
+              p: 3,
+            }}
           >
-            Cerrar sesión
+            <Typography sx={{fontWeight: 700, fontSize: 15, color: "#141414", mb: 1}}>
+              ¿Necesitás ayuda o querés cambiar tu solicitud?
+            </Typography>
+            <Stack spacing={0.75} sx={{mt: 1, mb: 1.5}}>
+              {[
+                {icon: <EmailIcon sx={{fontSize: 14}} />, text: businessEmail || "hola@formaurbana.com.uy"},
+                {icon: <ChatIcon sx={{fontSize: 14}} />, text: `WhatsApp ${whatsappDisplay}`},
+                {icon: <PlaceIcon sx={{fontSize: 14}} />, text: "Montevideo Centro"},
+              ].map(({icon, text}) => (
+                <Box key={text} sx={{display: "flex", alignItems: "center", gap: 1, fontSize: 14, color: "#5b5b5b"}}>
+                  <Box sx={{color: "#5b5b5b", display: "flex"}}>{icon}</Box>
+                  <Typography sx={{fontSize: 14, color: "#5b5b5b"}}>{text}</Typography>
+                </Box>
+              ))}
+            </Stack>
+            <Typography sx={{fontSize: 13, color: "#8a8a8a"}}>
+              Referencia:{" "}
+              <Box
+                component="code"
+                sx={{
+                  fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
+                  bgcolor: "#f2f2f2",
+                  px: 0.75,
+                  py: 0.25,
+                  borderRadius: "4px",
+                  fontSize: 12,
+                }}
+              >
+                {reqId || appointment.id}
+              </Box>
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Actions */}
+        <Stack direction={{xs: "column", sm: "row"}} spacing={2} sx={{mb: 2}}>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<EventIcon />}
+            onClick={() => navigate("/my-appointments")}
+            sx={{
+              bgcolor: "#2e7d32",
+              "&:hover": {bgcolor: "#3b8a3f"},
+              "&:active": {bgcolor: "#1f4f29"},
+              fontFamily: "'Work Sans'",
+              fontWeight: 600,
+              borderRadius: "8px",
+              px: 4,
+              py: 1.5,
+              textTransform: "none",
+            }}
+          >
+            Ver mis sesiones
           </Button>
           <Button
-            fullWidth
-            variant="contained"
-            color="info"
+            variant="outlined"
             size="large"
-            onClick={handleGoHome}
-            sx={{ py: 1.5 }}
+            onClick={() => navigate("/")}
+            sx={{
+              borderColor: "#e0e0e0",
+              color: "#141414",
+              fontFamily: "'Work Sans'",
+              fontWeight: 600,
+              borderRadius: "8px",
+              px: 4,
+              py: 1.5,
+              textTransform: "none",
+              "&:hover": {borderColor: "#bdbdbd", bgcolor: "#f9f9f9"},
+            }}
           >
-            Ir a inicio
+            Volver al inicio
           </Button>
         </Stack>
+
+        {/* Footnote */}
+        <Typography sx={{fontSize: 12, color: "#8a8a8a", textAlign: "center", mt: 2, mb: 4}}>
+          Podés cancelar o reprogramar hasta 24hs antes sin costo.
+        </Typography>
       </Container>
-    </>
+    </Box>
   );
 }

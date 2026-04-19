@@ -25,26 +25,18 @@ async function sendToBackend(level, message, extra) {
 }
 
 const logger = {
-  debug: (msg, ...args) => {
-    if (isDev) console.debug(msg, ...args);
-  },
+  debug: () => {},
 
-  info: (msg, ...args) => {
-    if (isDev) console.info(msg, ...args);
-  },
+  info: () => {},
 
   warn: (msg, ...args) => {
-    if (isDev) {
-      console.warn(msg, ...args);
-    } else {
+    if (!isDev) {
       sendToBackend('warning', msg, args[0]);
     }
   },
 
   error: (msg, err) => {
-    if (isDev) {
-      console.error(msg, err);
-    } else {
+    if (!isDev) {
       const errorMsg = err?.message || String(err);
       sendToBackend('error', msg, errorMsg);
     }

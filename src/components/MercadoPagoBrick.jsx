@@ -43,7 +43,7 @@ const mapMpError = (status, statusDetail) => {
  * Card fields (number, expiry, CVV, name, document) all inline — no redirects
  * Payment methods controlled by backend preference (cards only)
  */
-export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSuccess, onPaymentError, treatmentId, payerEmail, packageId, isEvaluation }) {
+export default function MercadoPagoBrick({ preferenceId, paymentId, amount, onPaymentSuccess, onPaymentError, treatmentId, payerEmail, packageId, isEvaluation }) {
   const brickRef = useRef(null);
   const brickControllerRef = useRef(null);
   const mountGenerationRef = useRef(0);
@@ -75,7 +75,6 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
       }
 
       if (currentGeneration === mountGenerationRef.current) {
-        console.error('SDK failed to load after max attempts');
         onPaymentErrorRef.current?.(new Error('SDK failed to load'));
       }
     };
@@ -94,7 +93,7 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
           try {
             await brickControllerRef.current.unmount();
           } catch (e) {
-            console.log('Previous instance cleanup:', e);
+            // Ignore cleanup errors
           }
           brickControllerRef.current = null;
         }
@@ -109,6 +108,12 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
           initialization: {
             amount: amount,
             preferenceId: preferenceId,
+          },
+          appearance: {
+            nodeStyles: {
+              padding: '0px',
+              margin: '0px',
+            },
           },
           callbacks: {
             onReady: () => {
@@ -125,6 +130,9 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
                   payer_email: payerEmail,
                   is_evaluation: isEvaluation,
                 };
+                if (paymentId) {
+                  paymentData.payment_id = paymentId;
+                }
                 if (packageId) {
                   paymentData.package_id = packageId;
                 }
@@ -133,17 +141,14 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
                   onPaymentSuccessRef.current?.(result.payment_id);
                 } else {
                   const friendlyErrorMsg = mapMpError(result.status, result.status_detail);
-                  console.error(`Raw payment error - status: ${result.status}, detail: ${result.status_detail}`);
                   onPaymentErrorRef.current?.(new Error(friendlyErrorMsg));
                 }
               } catch (error) {
-                console.error('Payment processing error:', error);
                 onPaymentErrorRef.current?.(error);
                 throw error;
               }
             },
             onError: (error) => {
-              console.error('Payment Brick error:', error);
               if (error?.type === 'critical') {
                 onPaymentErrorRef.current?.(error);
               }
@@ -166,7 +171,6 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
         }
       } catch (error) {
         if (currentGeneration === mountGenerationRef.current) {
-          console.error('Error initializing Payment Brick:', error);
           onPaymentErrorRef.current?.(error);
         }
       }
@@ -182,7 +186,7 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
             brickControllerRef.current = null;
           }
         } catch (e) {
-          console.log('Cleanup error (ignored):', e);
+          // Ignore cleanup errors
         }
       }
     };
@@ -202,7 +206,6 @@ export default function MercadoPagoBrick({ preferenceId, amount, onPaymentSucces
       ref={brickRef}
       sx={{
         width: '100%',
-        minHeight: { xs: 'auto', sm: '500px' },
         '& iframe': {
           width: '100% !important',
           maxWidth: '100%',

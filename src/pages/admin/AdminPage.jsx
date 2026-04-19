@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Box,
@@ -27,6 +27,11 @@ export default function AdminPage() {
   const { user, logout } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  useEffect(() => {
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
+
   const [activeTab, setActiveTab] = useState(2);
 
   const tabLabels = ['Pendientes', 'Confirmadas', 'Todas', 'Pagos', 'Plantillas', 'Tratamientos', 'Socios', 'Reportes', 'Campañas', 'Datos del Negocio'];

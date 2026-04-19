@@ -1,39 +1,37 @@
 /* eslint-disable no-irregular-whitespace */
-import {useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SEO from "../../components/SEO.jsx";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Container,
-  Grid,
-  Stack,
-  Typography,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import {useTheme} from "@mui/material/styles";
-import appointmentService from "../../services/appointment_service.js";
-import paymentService from "../../services/payment_service.js";
-import treatmentService from "../../services/treatment_service.js";
+import { Alert, Box, CircularProgress } from "@mui/material";
 import authService from "../../services/auth_service.js";
-import {getProductTypes} from "../../services/campaign_service.js";
+import { getProductTypes } from "../../services/campaign_service.js";
+import treatmentService from "../../services/treatment_service.js";
 import LoginModal from "../../components/LoginModal.jsx";
 import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
 import CampaignModal from "../../components/CampaignModal.jsx";
-import {useAuth} from "../../contexts/AuthContext.jsx";
-import {isHtml} from "../../utils/richText.js";
+import TreatmentCard from "../../components/TreatmentCard.jsx";
+import HeroSection from "../../components/HeroSection.jsx";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import heroBg from "../../assets/images/hero-bg.png";
+
+function toPlainText(value) {
+  if (!value) return "";
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 export default function HomePage() {
-  const theme = useTheme();
   const navigate = useNavigate();
-  const {isAuthenticated, user} = useAuth();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { isAuthenticated, user } = useAuth();
+
+  useEffect(() => {
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
+
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [checkingAppointment, setCheckingAppointment] = useState(false);
   const [bodyTreatments, setBodyTreatments] = useState([]);
   const [facialTreatments, setFacialTreatments] = useState([]);
   const [complementaryTreatments, setComplementaryTreatments] = useState([]);
@@ -41,155 +39,135 @@ export default function HomePage() {
   const [treatmentsError, setTreatmentsError] = useState(null);
   const [canPurchasePackages, setCanPurchasePackages] = useState(false);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-  const [selectedTreatmentForPurchase, setSelectedTreatmentForPurchase] =
-    useState(null);
-  const [campaignModals, setCampaignModals] = useState({}); // Track modal open state for each campaign
-  const [campaignProducts, setCampaignProducts] = useState([]); // List of available campaign product types
-  const [treatmentsByCategory, setTreatmentsByCategory] = useState({}); // All treatments grouped by category
+  const [selectedTreatmentForPurchase, setSelectedTreatmentForPurchase] = useState(null);
+  const [campaignModals, setCampaignModals] = useState({});
+  const [campaignProducts, setCampaignProducts] = useState([]);
+  const [treatmentsByCategory, setTreatmentsByCategory] = useState({});
+
+  const heroCategories = useMemo(() => {
+    const dynamic = campaignProducts.map((campaign) => ({
+      label:
+        campaign.product_label ||
+        `${campaign.product_type.charAt(0).toUpperCase()}${campaign.product_type.slice(1)}`,
+      anchor: campaign.product_type,
+    }));
+
+    return [
+      { label: "Estética Corporal", anchor: "estetica-corporal" },
+      { label: "Estética Facial", anchor: "estetica-facial" },
+      ...dynamic,
+      { label: "Complementarios", anchor: "complementarios" },
+    ];
+  }, [campaignProducts]);
 
   useEffect(() => {
+    const cachedData = localStorage.getItem("homePageTreatmentsCache");
+    if (cachedData) {
+      try {
+        const { treatments, products } = JSON.parse(cachedData);
+        setBodyTreatments(treatments.filter((t) => t.category === "body"));
+        setFacialTreatments(treatments.filter((t) => t.category === "facial"));
+        setComplementaryTreatments(treatments.filter((t) => t.category === "complementarios"));
+        const byCategory = {};
+        treatments.forEach((treatment) => {
+          if (!byCategory[treatment.category]) byCategory[treatment.category] = [];
+          byCategory[treatment.category].push(treatment);
+        });
+        setTreatmentsByCategory(byCategory);
+        setCampaignProducts(products);
+        setTreatmentsLoading(false);
+        return;
+      } catch (e) {
+        localStorage.removeItem("homePageTreatmentsCache");
+      }
+    }
+
     treatmentService
       .getAllTreatments()
       .then((data) => {
         setBodyTreatments(data.filter((t) => t.category === "body"));
         setFacialTreatments(data.filter((t) => t.category === "facial"));
-        setComplementaryTreatments(
-          data.filter((t) => t.category === "complementarios"),
-        );
+        setComplementaryTreatments(data.filter((t) => t.category === "complementarios"));
 
-        // Build map of all treatments by category (including new dynamic categories)
         const byCategory = {};
-        data.forEach((t) => {
-          if (!byCategory[t.category]) {
-            byCategory[t.category] = [];
-          }
-          byCategory[t.category].push(t);
+        data.forEach((treatment) => {
+          if (!byCategory[treatment.category]) byCategory[treatment.category] = [];
+          byCategory[treatment.category].push(treatment);
         });
         setTreatmentsByCategory(byCategory);
 
-        // Fetch campaign product types from backend (with product_label and product_description)
         getProductTypes()
           .then((types) => {
-            // Filter out dedicated sections to prevent duplicates
             const DEDICATED_SECTIONS = ["body", "facial", "complementarios"];
-            setCampaignProducts(
-              types.filter((t) => !DEDICATED_SECTIONS.includes(t.product_type)),
-            );
+            const filtered = types.filter((type) => !DEDICATED_SECTIONS.includes(type.product_type));
+            setCampaignProducts(filtered);
+            localStorage.setItem("homePageTreatmentsCache", JSON.stringify({ treatments: data, products: filtered }));
           })
-          .catch((err) => console.error("Error loading product types:", err));
+          .catch(() => {});
       })
       .catch((err) => {
-        console.error("Error loading treatments:", err);
         setTreatmentsError("No se pudieron cargar los tratamientos.");
       })
       .finally(() => setTreatmentsLoading(false));
   }, []);
 
-  // Check purchase eligibility when authenticated (only for customers)
   useEffect(() => {
     if (isAuthenticated && user?.user_type === "customer") {
       authService
         .getPurchaseEligibility()
-        .then((data) => {
-          setCanPurchasePackages(data.can_purchase_packages);
-        })
-        .catch((err) => {
-          console.error("Error checking purchase eligibility:", err);
-          setCanPurchasePackages(false);
-        });
+        .then((data) => setCanPurchasePackages(data.can_purchase_packages))
+        .catch(() => setCanPurchasePackages(false));
+      return;
     }
+    setCanPurchasePackages(false);
   }, [isAuthenticated, user]);
+
+  const scrollToSection = (anchor) => {
+    const el = document.getElementById(anchor);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  };
 
   const handleBodyTreatmentClick = (treatment) => {
     if (!isAuthenticated) {
       navigate(treatment.route);
       return;
     }
-
-    // Redirect employees to admin panel
     if (user?.user_type === "employee") {
       navigate("/admin");
       return;
     }
-
-    // If can't purchase packages, redirect to landing page (evaluation flow)
     if (!canPurchasePackages) {
       navigate(treatment.route);
       return;
     }
 
-    // Can purchase packages - open dialog to choose option
     setSelectedTreatmentForPurchase(treatment);
     setPurchaseDialogOpen(true);
   };
 
-  const handlePurchaseConfirm = async (packageId) => {
-    setCheckingAppointment(true);
-    try {
-      const existingAppointment =
-        await appointmentService.getCustomerAppointments();
-      if (existingAppointment) {
-        navigate("/my-appointments");
-        return;
-      }
-
-
-      navigate("/schedule", {
-        state: {
-          treatment: {
-            name: selectedTreatmentForPurchase.name,
-            slug: selectedTreatmentForPurchase.slug,
-          },
-          selectedPackageId: packageId,
-          productType: "body",
-        },
-      });
-    } catch (err) {
-      console.error("Error in purchase flow:", err);
-      setLoginModalOpen(true);
-    } finally {
-      setCheckingAppointment(false);
-    }
+  const handlePurchaseConfirm = (packageId) => {
+    navigate("/schedule", {
+      state: {
+        treatment: { name: selectedTreatmentForPurchase.name, slug: selectedTreatmentForPurchase.slug },
+        selectedPackageId: packageId,
+        productType: "body",
+      },
+    });
   };
 
-  const handleFacialTreatmentClick = async (treatment) => {
+  const handleFacialTreatmentClick = (treatment) => {
     if (!isAuthenticated) {
       setLoginModalOpen(true);
       return;
     }
-
-    // Redirect employees to admin panel
     if (user?.user_type === "employee") {
       navigate("/admin");
       return;
     }
 
-    setCheckingAppointment(true);
-    try {
-      // Check for existing active appointment
-      const existingAppointment =
-        await appointmentService.getCustomerAppointments();
-
-      if (existingAppointment) {
-        // Customer has pending or confirmed appointment
-        navigate("/my-appointments");
-      } else {
-        // No existing appointment - go to scheduling
-        navigate("/schedule", {
-          state: { treatment, productType: "body" }
-        });
-      }
-    } catch (err) {
-      console.error("Error checking appointments:", err);
-      // For other errors, show login modal as fallback
-      setLoginModalOpen(true);
-    } finally {
-      setCheckingAppointment(false);
-    }
-  };
-
-  const handleLoginSuccess = () => {
-    setLoginModalOpen(false);
+    navigate("/schedule", { state: { treatment, productType: "body" } });
   };
 
   return (
@@ -199,663 +177,160 @@ export default function HomePage() {
         description="Tratamientos no invasivos de estética corporal y facial en Montevideo Centro. Sin agujas. Sin cirugías. Resultados reales."
       />
 
-      {/* Hero Section */}
-      <Box
-        component="header"
-        sx={{
-          textAlign: "center",
-          bgcolor: "success.light",
-          color: "success.contrastText",
-          py: {xs: 2, md: 4},
-        }}
-      >
-        <Container>
-          <Typography
-            variant={isMobile ? "h3" : "h2"}
-            component="h1"
-            sx={{fontWeight: "bold"}}
-            gutterBottom
-          >
-            FORMA Urbana
-          </Typography>
-          <Typography variant="h5" gutterBottom>
-            Más que una estética facial y corporal
-          </Typography>
-          <Typography sx={{mb: 3}}>
-            Tratamientos no invasivos en Montevideo Centro. Sin cirugías. Sin
-            agujas. Resultados reales.
-          </Typography>
-          {!isAuthenticated && (
-            <Button
-              variant="contained"
-              color="success"
-              size="large"
-              onClick={() => setLoginModalOpen(true)}
-              sx={{fontWeight: "bold"}}
-            >
-              Iniciá sesión para reservar
-            </Button>
-          )}
-        </Container>
-      </Box>
+      <HeroSection
+        isAuthenticated={isAuthenticated}
+        onLogin={() => setLoginModalOpen(true)}
+        onCategorySelect={scrollToSection}
+        imageSrc={heroBg}
+        categories={heroCategories}
+      />
 
-      {/* Loading State */}
       {treatmentsLoading && (
-        <Container
-          component="section"
-          sx={{py: {xs: 4, md: 6}, textAlign: "center"}}
-        >
-          <CircularProgress />
-        </Container>
+        <div className="fu-container" style={{ paddingTop: 48, paddingBottom: 48, textAlign: "center" }}>
+          <CircularProgress sx={{ color: "#2e7d32" }} />
+        </div>
       )}
 
-      {/* Error State */}
       {treatmentsError && !treatmentsLoading && (
-        <Container component="section" sx={{py: {xs: 3, md: 4}}}>
+        <div className="fu-container" style={{ paddingTop: 24, paddingBottom: 24 }}>
           <Alert severity="error">{treatmentsError}</Alert>
-        </Container>
+        </div>
       )}
 
-      {/* Body Treatments Section */}
       {!treatmentsLoading && !treatmentsError && (
         <>
-          <Container
-            component="section"
-            id="estetica-corporal"
-            sx={{py: {xs: 3, md: 4}}}
-          >
-            <Typography
-              variant={isMobile ? "h4" : "h3"}
-              align="center"
-              gutterBottom
-              sx={{mb: 3}}
-            >
-              Estética Corporal
-            </Typography>
-            <Typography align="center" sx={{mb: 3, color: "text.secondary"}}>
-              Tecnología no invasiva para reducir contorno, tonificar músculo y
-              reafirmar piel
-            </Typography>
-
-            <Grid container spacing={3} justifyContent="center">
-              {bodyTreatments.map((treatment) => (
-                <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 6}}>
-                  <Card
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      cursor: "pointer",
-                      transition: "transform 0.2s, box-shadow 0.2s",
-                      "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: 3,
-                      },
-                    }}
-                    onClick={() => handleBodyTreatmentClick(treatment)}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: {xs: "column", sm: "row"},
-                      }}
-                    >
-                      {treatment.image_url && (
-                        <Box
-                          component="img"
-                          src={treatment.image_url}
-                          alt={treatment.name}
-                          sx={{
-                            width: {xs: "100%", sm: 200},
-                            height: {xs: 180, sm: "auto"},
-                            objectFit: "cover",
-                            flexShrink: 0,
-                            borderRadius: {
-                              xs: "4px 4px 0 0",
-                              sm: "4px 0 0 4px",
-                            },
-                          }}
-                        />
-                      )}
-                      <CardContent
-                        sx={{
-                          flexGrow: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
-                        <Typography
-                          variant="h6"
-                          gutterBottom
-                          sx={{fontWeight: "bold"}}
-                        >
-                          {treatment.name}
-                        </Typography>
-                        {treatment.subtitle && (
-                          <Typography
-                            variant="body2"
-                            color="success.main"
-                            gutterBottom
-                          >
-                            {treatment.subtitle}
-                          </Typography>
-                        )}
-                        {treatment.description &&
-                          (isHtml(treatment.description) ? (
-                            <Box
-                              component="div"
-                              dangerouslySetInnerHTML={{
-                                __html: treatment.description,
-                              }}
-                              sx={{
-                                fontSize: "0.875rem",
-                                color: "text.secondary",
-                                mb: 1,
-                                "& p": {mt: 0, mb: 0.5},
-                                "& ul, & ol": {pl: 2, mt: 0},
-                              }}
-                            />
-                          ) : (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{mb: 1}}
-                            >
-                              {treatment.description}
-                            </Typography>
-                          ))}
-                        <Typography
-                          variant="body2"
-                          sx={{fontWeight: "medium", mt: "auto"}}
-                        >
-                          Precio: ${treatment.price}
-                        </Typography>
-                      </CardContent>
-                    </Box>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Container>
-
-          {/* Facial Treatments Section */}
-          <Box sx={{bgcolor: "grey.50", py: {xs: 3, md: 4}}}>
-            <Container component="section" id="estetica-facial">
-              <Typography
-                variant={isMobile ? "h4" : "h3"}
-                align="center"
-                gutterBottom
-                sx={{mb: 3}}
-              >
-                Estética Facial
-              </Typography>
-              <Typography align="center" sx={{mb: 3, color: "text.secondary"}}>
-                Tratamientos para limpiar, hidratar, rejuvenecer y renovar tu
-                piel
-              </Typography>
-
-              <Grid container spacing={3} justifyContent="center">
-                {facialTreatments.map((treatment) => (
-                  <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 6}}>
-                    <Card
-                      sx={{
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        cursor: "pointer",
-                        transition: "transform 0.2s, box-shadow 0.2s",
-                        "&:hover": {
-                          transform: "translateY(-4px)",
-                          boxShadow: 3,
-                        },
-                      }}
-                      onClick={() => handleFacialTreatmentClick(treatment)}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: {xs: "column", sm: "row"},
-                        }}
-                      >
-                        {treatment.image_url && (
-                          <Box
-                            component="img"
-                            src={treatment.image_url}
-                            alt={treatment.name}
-                            sx={{
-                              width: {xs: "100%", sm: 200},
-                              height: {xs: 180, sm: "auto"},
-                              objectFit: "cover",
-                              flexShrink: 0,
-                              borderRadius: {
-                                xs: "4px 4px 0 0",
-                                sm: "4px 0 0 4px",
-                              },
-                            }}
-                          />
-                        )}
-                        <CardContent
-                          sx={{
-                            flexGrow: 1,
-                            display: "flex",
-                            flexDirection: "column",
-                          }}
-                        >
-                          <Typography
-                            variant="h6"
-                            gutterBottom
-                            sx={{fontWeight: "bold"}}
-                          >
-                            {treatment.name}
-                          </Typography>
-                          {treatment.description &&
-                            (isHtml(treatment.description) ? (
-                              <Box
-                                component="div"
-                                dangerouslySetInnerHTML={{
-                                  __html: treatment.description,
-                                }}
-                                sx={{
-                                  fontSize: "0.875rem",
-                                  color: "text.secondary",
-                                  mb: 1,
-                                  "& p": {mt: 0, mb: 0.5},
-                                  "& ul, & ol": {pl: 2, mt: 0},
-                                }}
-                              />
-                            ) : (
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{mb: 1}}
-                              >
-                                {treatment.description}
-                              </Typography>
-                            ))}
-                          <Typography
-                            variant="body2"
-                            sx={{fontWeight: "medium", mt: "auto"}}
-                          >
-                            Precio: ${treatment.price}
-                          </Typography>
-                        </CardContent>
-                      </Box>
-                    </Card>
-                  </Grid>
+          <section className="fu-section" id="estetica-corporal">
+            <div className="fu-container">
+              <div className="fu-section__head">
+                <div className="fu-eyebrow">Estética Corporal</div>
+                <h2 className="fu-section__title">Tecnología no invasiva, resultados reales.</h2>
+                <p className="fu-section__desc">Elegí el tratamiento y reservá tu sesión en un par de clics.</p>
+              </div>
+              <div className="fu-grid">
+                {bodyTreatments.map((treatment) => (
+                  <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleBodyTreatmentClick(treatment)} />
                 ))}
-              </Grid>
-            </Container>
-          </Box>
+              </div>
+            </div>
+          </section>
 
-          {/* Dynamic Campaign Sections */}
+          <section className="fu-section fu-section--alt" id="estetica-facial">
+            <div className="fu-container">
+              <div className="fu-section__head">
+                <div className="fu-eyebrow">Estética Facial</div>
+                <h2 className="fu-section__title">Cuidá tu piel con protocolos a medida.</h2>
+                <p className="fu-section__desc">Elegí el tratamiento y reservá tu sesión en un par de clics.</p>
+              </div>
+              <div className="fu-grid">
+                {facialTreatments.map((treatment) => (
+                  <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleFacialTreatmentClick(treatment)} />
+                ))}
+              </div>
+            </div>
+          </section>
+
           {campaignProducts.map((campaign) => {
             const productType = campaign.product_type;
             const campaignTreatments = treatmentsByCategory[productType] || [];
-
+            const categoryLabel =
+              campaign.product_label || `${productType.charAt(0).toUpperCase()}${productType.slice(1)}`;
+            const categoryDescription = toPlainText(campaign.product_description);
             if (campaignTreatments.length === 0) return null;
-
-            // Check if this campaign has gender-specific treatments
             const hasGenderSplit = campaignTreatments.some((t) => t.gender);
 
             return (
-              <Box key={productType} id={productType} sx={{py: {xs: 3, md: 4}}}>
-                <Container component="section">
+              <Box key={productType} id={productType} sx={{ py: { xs: 6, md: 9 } }}>
+                <div className="fu-container">
                   {campaign.image_url && (
                     <Box
                       component="img"
                       src={campaign.image_url}
                       alt={campaign.product_label}
-                      sx={{
-                        width: "100%",
-                        height: 400,
-                        objectFit: "cover",
-                        borderRadius: 1,
-                        mb: 3,
-                        display: "block",
-                      }}
+                      sx={{ width: "100%", height: 400, objectFit: "cover", borderRadius: "12px", mb: 5, display: "block" }}
                     />
                   )}
-                  <Typography
-                    variant={isMobile ? "h4" : "h3"}
-                    align="center"
-                    gutterBottom
-                    sx={{mb: 3}}
-                  >
-                    {campaign.product_label ||
-                      productType.charAt(0).toUpperCase() +
-                        productType.slice(1)}
-                  </Typography>
-                  {campaign.product_description &&
-                    (isHtml(campaign.product_description) ? (
-                      <Box
-                        component="div"
-                        dangerouslySetInnerHTML={{
-                          __html: campaign.product_description,
-                        }}
-                        sx={{
-                          mb: 3,
-                          color: "text.secondary",
-                          textAlign: "center",
-                          "& p": {mt: 0, mb: 0.5},
-                          "& ul, & ol": {
-                            display: "inline-block",
-                            textAlign: "left",
-                          },
-                        }}
-                      />
-                    ) : (
-                      <Typography
-                        align="center"
-                        sx={{mb: 3, color: "text.secondary"}}
-                      >
-                        {campaign.product_description}
-                      </Typography>
-                    ))}
+                  <div className="fu-section__head">
+                    <div className="fu-eyebrow">
+                      {categoryLabel}
+                    </div>
+                    <h2 className="fu-section__title">
+                      {categoryDescription || categoryLabel}
+                    </h2>
+                    <p className="fu-section__desc">Elegí el tratamiento y reservá tu sesión en un par de clics.</p>
+                  </div>
 
-                  {/* Calculate minimum price for this campaign */}
                   {(() => {
-                    // For gender-split, calculate min price per gender; otherwise overall min
                     const getMinPriceByGender = (gender) => {
-                      const genderTreatments = campaignTreatments.filter((t) => t.gender === gender);
-                      if (genderTreatments.length === 0) return null;
-                      const minPrice = Math.min(...genderTreatments.map((t) => t.price || Infinity));
-                      return minPrice === Infinity ? null : minPrice;
+                      const group = campaignTreatments.filter((t) => t.gender === gender);
+                      if (!group.length) return null;
+                      const min = Math.min(...group.map((t) => t.price || Infinity));
+                      return min === Infinity ? null : min;
                     };
 
                     const overallMinPrice = (() => {
-                      const minPrice = Math.min(
-                        ...campaignTreatments.map((t) => t.price || Infinity),
-                      );
-                      return minPrice === Infinity ? null : minPrice;
+                      const min = Math.min(...campaignTreatments.map((t) => t.price || Infinity));
+                      return min === Infinity ? null : min;
                     })();
 
                     return (
-                      <Grid container spacing={3} justifyContent="center">
+                      <div className="fu-grid">
                         {hasGenderSplit ? (
-                          [
-                            {gender: "hombres", label: "Hombres"},
-                            {gender: "mujeres", label: "Mujeres"},
-                          ].map(({gender, label}) => {
+                          [{ gender: "hombres", label: "Hombres" }, { gender: "mujeres", label: "Mujeres" }].map(({ gender, label }) => {
                             const genderMinPrice = getMinPriceByGender(gender);
                             return (
-                              <Grid key={gender} size={{xs: 12, sm: 6, md: 6}}>
-                                <Card
-                                  sx={{
-                                    height: "100%",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    cursor: "pointer",
-                                    transition: "transform 0.2s, box-shadow 0.2s",
-                                    "&:hover": {
-                                      transform: "translateY(-4px)",
-                                      boxShadow: 3,
-                                    },
-                                  }}
-                                  onClick={() => {
-                                    setCampaignModals((prev) => ({
-                                      ...prev,
-                                      [`${productType}-${gender}`]: true,
-                                    }));
-                                  }}
-                                >
-                                  <CardContent
-                                    sx={{
-                                      flexGrow: 1,
-                                      display: "flex",
-                                      flexDirection: "column",
-                                    }}
-                                  >
-                                    <Typography
-                                      variant="h5"
-                                      gutterBottom
-                                      sx={{
-                                        fontWeight: "bold",
-                                        textAlign: "center",
-                                      }}
-                                    >
-                                      {label}
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      color="text.secondary"
-                                      sx={{textAlign: "center", mb: 1}}
-                                    >
-                                      Ver zonas y paquetes disponibles
-                                    </Typography>
-                                    {genderMinPrice && (
-                                      <Typography
-                                        variant="body2"
-                                        sx={{
-                                          fontWeight: "medium",
-                                          textAlign: "center",
-                                          mt: "auto",
-                                        }}
-                                      >
-                                        Desde: ${genderMinPrice}
-                                      </Typography>
-                                    )}
-                                  </CardContent>
-                                </Card>
-                              </Grid>
+                              <TreatmentCard
+                                key={gender}
+                                treatment={{
+                                  slug: `${productType}-${gender}`,
+                                  subtitle: "Ver zonas y paquetes disponibles",
+                                  name: label,
+                                  price: genderMinPrice || 0,
+                                  image_url: null,
+                                }}
+                                onClick={() => setCampaignModals((prev) => ({ ...prev, [`${productType}-${gender}`]: true }))}
+                              />
                             );
                           })
                         ) : (
-                          <Grid size={{xs: 12, sm: 6, md: 6}}>
-                            <Card
-                              sx={{
-                                height: "100%",
-                                display: "flex",
-                                flexDirection: "column",
-                                cursor: "pointer",
-                                transition: "transform 0.2s, box-shadow 0.2s",
-                                "&:hover": {
-                                  transform: "translateY(-4px)",
-                                  boxShadow: 3,
-                                },
-                              }}
-                              onClick={() => {
-                                setCampaignModals((prev) => ({
-                                  ...prev,
-                                  [productType]: true,
-                                }));
-                              }}
-                            >
-                              <CardContent
-                                sx={{
-                                  flexGrow: 1,
-                                  display: "flex",
-                                  flexDirection: "column",
-                                }}
-                              >
-                                <Typography
-                                  variant="h5"
-                                  gutterBottom
-                                  sx={{fontWeight: "bold", textAlign: "center"}}
-                                >
-                                  Consultar disponibilidad
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                  sx={{textAlign: "center", mb: 1}}
-                                >
-                                  Zonas y paquetes personalizados
-                                </Typography>
-                                {overallMinPrice && (
-                                  <Typography
-                                    variant="body2"
-                                    sx={{
-                                      fontWeight: "medium",
-                                      textAlign: "center",
-                                      mt: "auto",
-                                    }}
-                                  >
-                                    Desde: ${overallMinPrice}
-                                  </Typography>
-                                )}
-                              </CardContent>
-                            </Card>
-                          </Grid>
+                          <TreatmentCard
+                            treatment={{
+                              slug: productType,
+                              subtitle: "Zonas y paquetes personalizados",
+                              name: "Consultar disponibilidad",
+                              price: overallMinPrice || 0,
+                              image_url: null,
+                            }}
+                            onClick={() => setCampaignModals((prev) => ({ ...prev, [productType]: true }))}
+                          />
                         )}
-                      </Grid>
+                      </div>
                     );
                   })()}
-                </Container>
+                </div>
               </Box>
             );
           })}
 
-          {/* Complementarios Section - only show if treatments exist */}
           {complementaryTreatments.length > 0 && (
-            <Container
-              component="section"
-              id="complementarios"
-              sx={{py: {xs: 3, md: 4}}}
-            >
-              <Typography
-                variant={isMobile ? "h4" : "h3"}
-                align="center"
-                gutterBottom
-                sx={{mb: 3}}
-              >
-                Complementarios
-              </Typography>
-              <Typography align="center" sx={{mb: 3, color: "text.secondary"}}>
-                Otros servicios que no encajan completamente en las categorías
-                anteriores
-              </Typography>
-
-              <Grid container spacing={3} justifyContent="center">
-                {complementaryTreatments.map((treatment) => (
-                  <Grid key={treatment.slug} size={{xs: 12, sm: 6, md: 6}}>
-                    <Card
-                      sx={{
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        cursor: "pointer",
-                        transition: "transform 0.2s, box-shadow 0.2s",
-                        "&:hover": {
-                          transform: "translateY(-4px)",
-                          boxShadow: 3,
-                        },
-                      }}
-                      onClick={() => handleFacialTreatmentClick(treatment)}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: {xs: "column", sm: "row"},
-                        }}
-                      >
-                        {treatment.image_url && (
-                          <Box
-                            component="img"
-                            src={treatment.image_url}
-                            alt={treatment.name}
-                            sx={{
-                              width: {xs: "100%", sm: 200},
-                              height: {xs: 180, sm: "auto"},
-                              objectFit: "cover",
-                              flexShrink: 0,
-                              borderRadius: {
-                                xs: "4px 4px 0 0",
-                                sm: "4px 0 0 4px",
-                              },
-                            }}
-                          />
-                        )}
-                        <CardContent
-                          sx={{
-                            flexGrow: 1,
-                            display: "flex",
-                            flexDirection: "column",
-                          }}
-                        >
-                          <Typography
-                            variant="h6"
-                            gutterBottom
-                            sx={{fontWeight: "bold"}}
-                          >
-                            {treatment.name}
-                          </Typography>
-                          {treatment.subtitle && (
-                            <Typography
-                              variant="body2"
-                              color="success.main"
-                              gutterBottom
-                            >
-                              {treatment.subtitle}
-                            </Typography>
-                          )}
-                          {treatment.description &&
-                            (isHtml(treatment.description) ? (
-                              <Box
-                                component="div"
-                                dangerouslySetInnerHTML={{
-                                  __html: treatment.description,
-                                }}
-                                sx={{
-                                  fontSize: "0.875rem",
-                                  color: "text.secondary",
-                                  mb: 1,
-                                  "& p": {mt: 0, mb: 0.5},
-                                  "& ul, & ol": {pl: 2, mt: 0},
-                                }}
-                              />
-                            ) : (
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{mb: 1}}
-                              >
-                                {treatment.description}
-                              </Typography>
-                            ))}
-                          <Typography
-                            variant="body2"
-                            sx={{fontWeight: "medium", mt: "auto"}}
-                          >
-                            Precio: ${treatment.price}
-                          </Typography>
-                        </CardContent>
-                      </Box>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Container>
+            <section className="fu-section" id="complementarios">
+              <div className="fu-container">
+                <div className="fu-section__head">
+                  <div className="fu-eyebrow">Complementarios</div>
+                  <h2 className="fu-section__title">Servicios que complementan tus tratamientos principales</h2>
+                  <p className="fu-section__desc">Elegí el tratamiento y reservá tu sesión en un par de clics.</p>
+                </div>
+                <div className="fu-grid">
+                  {complementaryTreatments.map((treatment) => (
+                    <TreatmentCard key={treatment.slug} treatment={treatment} onClick={() => handleFacialTreatmentClick(treatment)} />
+                  ))}
+                </div>
+              </div>
+            </section>
           )}
         </>
       )}
 
-      {/* Footer CTA */}
-      {isAuthenticated && (
-        <Box
-          component="section"
-          sx={{
-            py: {xs: 3, md: 4},
-            textAlign: "center",
-            bgcolor: "success.light",
-            color: "success.contrastText",
-          }}
-        >
-          <Container>
-            <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
-              ¿Listo para empezar?
-            </Typography>
-            <Typography sx={{mb: 2}}>
-              Selecciona un tratamiento arriba para reservar tu sesión
-            </Typography>
-          </Container>
-        </Box>
-      )}
-
-      <LoginModal
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-        onSuccess={handleLoginSuccess}
-      />
+      <LoginModal open={loginModalOpen} onClose={() => setLoginModalOpen(false)} onSuccess={() => setLoginModalOpen(false)} />
 
       <PurchaseOptionsDialog
         open={purchaseDialogOpen}
@@ -864,14 +339,10 @@ export default function HomePage() {
         onConfirm={handlePurchaseConfirm}
       />
 
-      {/* Dynamic Campaign Modals */}
       {campaignProducts.map((campaign) => {
         const productType = campaign.product_type;
-        const label =
-          campaign.product_label ||
-          productType.charAt(0).toUpperCase() + productType.slice(1);
+        const label = campaign.product_label || `${productType.charAt(0).toUpperCase()}${productType.slice(1)}`;
         const campaignTreatments = treatmentsByCategory[productType] || [];
-
         const hasGenderSplit = campaignTreatments.some((t) => t.gender);
 
         if (hasGenderSplit) {
@@ -879,29 +350,16 @@ export default function HomePage() {
             <Box key={productType}>
               {["hombres", "mujeres"].map((gender) => {
                 const modalKey = `${productType}-${gender}`;
-                const isOpen = campaignModals[modalKey] || false;
-                const treatments = campaignTreatments.filter(
-                  (t) => t.gender === gender,
-                );
-
                 return (
                   <CampaignModal
                     key={modalKey}
-                    open={isOpen}
-                    onClose={() => {
-                      setCampaignModals((prev) => ({
-                        ...prev,
-                        [modalKey]: false,
-                      }));
-                    }}
+                    open={campaignModals[modalKey] || false}
+                    onClose={() => setCampaignModals((prev) => ({ ...prev, [modalKey]: false }))}
                     gender={gender}
-                    treatments={treatments}
+                    treatments={campaignTreatments.filter((t) => t.gender === gender)}
                     isAuthenticated={isAuthenticated}
                     onLoginRequired={() => {
-                      setCampaignModals((prev) => ({
-                        ...prev,
-                        [modalKey]: false,
-                      }));
+                      setCampaignModals((prev) => ({ ...prev, [modalKey]: false }));
                       setLoginModalOpen(true);
                     }}
                     productType={productType}
@@ -911,35 +369,26 @@ export default function HomePage() {
               })}
             </Box>
           );
-        } else {
-          const modalKey = productType;
-          const isOpen = campaignModals[modalKey] || false;
-
-          return (
-            <CampaignModal
-              key={modalKey}
-              open={isOpen}
-              onClose={() => {
-                setCampaignModals((prev) => ({
-                  ...prev,
-                  [modalKey]: false,
-                }));
-              }}
-              treatments={campaignTreatments}
-              isAuthenticated={isAuthenticated}
-              onLoginRequired={() => {
-                setCampaignModals((prev) => ({
-                  ...prev,
-                  [modalKey]: false,
-                }));
-                setLoginModalOpen(true);
-              }}
-              productType={productType}
-              modalTitle={label}
-            />
-          );
         }
+
+        const modalKey = productType;
+        return (
+          <CampaignModal
+            key={modalKey}
+            open={campaignModals[modalKey] || false}
+            onClose={() => setCampaignModals((prev) => ({ ...prev, [modalKey]: false }))}
+            treatments={campaignTreatments}
+            isAuthenticated={isAuthenticated}
+            onLoginRequired={() => {
+              setCampaignModals((prev) => ({ ...prev, [modalKey]: false }));
+              setLoginModalOpen(true);
+            }}
+            productType={productType}
+            modalTitle={label}
+          />
+        );
       })}
+
     </>
   );
 }

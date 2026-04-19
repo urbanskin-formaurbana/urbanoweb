@@ -138,7 +138,6 @@ export default function TreatmentsTab() {
       const response = await adminService.getTreatments();
       setTreatments(response.treatments || []);
     } catch (err) {
-      console.error("Error loading treatments:", err);
       setError("No se pudieron cargar los tratamientos");
     } finally {
       setLoadingTreatments(false);
@@ -153,7 +152,6 @@ export default function TreatmentsTab() {
         (configs || []).filter((c) => !BUILTIN.includes(c.category)),
       );
     } catch (err) {
-      console.error("Error loading category configs:", err);
     }
   };
 
@@ -236,7 +234,6 @@ export default function TreatmentsTab() {
       await loadTreatments();
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      console.error("Error creating treatment:", err);
       if (err.message && err.message.includes("409")) {
         setError("Ya existe un tratamiento con este slug");
       } else {
@@ -262,7 +259,6 @@ export default function TreatmentsTab() {
         [treatmentId]: response.packages || [],
       }));
     } catch (err) {
-      console.error("Error loading treatment packages:", err);
       setError("No se pudieron cargar los paquetes");
     } finally {
       setLoadingPackages(false);
@@ -328,7 +324,6 @@ export default function TreatmentsTab() {
       await loadTreatments();
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      console.error("Error updating treatment:", err);
       setError("No se pudo actualizar el tratamiento");
     } finally {
       setSavingTreatment(false);
@@ -418,7 +413,6 @@ export default function TreatmentsTab() {
       }
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      console.error("Error saving package:", err);
       setError("No se pudo guardar el paquete");
     } finally {
       setSavingPackage(false);
@@ -438,7 +432,6 @@ export default function TreatmentsTab() {
       }));
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      console.error("Error deleting package:", err);
       setError("No se pudo eliminar el paquete");
     }
   };
@@ -1027,7 +1020,6 @@ export default function TreatmentsTab() {
                       setSuccessMessage('Imagen subida exitosamente');
                       setTimeout(() => setSuccessMessage(''), 3000);
                     } catch (err) {
-                      console.error('Error uploading image:', err);
                       setError('No se pudo subir la imagen');
                     } finally {
                       setUploadingImage(false);

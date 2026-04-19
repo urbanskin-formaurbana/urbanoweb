@@ -141,7 +141,6 @@ async function getProductTypes() {
   try {
     return await apiCall('/campaigns/product-types');
   } catch (error) {
-    console.error('Error fetching product types:', error);
     return [];
   }
 }

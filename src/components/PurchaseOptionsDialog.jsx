@@ -40,7 +40,6 @@ export default function PurchaseOptionsDialog({ open, onClose, treatment, onConf
       // Default to single session
       setSelectedOption("single");
     } catch (err) {
-      console.error("Error loading packages:", err);
       setError("No se pudieron cargar los paquetes");
     } finally {
       setLoading(false);

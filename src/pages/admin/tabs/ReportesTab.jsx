@@ -50,7 +50,6 @@ export default function ReportesTab() {
       const result = await adminService.getMonthlyReports(monthCount, category);
       setReports(result.reports || []);
     } catch (err) {
-      console.error("Error loading reports:", err);
       setError("No se pudieron cargar los reportes");
     } finally {
       setLoading(false);

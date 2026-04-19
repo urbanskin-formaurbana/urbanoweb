@@ -12,12 +12,21 @@ const keyPathLocal = path.join(__dirname, 'localhost+1-key.pem')
 const certPath = fs.existsSync(certPathBackend) ? certPathBackend : certPathLocal
 const keyPath = fs.existsSync(keyPathBackend) ? keyPathBackend : keyPathLocal
 
-// Only load HTTPS config if certs exist (for local dev only)
-const httpsConfig = fs.existsSync(certPath) && fs.existsSync(keyPath)
+const hasReadableNonEmptyFile = (filePath) => {
+  if (!fs.existsSync(filePath)) return false
+  try {
+    return fs.statSync(filePath).size > 0
+  } catch {
+    return false
+  }
+}
+
+// Only load HTTPS config when cert and key both exist and are non-empty
+const httpsConfig = hasReadableNonEmptyFile(certPath) && hasReadableNonEmptyFile(keyPath)
   ? {
-      key: fs.readFileSync(keyPath),
-      cert: fs.readFileSync(certPath),
-    }
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  }
   : undefined
 
 // https://vite.dev/config/

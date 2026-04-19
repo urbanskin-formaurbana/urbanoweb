@@ -258,6 +258,26 @@ export const paymentService = {
       method: 'GET',
     });
   },
+
+  /**
+   * Get payment by appointment ID
+   * @param {string} appointmentId - Appointment ID
+   * @returns {Promise<object>} - Payment details { id, amount, payment_method, status, paid_at }
+   */
+  async getPaymentByAppointment(appointmentId) {
+    return apiCall(`/payments/by-appointment/${appointmentId}`, {
+      method: 'GET',
+    });
+  },
+
+  /**
+   * Cancel/delete a pending payment intent
+   * @param {string} paymentId - Payment intent ID
+   * @returns {Promise<object>} - Cancellation response { success, message }
+   */
+  async cancelPaymentIntent(paymentId) {
+    return apiCall(`/payments/intent/${paymentId}`, { method: 'DELETE' });
+  },
 };
 
 export default paymentService;

@@ -75,7 +75,6 @@ export default function SociosTab() {
         );
       }
     } catch (err) {
-      console.error("Error loading customers:", err);
       setError("No se pudieron cargar los clientes");
     } finally {
       setLoading(false);
@@ -101,7 +100,6 @@ export default function SociosTab() {
       const history = await adminService.getCustomerHistory(customerId);
       setCustomerHistory(history);
     } catch (err) {
-      console.error("Error loading customer history:", err);
       setError("No se pudo cargar el historial");
     } finally {
       setHistoryLoading(false);
@@ -115,7 +113,6 @@ export default function SociosTab() {
       const history = await adminService.getCustomerHistory(customerId);
       setCustomerHistory(history);
     } catch (err) {
-      console.error("Error approving customer:", err);
       setError("No se pudo aprobar al cliente");
     }
   };
@@ -185,7 +182,6 @@ export default function SociosTab() {
       const history = await adminService.getCustomerHistory(expandedCustomerId);
       setCustomerHistory(history);
     } catch (err) {
-      console.error("Error updating feedback:", err);
       setSnackbarMsg("Error al actualizar feedback");
     } finally {
       setSavingFeedback(false);
@@ -222,7 +218,6 @@ export default function SociosTab() {
       setSnackbarMsg("Cliente actualizado");
       setEditDialogOpen(false);
     } catch (err) {
-      console.error("Error updating customer:", err);
       setSnackbarMsg("Error al actualizar cliente");
     } finally {
       setSavingEdit(false);

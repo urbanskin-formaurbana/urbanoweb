@@ -58,7 +58,6 @@ export default function PagosTab() {
       setDeposits(depositsResult.deposits || []);
       setTransfers(transfersResult.transfers || []);
     } catch (err) {
-      console.error("Error loading payments:", err);
       setError("No se pudieron cargar los pagos");
     } finally {
       setLoading(false);
@@ -139,7 +138,6 @@ export default function PagosTab() {
       loadPayments();
       handleRemainderModalClose();
     } catch (err) {
-      console.error("Error adding remainder:", err);
       setError("No se pudo registrar el cobro");
     } finally {
       setSavingRemainder(false);
@@ -152,7 +150,6 @@ export default function PagosTab() {
       setSuccessMessage("Pago de transferencia confirmado");
       loadPayments();
     } catch (err) {
-      console.error("Error confirming transfer:", err);
       setError("No se pudo confirmar la transferencia");
     }
   };

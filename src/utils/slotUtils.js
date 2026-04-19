@@ -41,24 +41,16 @@ export function filterSlotsForEmployee(slots) {
 }
 
 /**
- * Filter slots for customer — enforce 24-hour advance booking for tomorrow only
+ * Filter slots for customer — enforce strict 24-hour advance booking
  * Input: raw ISO datetime strings
  */
 export function filterSlotsForCustomer(slots) {
   const now = dayjs().tz('America/Montevideo');
-  const tomorrow = now.add(1, 'day');
+  const minAllowed = now.add(24, 'hour');
 
   return slots.filter(slot => {
     const slotTime = dayjs.utc(slot).tz('America/Montevideo');
-    // For tomorrow: only allow slots at or after current time of day
-    if (slotTime.isSame(tomorrow, 'day')) {
-      return (
-        slotTime.hour() > now.hour() ||
-        (slotTime.hour() === now.hour() && slotTime.minute() >= now.minute())
-      );
-    }
-    // All other days: no restriction
-    return true;
+    return !slotTime.isBefore(minAllowed);
   });
 }
 
@@ -84,7 +76,6 @@ export async function fetchAllCampaignSlots(treatment, paymentMode) {
     const campaignService = createCampaignService(productType);
     return await campaignService.getAvailableSlots(duration);
   } catch (err) {
-    console.error('Error fetching all campaign slots:', err);
     throw err;
   }
 }
@@ -114,7 +105,6 @@ export async function fetchAvailableSlots(date, treatment, paymentMode, excludeA
       return appointmentService.getAvailableSlots(date, duration, excludeAppointmentId);
     }
   } catch (err) {
-    console.error('Error fetching available slots:', err);
     throw err;
   }
 }

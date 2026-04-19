@@ -22,7 +22,6 @@ export default function CardPaymentForm({ onSubmit, onError, loading = false }) 
     const publicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
 
     if (!publicKey) {
-      console.error('❌ MercadoPago public key not found');
       setSdkLoading(false);
       return;
     }
@@ -36,12 +35,10 @@ export default function CardPaymentForm({ onSubmit, onError, loading = false }) 
         // Create instance with public key
         const mpInstance = new window.MercadoPago(publicKey);
         setMp(mpInstance);
-        console.log('✅ MercadoPago SDK loaded and initialized successfully');
       }
       setSdkLoading(false);
     };
     script.onerror = () => {
-      console.error('❌ Failed to load MercadoPago SDK');
       setSdkLoading(false);
     };
     document.head.appendChild(script);
@@ -130,11 +127,8 @@ export default function CardPaymentForm({ onSubmit, onError, loading = false }) 
 
     try {
       if (!mp) {
-        console.error('❌ MercadoPago SDK not initialized');
         throw new Error('MercadoPago SDK not initialized - please refresh the page');
       }
-
-      console.log('✅ MercadoPago SDK ready, creating card token...');
 
       // Determine payment method from card BIN
       const cardBin = cardData.number.replace(/\s/g, '').slice(0, 6);
@@ -164,8 +158,6 @@ export default function CardPaymentForm({ onSubmit, onError, loading = false }) 
         throw new Error(errorMsg);
       }
 
-      console.log('✅ Card token created:', tokenResponse.id);
-
       // Call parent handler with token and payer identification
       await onSubmit({
         token: tokenResponse.id,
@@ -177,7 +169,6 @@ export default function CardPaymentForm({ onSubmit, onError, loading = false }) 
 
       setIsProcessing(false);
     } catch (err) {
-      console.error('Card tokenization error:', err.message || err);
       setIsProcessing(false);
       onError({
         type: 'error',

@@ -279,7 +279,6 @@ export default function CreateAppointmentModal({
         const filtered = filterSlotsForEmployee(slotStrings);
         setAvailableSlots(filtered);
       } catch (err) {
-        console.error("Error loading slots:", err);
         setError("Error al cargar los horarios disponibles");
       } finally {
         setLoadingSlots(false);
@@ -311,7 +310,6 @@ export default function CreateAppointmentModal({
         );
         setAvailableLaserDates(dates);
       } catch (err) {
-        console.error("Error loading laser dates:", err);
       } finally {
         setLoadingLaserDates(false);
       }
@@ -326,7 +324,6 @@ export default function CreateAppointmentModal({
       const {customers} = await adminService.getCustomers(null, 0, 500);
       setCustomerOptions(customers || []);
     } catch (err) {
-      console.error("Error loading customers:", err);
       setError("Error al cargar clientes");
     } finally {
       setLoadingCustomers(false);
@@ -352,14 +349,9 @@ export default function CreateAppointmentModal({
       if (categoryConfigResult.status === "fulfilled") {
         setCategoryConfigs(categoryConfigResult.value || []);
       } else {
-        console.error(
-          "Error loading category configs:",
-          categoryConfigResult.reason,
-        );
         setCategoryConfigs([]);
       }
     } catch (err) {
-      console.error("Error loading treatments:", err);
       setError("Error al cargar tratamientos");
     } finally {
       setLoadingTreatments(false);
@@ -433,7 +425,6 @@ export default function CreateAppointmentModal({
         }
       }
     } catch (err) {
-      console.error("Error loading step 3 data:", err);
       setError("Error al cargar datos de la sesión");
     } finally {
       setLoadingStep3(false);
@@ -830,7 +821,6 @@ export default function CreateAppointmentModal({
 
       setSubmitting(false);
     } catch (err) {
-      console.error("Error creating appointment:", err);
       setError(err.detail || "Error al crear la sesión");
       setSubmitting(false);
     }

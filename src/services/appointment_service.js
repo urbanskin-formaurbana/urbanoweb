@@ -28,7 +28,32 @@ export const appointmentService = {
       });
       return response; // Array of ISO datetime strings
     } catch (err) {
-      console.error('Error fetching available slots:', err);
+      throw err;
+    }
+  },
+
+  /**
+   * Get available time slots for multiple dates in one batch request
+   * @param {Date[]} dates - Array of dates to check availability
+   * @param {number} durationMinutes - Appointment duration in minutes (default 90)
+   * @param {string} excludeAppointmentId - Optional appointment ID to exclude (for rescheduling)
+   * @returns {Promise<object>} - { "YYYY-MM-DD": ["ISO_string", ...] }
+   */
+  async getAvailableSlotsBatch(dates, durationMinutes = 90, excludeAppointmentId = null) {
+    try {
+      const body = {
+        dates: dates.map(d => d.toISOString()),
+        duration_minutes: durationMinutes,
+      };
+      if (excludeAppointmentId) {
+        body.exclude_appointment_id = excludeAppointmentId;
+      }
+      const response = await apiCall('/appointments/available-slots-batch', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+      return response; // { "YYYY-MM-DD": ["ISO_string", ...] }
+    } catch (err) {
       throw err;
     }
   },
@@ -46,7 +71,6 @@ export const appointmentService = {
       });
       return response;
     } catch (err) {
-      console.error('Error creating appointment:', err);
       throw err;
     }
   },
@@ -89,7 +113,6 @@ export const appointmentService = {
         return null;
       }
 
-      console.error('Error fetching appointments:', err);
       throw err;
     }
   },
@@ -120,7 +143,6 @@ export const appointmentService = {
         return [];
       }
 
-      console.error('Error fetching all appointments:', err);
       throw err;
     }
   },
@@ -137,7 +159,6 @@ export const appointmentService = {
       });
       return response;
     } catch (err) {
-      console.error('Error fetching appointment:', err);
       throw err;
     }
   },
@@ -156,7 +177,6 @@ export const appointmentService = {
       });
       return response;
     } catch (err) {
-      console.error('Error rescheduling appointment:', err);
       throw err;
     }
   },
@@ -174,7 +194,6 @@ export const appointmentService = {
       });
       return response;
     } catch (err) {
-      console.error('Error marking calendar added:', err);
       throw err;
     }
   },
@@ -204,7 +223,6 @@ export const appointmentService = {
       );
       return response;
     } catch (err) {
-      console.error('Error deleting appointment:', err);
       throw err;
     }
   },

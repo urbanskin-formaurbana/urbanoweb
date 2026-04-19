@@ -63,7 +63,6 @@ export default function CampaignsTab() {
       setProductTypes(filtered);
       setActiveProductIndex(0);
     } catch (error) {
-      console.error('Error loading product types:', error);
     } finally {
       setLoadingProductTypes(false);
     }
@@ -120,7 +119,6 @@ export default function CampaignsTab() {
       setProductDialogOpen(false);
       await loadProductTypes();
     } catch (error) {
-      console.error('Error saving product:', error);
     } finally {
       setSavingProduct(false);
     }
@@ -219,7 +217,6 @@ export default function CampaignsTab() {
                           const result = await adminService.uploadCategoryImage(editingProductType, file);
                           setProductImageUrl(result.image_url);
                         } catch (err) {
-                          console.error('Error uploading image:', err);
                         } finally {
                           setUploadingImage(false);
                         }

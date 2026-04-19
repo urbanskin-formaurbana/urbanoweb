@@ -5,33 +5,11 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import * as Sentry from '@sentry/react'
 import App from './App.jsx'
 import './index.css'
+import './styles/landing.css'
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material'
 import { AuthProvider } from './contexts/AuthContext'
 import { BusinessProvider } from './contexts/BusinessContext'
 
-// Suppress harmless MercadoPago SDK warnings
-const originalWarn = console.warn
-console.warn = function(...args) {
-  const fullMessage = args.map(arg => arg?.toString?.() || '').join(' ')
-  if (
-    fullMessage.includes('Cross-Origin-Opener-Policy') ||
-    fullMessage.includes('onboarding_credits') ||
-    fullMessage.includes('[BRICKS]')
-  ) {
-    return // Silently ignore these warnings
-  }
-  originalWarn.apply(console, args)
-}
-
-// Suppress 401 errors from Sentry's fetch instrumentation - auth flow handles these cleanly
-const originalError = console.error
-console.error = function(...args) {
-  const message = args[0]?.toString?.() || ''
-  if (message.includes('401')) {
-    return // Silently ignore expired session 401 errors (handled by api.js & ProtectedAdminRoute)
-  }
-  originalError.apply(console, args)
-}
 
 // Initialize Sentry as early as possible
 Sentry.init({
@@ -54,7 +32,98 @@ Sentry.init({
   },
 })
 
-const theme = createTheme()
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#2e7d32',
+      dark: '#1f4f29',
+      light: '#3b8a3f',
+      contrastText: '#fff',
+    },
+    background: {
+      default: '#fafaf7',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#141414',
+      secondary: '#5b5b5b',
+    },
+    success: { main: '#2e7d32' },
+    divider: '#e0e0e0',
+  },
+  typography: {
+    fontFamily: "'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    h1: {
+      fontFamily: "'Work Sans', system-ui, -apple-system, sans-serif",
+      fontWeight: 700,
+      fontSize: 'clamp(32px, 4.2vw, 48px)',
+      letterSpacing: '-0.02em',
+      lineHeight: 1.05,
+    },
+    h2: {
+      fontFamily: "'Work Sans', system-ui, -apple-system, sans-serif",
+      fontWeight: 600,
+      fontSize: 'clamp(26px, 3vw, 36px)',
+      letterSpacing: '-0.02em',
+      lineHeight: 1.2,
+    },
+    h3: {
+      fontFamily: "'Work Sans', system-ui, -apple-system, sans-serif",
+      fontWeight: 600,
+      fontSize: '22px',
+      lineHeight: 1.2,
+    },
+    h4: {
+      fontFamily: "'Work Sans', system-ui, -apple-system, sans-serif",
+      fontWeight: 600,
+      fontSize: '18px',
+      lineHeight: 1.2,
+    },
+    h5: {
+      fontFamily: "'Work Sans', system-ui, -apple-system, sans-serif",
+      fontWeight: 600,
+      fontSize: '16px',
+    },
+    h6: {
+      fontFamily: "'Work Sans', system-ui, -apple-system, sans-serif",
+      fontWeight: 600,
+      fontSize: '14px',
+    },
+    body1: {
+      fontSize: '16px',
+      lineHeight: 1.45,
+    },
+    body2: {
+      fontSize: '14px',
+      lineHeight: 1.45,
+    },
+    caption: {
+      fontSize: '12px',
+      lineHeight: 1.45,
+    },
+  },
+  shape: {
+    borderRadius: 8,
+  },
+  components: {
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontWeight: 600,
+          borderRadius: '8px',
+        },
+      },
+    },
+  },
+})
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 

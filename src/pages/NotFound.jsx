@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Box,
   Button,
@@ -36,6 +37,11 @@ const LANDING_LINKS = [
 
 export default function NotFound() {
   const { whatsappPhone } = useBusiness();
+
+  useEffect(() => {
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
+
   const WHATSAPP_LINK = `https://wa.me/${whatsappPhone}`;
 
   return (

@@ -32,6 +32,7 @@ docker-compose*.yml
 
 # Development guides (local only)
 guides/
+designs/
 
 # SSL certificates (local development only)
 localhost+1.pem

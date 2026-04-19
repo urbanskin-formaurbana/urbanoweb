@@ -1,183 +1,107 @@
-import {useState} from "react";
-import {useNavigate} from "react-router-dom";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Divider,
-  CircularProgress,
-  Alert,
-  Tabs,
-  Tab,
-  Stack,
-} from "@mui/material";
-import {GoogleLogin} from "@react-oauth/google";
-import {useAuth} from "../contexts/AuthContext";
-import {appointmentService} from "../services/appointment_service";
-import PhoneIcon from "@mui/icons-material/Phone";
-import GoogleIcon from "@mui/icons-material/Google";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import { useAuth } from "../contexts/AuthContext";
 
-export default function LoginModal({open, onClose, onSuccess}) {
+export default function LoginModal({ open, onClose, onSuccess, context }) {
   const navigate = useNavigate();
-  const {loginWithGoogle, sendWhatsAppOTP, verifyWhatsAppOTP} = useAuth();
-  const [tabValue, setTabValue] = useState(0); // 0: Google, 1: WhatsApp
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+  const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const googleWrapRef = useRef(null);
+  const [googleWidth, setGoogleWidth] = useState(300);
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-    setError("");
-    setSuccessMessage("");
-    setOtpSent(false);
-    setPhone("");
-    setOtp("");
-  };
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") onClose?.();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
 
-  const handlePostLogin = async () => {
-    onClose();
+  useEffect(() => {
+    if (!open || !googleWrapRef.current) return undefined;
+
+    const updateWidth = () => {
+      const next = Math.max(220, Math.floor(googleWrapRef.current?.clientWidth || 300));
+      setGoogleWidth(next);
+    };
+
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(googleWrapRef.current);
+    window.addEventListener("resize", updateWidth);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, [open]);
+
+  const handlePostLogin = () => {
+    onClose?.();
     const storedUser = JSON.parse(localStorage.getItem("user") || "null");
     if (storedUser?.user_type === "employee") return;
-    try {
-      const appointment = await appointmentService.getCustomerAppointments();
-      if (appointment) {
-        navigate("/my-appointments");
-        return;
-      }
-    } catch (err) {
-      console.error("Failed to check appointments:", err);
-    }
+
     onSuccess?.();
   };
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     setLoading(true);
     setError("");
-
     try {
       const success = await loginWithGoogle(credentialResponse.credential);
       if (success) {
-        setSuccessMessage("¡Iniciaste sesión con Google!");
-        setTimeout(() => {
-          handlePostLogin();
-        }, 1000);
+        setTimeout(() => handlePostLogin(), 450);
       } else {
-        setError("Failed to login with Google. Please try again.");
+        setError("No se pudo iniciar sesión con Google.");
       }
     } catch (err) {
-      setError(err.message || "Google login error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLoginError = () => {
-    setError("Google login failed. Please try again.");
-  };
-
-  const handleSendOTP = async () => {
-    if (!phone) {
-      setError("Please enter a phone number");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      await sendWhatsAppOTP(phone);
-      setOtpSent(true);
-      setSuccessMessage("OTP sent to your WhatsApp!");
-    } catch (err) {
-      setError(err.message || "Failed to send OTP");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    if (!otp) {
-      setError("Please enter the OTP");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const success = await verifyWhatsAppOTP(phone, otp);
-      if (success) {
-        setSuccessMessage("¡Iniciaste sesión con WhatsApp!");
-        setTimeout(() => {
-          handlePostLogin();
-        }, 1000);
-      } else {
-        setError("Invalid or expired OTP");
-      }
-    } catch (err) {
-      setError(err.message || "Failed to verify OTP");
+      setError(err.message || "Error al iniciar sesión con Google.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      disablePortal={false}
-      disableRestoreFocus={true}
+    <div
+      className={`fu-modal-scrim ${open ? "open" : ""}`}
+      onClick={() => onClose?.()}
+      role="dialog"
+      aria-modal="true"
+      aria-hidden={!open}
     >
-      <DialogTitle sx={{textAlign: "center", fontWeight: "bold"}}>
-        Agenda tu Evaluación
-      </DialogTitle>
+      <div className="fu-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="fu-modal__handle" />
 
-      <DialogContent sx={{pt: 3}}>
-        {error && (
-          <Alert severity="error" sx={{mb: 2}}>
-            {error}
-          </Alert>
-        )}
-        {successMessage && (
-          <Alert severity="success" sx={{mb: 2}}>
-            {successMessage}
-          </Alert>
-        )}
-        <Stack spacing={2} sx={{alignItems: "center"}}>
-          <Typography variant="body2" sx={{color: "text.secondary"}}>
-            Inicia sesión con tu cuenta de Google.
-          </Typography>
-          <Box sx={{width: "100%", display: "flex", justifyContent: "center"}}>
-            <GoogleLogin
-              onSuccess={handleGoogleLoginSuccess}
-              onError={handleGoogleLoginError}
-              useOneTap={false}
-              theme="outline"
-              size="large"
-              text="continue_with"
-              locale="es"
-              auto_select={false}
-              popup_ux_mode="iframe"
-            />
-          </Box>
-        </Stack>
-      </DialogContent>
+        <h2 className="fu-modal__title">{context === "reserve" ? "Agendá tu evaluación" : "Iniciá sesión"}</h2>
+        <p className="fu-modal__lead">
+          {context === "reserve"
+            ? "Entrá con tu cuenta de Google para reservar y gestionar tus sesiones."
+            : "Entrá con tu cuenta de Google. Es rápido y seguro."}
+        </p>
 
-      <DialogActions sx={{p: 2}}>
-        <Button onClick={onClose} disabled={loading}>
-          Cancelar
-        </Button>
-      </DialogActions>
-    </Dialog>
+        {error && <div className="fu-modal__error">{error}</div>}
+
+        <div className="fu-modal__google-wrap" ref={googleWrapRef}>
+          <GoogleLogin
+            onSuccess={handleGoogleLoginSuccess}
+            onError={() => setError("Error al iniciar sesión con Google.")}
+            useOneTap={false}
+            theme="outline"
+            size="large"
+            text="continue_with"
+            locale="es"
+            width={String(googleWidth)}
+            disabled={loading}
+          />
+        </div>
+
+        <p className="fu-modal__foot">
+          Al continuar aceptás nuestros <a href="#">términos</a> y <a href="#">política de privacidad</a>.
+        </p>
+      </div>
+    </div>
   );
 }

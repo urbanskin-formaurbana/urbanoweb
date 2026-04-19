@@ -1,5 +1,6 @@
 import {
   RichTextEditor,
+  RichTextReadOnly,
   MenuButtonBold,
   MenuButtonItalic,
   MenuButtonUnderline,
@@ -19,6 +20,8 @@ export default function RichTextDescriptionEditor({
   value,
   onChange,
   label = "Descripción",
+  readOnly = false,
+  sx,
 }) {
   const rteRef = useRef(null);
 
@@ -33,25 +36,33 @@ export default function RichTextDescriptionEditor({
           {label}
         </Typography>
       )}
-      <RichTextEditor
-        ref={rteRef}
-        extensions={extensions}
-        content={value || ""}
-        onUpdate={({editor}) => {
-          onChange(editor.getHTML());
-        }}
-        renderControls={() => (
-          <MenuControlsContainer>
-            <MenuButtonBold />
-            <MenuButtonItalic />
-            <MenuButtonUnderline />
-            <MenuDivider />
-            <MenuButtonBulletedList />
-            <MenuButtonOrderedList />
-            <MenuButtonBlockquote />
-          </MenuControlsContainer>
-        )}
-      />
+      {readOnly ? (
+        <RichTextReadOnly
+          content={value || ""}
+          extensions={extensions}
+          sx={sx}
+        />
+      ) : (
+        <RichTextEditor
+          ref={rteRef}
+          extensions={extensions}
+          content={value || ""}
+          onUpdate={({editor}) => {
+            onChange?.(editor.getHTML());
+          }}
+          renderControls={() => (
+            <MenuControlsContainer>
+              <MenuButtonBold />
+              <MenuButtonItalic />
+              <MenuButtonUnderline />
+              <MenuDivider />
+              <MenuButtonBulletedList />
+              <MenuButtonOrderedList />
+              <MenuButtonBlockquote />
+            </MenuControlsContainer>
+          )}
+        />
+      )}
     </Box>
   );
 }

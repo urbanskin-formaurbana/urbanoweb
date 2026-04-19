@@ -97,7 +97,6 @@ export const AuthProvider = ({ children }) => {
             try {
               const refreshResponse = await authService.refreshToken();
               authService.saveTokens(refreshResponse);
-              console.log('Token refreshed due to activity');
             } catch (error) {
               logger.error('Token refresh failed:', error);
               // If refresh fails, log out the user

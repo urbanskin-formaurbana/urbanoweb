@@ -54,7 +54,6 @@ export default function ReceiptModal({ open, receiptUrl, isPdf, onClose, canConf
 
         setPdfPages(pages);
       } catch (err) {
-        console.error('Error loading PDF:', err);
         setError('No se pudo cargar el PDF');
       } finally {
         setLoading(false);

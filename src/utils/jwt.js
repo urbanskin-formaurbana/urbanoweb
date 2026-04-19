@@ -16,7 +16,6 @@ export function decodeJWT(token) {
     const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
     return payload;
   } catch (error) {
-    console.error('JWT decode error:', error);
     return null;
   }
 }

@@ -5,10 +5,12 @@ const BusinessContext = createContext();
 
 const DEFAULT_WHATSAPP = '59893770785';
 const DEFAULT_EMAIL = 'urbanskin.uy@gmail.com';
+const DEFAULT_ADDRESS = 'Convención 1378. Galería Libertador. Local 80. Montevideo Centro';
 
 export function BusinessProvider({ children }) {
   const [whatsappPhone, setWhatsappPhone] = useState(DEFAULT_WHATSAPP);
   const [businessEmail, setBusinessEmail] = useState(DEFAULT_EMAIL);
+  const [businessAddress, setBusinessAddress] = useState(DEFAULT_ADDRESS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,8 +23,10 @@ export function BusinessProvider({ children }) {
         if (data.business_email) {
           setBusinessEmail(data.business_email);
         }
+        if (data.business_address) {
+          setBusinessAddress(data.business_address);
+        }
       } catch (error) {
-        console.error('Error loading business details:', error);
         // Use default fallbacks
       } finally {
         setLoading(false);
@@ -33,7 +37,7 @@ export function BusinessProvider({ children }) {
   }, []);
 
   return (
-    <BusinessContext.Provider value={{ whatsappPhone, businessEmail, loading }}>
+    <BusinessContext.Provider value={{ whatsappPhone, businessEmail, businessAddress, loading }}>
       {children}
     </BusinessContext.Provider>
   );

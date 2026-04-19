@@ -128,7 +128,6 @@ function CampaignModal({
         },
       });
     } catch (error) {
-      console.error("Error checking campaign:", error);
       setHasCampaign(false);
     }
   };
@@ -139,7 +138,6 @@ function CampaignModal({
       await campaignService.joinWaitlist();
       setIsOnWaitlist(true);
     } catch (error) {
-      console.error("Error joining waitlist:", error);
     } finally {
       setWaitlistJoining(false);
     }

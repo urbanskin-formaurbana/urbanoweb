@@ -37,11 +37,15 @@ export default function CinturonAcero() {
   const { isAuthenticated, user } = useAuth();
   const { whatsappPhone } = useBusiness();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
+
   const [treatment, setTreatment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [checkingAppointment, setCheckingAppointment] = useState(false);
   const [canPurchasePackages, setCanPurchasePackages] = useState(false);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
 
@@ -59,10 +63,8 @@ export default function CinturonAcero() {
             cta_location: "header"
           });
         } catch (err) {
-          console.warn("Lead capture failed:", err);
         }
       } catch (err) {
-        console.error("Error loading treatment:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -102,52 +104,19 @@ export default function CinturonAcero() {
       return;
     }
 
-    setCheckingAppointment(true);
-    try {
-      // Check for existing active appointment
-      const existingAppointment = await appointmentService.getCustomerAppointments();
-
-      if (existingAppointment) {
-        // Customer has pending or confirmed appointment
-        navigate("/my-appointments");
-      } else {
-        // No existing appointment - go to scheduling
-        navigate("/schedule", {
-          state: { treatment: { name: "Cinturón de Acero", slug: "acero" }, isEvaluation: true, campaignItemType: "acero" }
-        });
-      }
-    } catch (err) {
-      console.error("Error checking appointments:", err);
-      // For other errors, show login modal as fallback
-      setLoginModalOpen(true);
-    } finally {
-      setCheckingAppointment(false);
-    }
+    navigate("/schedule", {
+      state: { treatment: { name: "Cinturón de Acero", slug: "acero" }, isEvaluation: true, campaignItemType: "acero" }
+    });
   };
 
-  const handlePurchaseConfirm = async (packageId) => {
-    setCheckingAppointment(true);
-    try {
-      const existingAppointment = await appointmentService.getCustomerAppointments();
-      if (existingAppointment) {
-        navigate("/my-appointments");
-        return;
-      }
-
-
-      navigate("/schedule", {
-        state: {
-          treatment: { name: "Cinturón de Acero", slug: "acero" },
-          selectedPackageId: packageId,
-          campaignItemType: "acero",
-        },
-      });
-    } catch (err) {
-      console.error("Error in purchase flow:", err);
-      setLoginModalOpen(true);
-    } finally {
-      setCheckingAppointment(false);
-    }
+  const handlePurchaseConfirm = (packageId) => {
+    navigate("/schedule", {
+      state: {
+        treatment: { name: "Cinturón de Acero", slug: "acero" },
+        selectedPackageId: packageId,
+        campaignItemType: "acero",
+      },
+    });
   };
 
   const handleLoginSuccess = async () => {
@@ -209,10 +178,10 @@ export default function CinturonAcero() {
             color="success"
             size="large"
             onClick={handleBookingClick}
-            disabled={loading || checkingAppointment}
+            disabled={loading}
             sx={{fontWeight: "bold"}}
           >
-            {loading ? "Cargando..." : checkingAppointment ? "Verificando cita..." : "Agenda tu Evaluación"}
+            {loading ? "Cargando..." : "Agenda tu Evaluación"}
           </Button>
         </Container>
       </Box>

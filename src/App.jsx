@@ -17,7 +17,6 @@ mpScript.onload = () => {
 }
 
 mpScript.onerror = () => {
-  console.error('Failed to load MercadoPago SDK')
 }
 
 document.head.appendChild(mpScript)

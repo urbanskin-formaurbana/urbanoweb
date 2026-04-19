@@ -1,38 +1,52 @@
-import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Box, CircularProgress, Typography, Alert } from '@mui/material';
+import {useEffect} from "react";
+import {useNavigate, useSearchParams} from "react-router-dom";
+import {Box, CircularProgress, Typography} from "@mui/material";
 
-/**
- * MercadoPago redirect page after successful payment
- * Auto-redirects to scheduling page after payment confirmation
- */
 export default function BookingSuccessPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Wait a moment to show the loading state, then redirect
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
-      // Get the preference ID to track the payment
-      const preferenceId = searchParams.get('preference-id');
-      console.log('✅ Payment successful. Preference ID:', preferenceId);
-
-      // Redirect to scheduling page
-      navigate('/schedule', {
-        state: { paymentSuccess: true, preferenceId }
-      });
+      const preferenceId = searchParams.get("preference-id");
+      navigate("/schedule", {state: {paymentSuccess: true, preferenceId}});
     }, 1500);
-
     return () => clearTimeout(timer);
   }, [navigate, searchParams]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', p: 2 }}>
-      <CircularProgress size={48} sx={{ mb: 2 }} />
-      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-        Procesando tu pago...
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        bgcolor: "#fafaf7",
+        p: 3,
+      }}
+    >
+      <CircularProgress
+        size={48}
+        sx={{color: "#2e7d32", mb: 2.5}}
+      />
+      <Typography
+        sx={{
+          fontFamily: "'Work Sans'",
+          fontWeight: 700,
+          fontSize: 18,
+          color: "#141414",
+          mb: 1,
+          textAlign: "center",
+        }}
+      >
+        Procesando tu pago…
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography sx={{fontSize: 14, color: "#5b5b5b", textAlign: "center"}}>
         Redirigiendo a la página de agendamiento
       </Typography>
     </Box>
