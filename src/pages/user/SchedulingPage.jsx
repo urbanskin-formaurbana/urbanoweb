@@ -16,7 +16,10 @@ import DateTimeSlotPicker from "../../components/DateTimeSlotPicker.jsx";
 import {useAuth} from "../../contexts/AuthContext";
 import appointmentService from "../../services/appointment_service";
 import treatmentService from "../../services/treatment_service";
-import {isCampaignTreatment, filterSlotsForCustomer} from "../../utils/slotUtils";
+import {
+  isCampaignTreatment,
+  filterSlotsForCustomer,
+} from "../../utils/slotUtils";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -77,7 +80,6 @@ export default function SchedulingPage() {
   const parsedBasePrice = Number(basePrice);
   const hasValidBasePrice = Number.isFinite(parsedBasePrice);
 
-
   useEffect(() => {
     requestAnimationFrame(() => window.scrollTo(0, 0));
   }, []);
@@ -133,7 +135,6 @@ export default function SchedulingPage() {
     isEvaluation,
     productType,
   ]);
-
 
   const handleCreateAppointment = async () => {
     if (!selectedDate || !selectedTime) {
@@ -266,26 +267,47 @@ export default function SchedulingPage() {
                 lead={`Elegí el día y horario que mejor te queden. ${isEvaluation ? "La evaluación dura ~20 min." : `La sesión dura ${duration || SESSION_DURATION} min.`}`}
               >
                 <DateTimeSlotPicker
-                treatment={treatment}
-                paymentMode={isEvaluation ? "evaluacion" : null}
-                selectedDate={selectedDate}
-                onDateChange={(d) => { setSelectedDate(d); setSelectedTime(null); }}
-                selectedTime={selectedTime}
-                onTimeChange={setSelectedTime}
-              />
+                  treatment={treatment}
+                  paymentMode={isEvaluation ? "evaluacion" : null}
+                  selectedDate={selectedDate}
+                  onDateChange={(d) => {
+                    setSelectedDate(d);
+                    setSelectedTime(null);
+                  }}
+                  selectedTime={selectedTime}
+                  onTimeChange={setSelectedTime}
+                />
 
                 {selectedDate && selectedTime && (
-                  <div className="fu-panel__section" style={{marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--fu-border)"}}>
+                  <div
+                    className="fu-panel__section"
+                    style={{
+                      marginTop: 24,
+                      paddingTop: 24,
+                      borderTop: "1px solid var(--fu-border)",
+                    }}
+                  >
                     <label className="fu-field" style={{marginBottom: 0}}>
                       <span className="fu-field__label">
-                        Notas para el profesional <span style={{color: "var(--fu-ink-400)", fontWeight: 400}}>(opcional)</span>
+                        Notas para el profesional{" "}
+                        <span
+                          style={{color: "var(--fu-ink-400)", fontWeight: 400}}
+                        >
+                          (opcional)
+                        </span>
                       </span>
-                      <textarea className="fu-input" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Ej: cirugías previas, embarazo, medicación, zona a tratar…" />
+                      <textarea
+                        className="fu-input"
+                        rows={3}
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Ej: cirugías previas, embarazo, medicación, zona a tratar…"
+                      />
                     </label>
                   </div>
                 )}
 
-                <div className="fu-flow__foot" style={{marginTop: 20}}>
+                <div className="fu-flow__foot">
                   <div className="fu-flow__foot-total">
                     <small>Total</small>
                     <b>

@@ -952,6 +952,13 @@
 .fu-flow__grid > * {
   min-width: 0;
 }
+@media (max-width: 639px) {
+  .fu-flow__grid > * {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+}
 @media (min-width: 960px) {
   .fu-flow {
     padding: 28px 0 72px;
@@ -968,6 +975,7 @@
 .fu-stepper {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin-bottom: 20px;
   overflow-x: auto;
@@ -1032,6 +1040,13 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+}
+@media (max-width: 639px) {
+  .fu-panel {
+    margin: 0;
+    padding: 0 16px;
+    border-radius: 0;
+  }
 }
 .fu-panel + .fu-panel {
   margin-top: 16px;
@@ -1259,6 +1274,16 @@ textarea.fu-input {
   max-width: 100%;
   box-sizing: border-box;
 }
+@media (max-width: 639px) {
+  .fu-summary {
+    width: calc(100% + 32px);
+    max-width: none;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 20px 16px;
+    border-radius: 0;
+  }
+}
 .fu-summary__label {
   font-size: 11px;
   font-weight: 700;
@@ -1326,13 +1351,20 @@ textarea.fu-input {
   bottom: 0;
   background: var(--fu-surface);
   border-top: 1px solid var(--fu-border);
-  padding: 14px 16px;
+  padding: 10px 12px;
   margin: 20px -16px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   z-index: 10;
+}
+@media (min-width: 640px) {
+  .fu-flow__foot {
+    padding: 16px 24px;
+    margin: 20px -24px 0;
+    gap: 12px;
+  }
 }
 @media (min-width: 960px) {
   .fu-flow__foot {
@@ -1341,6 +1373,18 @@ textarea.fu-input {
     padding: 20px 0 0;
     border-top: 1px solid var(--fu-border);
     background: transparent;
+  }
+}
+.fu-flow__foot .fu-btn {
+  padding: 10px 12px;
+  font-size: 14px;
+  min-height: 44px;
+}
+@media (min-width: 640px) {
+  .fu-flow__foot .fu-btn {
+    padding: 14px 22px;
+    font-size: 16px;
+    min-height: 52px;
   }
 }
 .fu-flow__foot-total {
