@@ -76,7 +76,6 @@ export default function HomePage() {
         setTreatmentsByCategory(byCategory);
         setCampaignProducts(products);
         setTreatmentsLoading(false);
-        return;
       } catch (e) {
         localStorage.removeItem("homePageTreatmentsCache");
       }
@@ -106,7 +105,7 @@ export default function HomePage() {
           .catch(() => {});
       })
       .catch((err) => {
-        setTreatmentsError("No se pudieron cargar los tratamientos.");
+        if (!cachedData) setTreatmentsError("No se pudieron cargar los tratamientos.");
       })
       .finally(() => setTreatmentsLoading(false));
   }, []);
