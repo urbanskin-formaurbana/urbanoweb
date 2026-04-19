@@ -108,7 +108,7 @@ function LockableField({
     bgcolor: "#fafaf7",
     border: "1px solid #e0e0e0",
     borderRadius: "8px",
-    p: "10px 14px",
+    p: "8px 10px",
     display: "flex",
     alignItems: "center",
     gap: 1,
@@ -117,14 +117,20 @@ function LockableField({
   return (
     <Box>
       <Typography
-        sx={{fontSize: 13, fontWeight: 600, color: "#141414", mb: 0.5}}
+        sx={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: "#141414",
+          mb: 0.5,
+          whiteSpace: "nowrap",
+        }}
       >
         {label}
       </Typography>
       {locked ? (
         <Box sx={lockedStyle}>
           <LockIcon sx={{fontSize: 15, color: "#8a8a8a", flexShrink: 0}} />
-          <Typography sx={{fontSize: 14, color: "#5b5b5b"}}>
+          <Typography sx={{fontSize: {xs: 12, sm: 14}, color: "#5b5b5b"}}>
             {value || "—"}
           </Typography>
         </Box>
@@ -140,8 +146,8 @@ function LockableField({
             placeholder={placeholder}
             sx={{
               width: "100%",
-              p: "10px 14px",
-              fontSize: 14,
+              p: "8px 10px",
+              fontSize: {xs: 12, sm: 14},
               fontFamily: "'Work Sans'",
               border: "1px solid",
               borderColor: error ? "#b42a2a" : "#e0e0e0",
@@ -262,6 +268,7 @@ const panelSx = {
   borderRadius: "12px",
   p: 3,
   mb: 2,
+  mx: {xs: -3, sm: 0},
 };
 
 export default function PaymentPage() {
@@ -531,7 +538,9 @@ export default function PaymentPage() {
       setPaymentId(payment_id);
       setPaymentStatus("payment_ready");
       setTimeout(() => {
-        document.getElementById("payment-brick-container")?.scrollIntoView({behavior: "smooth", block: "start"});
+        document
+          .getElementById("payment-brick-container")
+          ?.scrollIntoView({behavior: "smooth", block: "start"});
       }, 100);
     } catch (err) {
       setPaymentStatus("idle");
@@ -679,8 +688,15 @@ export default function PaymentPage() {
         onSuccess={() => setShowLoginModal(false)}
       />
 
-      <Box sx={{minHeight: "100vh", bgcolor: "#f2f2f2", pb: 6}}>
-        <Container sx={{py: 3}}>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          bgcolor: "#f2f2f2",
+          pb: 6,
+          overflowX: "hidden",
+        }}
+      >
+        <Box sx={{py: 3, px: {xs: 3, sm: 3, md: 3}, maxWidth: "100%"}}>
           <FlowStepper active={1} />
 
           <Box
@@ -995,14 +1011,28 @@ export default function PaymentPage() {
                 {/* MercadoPago brick loading state */}
                 {needsCardForm && paymentStatus === "processing" && (
                   <Box sx={{...panelSx, textAlign: "center", py: 4}}>
-                    <CircularProgress size={40} sx={{color: "#2e7d32", mb: 2}} />
-                    <Typography sx={{fontSize: 14, color: "#5b5b5b"}}>Preparando formulario de pago...</Typography>
+                    <CircularProgress
+                      size={40}
+                      sx={{color: "#2e7d32", mb: 2}}
+                    />
+                    <Typography sx={{fontSize: 14, color: "#5b5b5b"}}>
+                      Preparando formulario de pago...
+                    </Typography>
                   </Box>
                 )}
 
                 {/* MercadoPago brick */}
                 {needsCardForm && paymentStatus === "payment_ready" && (
-                  <Box sx={{bgcolor: "#fff", border: "1px solid #e0e0e0", borderRadius: "12px", mb: 2, overflow: "hidden"}} id="payment-brick-container">
+                  <Box
+                    sx={{
+                      bgcolor: "#fff",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "12px",
+                      mb: 2,
+                      overflow: "hidden",
+                    }}
+                    id="payment-brick-container"
+                  >
                     <MercadoPagoBrick
                       key="payment-brick"
                       preferenceId={preferenceId}
@@ -1121,14 +1151,17 @@ export default function PaymentPage() {
                       }}
                       style={{display: "none"}}
                     />
-                    <label htmlFor="transfer-file-input">
+                    <label
+                      htmlFor="transfer-file-input"
+                      style={{display: "block"}}
+                    >
                       <Box
                         component="div"
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          gap: 2,
-                          p: 2,
+                          gap: 1,
+                          p: {xs: 1, sm: 2},
                           border: transferFile
                             ? "1.5px solid #2e7d32"
                             : "1.5px dashed #e0e0e0",
@@ -1147,7 +1180,7 @@ export default function PaymentPage() {
                             <CheckCircleIcon
                               sx={{color: "#2e7d32", flexShrink: 0}}
                             />
-                            <Box sx={{flex: 1, minWidth: 0}}>
+                            <Box sx={{flex: 1, width: 0, overflow: "hidden"}}>
                               <Typography
                                 sx={{
                                   fontWeight: 600,
@@ -1159,7 +1192,14 @@ export default function PaymentPage() {
                               >
                                 {transferFile.name}
                               </Typography>
-                              <Typography sx={{fontSize: 12, color: "#8a8a8a"}}>
+                              <Typography
+                                sx={{
+                                  fontSize: 12,
+                                  color: "#8a8a8a",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
                                 {(transferFile.size / 1024).toFixed(0)} KB ·
                                 Listo para enviar
                               </Typography>
@@ -1170,6 +1210,10 @@ export default function PaymentPage() {
                                 e.preventDefault();
                                 setTransferFile(null);
                                 transferReceiptStore.file = null;
+                                const fileInput = document.getElementById(
+                                  "transfer-file-input",
+                                );
+                                if (fileInput) fileInput.value = "";
                               }}
                               sx={{
                                 fontSize: 13,
@@ -1187,12 +1231,22 @@ export default function PaymentPage() {
                             <UploadFileIcon
                               sx={{color: "#2e7d32", flexShrink: 0}}
                             />
-                            <Box sx={{flex: 1}}>
-                              <Typography sx={{fontWeight: 600, fontSize: 14}}>
+                            <Box sx={{flex: 1, minWidth: 0}}>
+                              <Typography
+                                sx={{
+                                  fontWeight: 600,
+                                  fontSize: {xs: 12, sm: 14},
+                                }}
+                              >
                                 Adjuntar comprobante
                               </Typography>
-                              <Typography sx={{fontSize: 12, color: "#8a8a8a"}}>
-                                Imagen o PDF — requerido para confirmar
+                              <Typography
+                                sx={{
+                                  fontSize: {xs: 11, sm: 12},
+                                  color: "#8a8a8a",
+                                }}
+                              >
+                                Imagen o PDF requerido para confirmar
                               </Typography>
                             </Box>
                             <Box
@@ -1203,7 +1257,7 @@ export default function PaymentPage() {
                                 color: "#2e7d32",
                                 border: "1px solid #2e7d32",
                                 borderRadius: "6px",
-                                px: 1.5,
+                                px: 0.75,
                                 py: 0.5,
                                 flexShrink: 0,
                               }}
@@ -1247,6 +1301,7 @@ export default function PaymentPage() {
                       alignItems: "center",
                       justifyContent: "space-between",
                       p: 2,
+                      mx: {xs: -3, sm: 0},
                       bgcolor: "#fff",
                       borderTop: "1px solid #e0e0e0",
                       borderRadius: 0,
@@ -1295,7 +1350,7 @@ export default function PaymentPage() {
                         fontWeight: 700,
                         fontSize: 15,
                         py: 1.5,
-                        px: 3,
+                        px: {xs: 1.5, sm: 3},
                         borderRadius: "8px",
                       }}
                     >
@@ -1397,6 +1452,7 @@ export default function PaymentPage() {
                   border: "1px solid #e0e0e0",
                   borderRadius: "12px",
                   p: 3,
+                  mx: {xs: -3, sm: 0},
                   position: {lg: "sticky"},
                   top: {lg: 88},
                 }}
@@ -1539,7 +1595,10 @@ export default function PaymentPage() {
                         Costo de procesamiento
                       </Typography>
                       <Typography sx={{fontSize: 13, fontWeight: 600}}>
-                        ${formatMoney((totalPrice || parsedBasePrice) - parsedBasePrice)}
+                        $
+                        {formatMoney(
+                          (totalPrice || parsedBasePrice) - parsedBasePrice,
+                        )}
                       </Typography>
                     </Box>
                   </Box>
@@ -1583,7 +1642,7 @@ export default function PaymentPage() {
               </Box>
             </Box>
           )}
-        </Container>
+        </Box>
       </Box>
     </>
   );
