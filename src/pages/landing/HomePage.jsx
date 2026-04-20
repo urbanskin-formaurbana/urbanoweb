@@ -217,7 +217,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          {campaignProducts.map((campaign) => {
+          {campaignProducts.map((campaign, index) => {
             const productType = campaign.product_type;
             const campaignTreatments = treatmentsByCategory[productType] || [];
             const categoryLabel =
@@ -225,18 +225,12 @@ export default function HomePage() {
             const categoryDescription = toPlainText(campaign.product_description);
             if (campaignTreatments.length === 0) return null;
             const hasGenderSplit = campaignTreatments.some((t) => t.gender);
+            const sectionIndex = 2 + index;
+            const hasAltBackground = sectionIndex % 2 === 1;
 
             return (
-              <Box key={productType} id={productType} sx={{ py: { xs: 6, md: 9 } }}>
+              <Box key={productType} id={productType} sx={{ py: { xs: 6, md: 9 }, backgroundColor: hasAltBackground ? "#f2f2f2" : "transparent" }}>
                 <div className="fu-container">
-                  {campaign.image_url && (
-                    <Box
-                      component="img"
-                      src={campaign.image_url}
-                      alt={campaign.product_label}
-                      sx={{ width: "100%", height: 400, objectFit: "cover", borderRadius: "12px", mb: 5, display: "block" }}
-                    />
-                  )}
                   <div className="fu-section__head">
                     <div className="fu-eyebrow">
                       {categoryLabel}
@@ -300,8 +294,11 @@ export default function HomePage() {
             );
           })}
 
-          {complementaryTreatments.length > 0 && (
-            <section className="fu-section" id="complementarios">
+          {complementaryTreatments.length > 0 && (() => {
+            const complementariosIndex = 2 + campaignProducts.length;
+            const hasAltBackground = complementariosIndex % 2 === 1;
+            return (
+            <section className={`fu-section${hasAltBackground ? " fu-section--alt" : ""}`} id="complementarios">
               <div className="fu-container">
                 <div className="fu-section__head">
                   <div className="fu-eyebrow">Complementarios</div>
@@ -315,7 +312,8 @@ export default function HomePage() {
                 </div>
               </div>
             </section>
-          )}
+            );
+          })()}
         </>
       )}
 
