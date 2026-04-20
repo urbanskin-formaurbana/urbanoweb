@@ -13,7 +13,6 @@ import authService from "../services/auth_service";
 import { getProductTypes } from "../services/campaign_service.js";
 
 const STATIC_HOME_SECTIONS = [
-  { label: "Forma Urbana", id: "fu-top" },
   { label: "Estética Corporal", id: "estetica-corporal" },
   { label: "Estética Facial", id: "estetica-facial" },
 ];
@@ -43,10 +42,6 @@ export default function LandingLayout() {
   }, []);
 
   const scrollToSection = (id) => {
-    if (id === "fu-top") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
     const el = document.getElementById(id);
     if (!el) return;
     const y = el.getBoundingClientRect().top + window.scrollY - 80;

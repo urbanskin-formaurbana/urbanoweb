@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import LandingIcon from "./LandingIcon.jsx";
+import FormaBrandSVG from "./FormaBrandSVG.jsx";
 
 const CATEGORIES = [
   { label: "Estética Corporal", anchor: "estetica-corporal" },
@@ -45,8 +46,7 @@ export default function HeroSection({ isAuthenticated, onLogin, onCategorySelect
         <div className="fu-container">
           <div className="fu-hero__content">
             <h1 className="fu-hero__brand">
-              <span className="fu-hero__brand-forma">FORMA</span>
-              <span className="fu-hero__brand-urbana">URBANA</span>
+              <FormaBrandSVG size={200} variant="stacked" />
             </h1>
 
             <p className="fu-hero__lead">MÁS QUE UNA ESTÉTICA: TECNOLOGÍA QUE TRANSFORMA TU CUERPO.</p>

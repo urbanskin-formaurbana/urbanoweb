@@ -1,5 +1,6 @@
 import { Link as RouterLink } from "react-router-dom";
 import LandingIcon from "./LandingIcon.jsx";
+import FormaBrandSVG from "./FormaBrandSVG.jsx";
 import logoSquare from "../assets/images/logo-square.png";
 
 function fullName(user) {
@@ -28,11 +29,13 @@ export default function LandingDrawer({
       <div className={`fu-drawer-scrim ${open ? "open" : ""}`} onClick={onClose} />
       <aside className={`fu-drawer ${open ? "open" : ""}`}>
         <div className="fu-drawer__head">
-          <RouterLink className="fu-header__logo" to="/" onClick={onClose}>
+          <RouterLink className="fu-header__logo" to="/" onClick={() => {
+            window.scrollTo(0, 0);
+            onClose();
+          }}>
             <img src={logoSquare} alt="" style={{ height: 36 }} />
             <div className="fu-header__logo-text" style={{ display: "block" }}>
-              FORMA
-              <small>Urbana</small>
+              <FormaBrandSVG size={60} variant="stacked" color="var(--fu-success-700)" />
             </div>
           </RouterLink>
           <button className="fu-icon-btn" type="button" onClick={onClose} aria-label="Cerrar">

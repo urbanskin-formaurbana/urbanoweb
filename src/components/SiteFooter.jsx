@@ -1,6 +1,7 @@
 import { Link as RouterLink } from "react-router-dom";
 import { Box } from "@mui/material";
 import LandingIcon from "./LandingIcon.jsx";
+import FormaBrandSVG from "./FormaBrandSVG.jsx";
 
 export default function SiteFooter({ sections = [], onSectionClick, whatsappPhone, businessEmail, businessAddress }) {
   return (
@@ -8,7 +9,9 @@ export default function SiteFooter({ sections = [], onSectionClick, whatsappPhon
       <div className="fu-container">
         <div className="fu-footer__grid">
           <div>
-            <div className="fu-footer__brand">FORMA <em>Urbana</em></div>
+            <div className="fu-footer__brand">
+              <FormaBrandSVG size={80} variant="stacked" />
+            </div>
             <p className="fu-footer__sub">Más que una estética facial y corporal. Tratamientos no invasivos en Montevideo Centro.</p>
             <p className="fu-footer__address">
               <LandingIcon name="place" size={16} color="currentColor" />

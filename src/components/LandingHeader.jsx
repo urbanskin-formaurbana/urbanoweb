@@ -1,5 +1,6 @@
 import { Link as RouterLink } from "react-router-dom";
 import LandingIcon from "./LandingIcon.jsx";
+import FormaBrandSVG from "./FormaBrandSVG.jsx";
 import logoSquare from "../assets/images/logo-square.png";
 
 function fullName(user) {
@@ -28,8 +29,7 @@ export default function LandingHeader({
         <RouterLink className="fu-header__logo" to="/">
           <img src={logoSquare} alt="Forma Urbana" />
           <div className="fu-header__logo-text">
-            FORMA
-            <small>Urbana</small>
+            <FormaBrandSVG size={60} variant="stacked" />
           </div>
         </RouterLink>
 
