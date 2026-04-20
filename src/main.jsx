@@ -9,6 +9,7 @@ import './styles/landing.css'
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material'
 import { AuthProvider } from './contexts/AuthContext'
 import { BusinessProvider } from './contexts/BusinessContext'
+import { ColdStartProvider } from './contexts/ColdStartContext'
 
 
 // Initialize Sentry as early as possible
@@ -129,17 +130,19 @@ const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={googleClientId}>
-      <BrowserRouter>
-        <AuthProvider>
-          <BusinessProvider>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <App />
-            </ThemeProvider>
-          </BusinessProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </GoogleOAuthProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <ColdStartProvider>
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <BrowserRouter>
+            <AuthProvider>
+              <BusinessProvider>
+                <App />
+              </BusinessProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </GoogleOAuthProvider>
+      </ColdStartProvider>
+    </ThemeProvider>
   </React.StrictMode>
 )
