@@ -157,9 +157,6 @@
   .fu-header__nav {
     display: flex;
   }
-  .fu-header__menu {
-    display: none !important;
-  }
 }
 .fu-header__right {
   display: flex;
@@ -189,6 +186,46 @@
 }
 .fu-icon-btn:hover {
   background: var(--fu-ink-100);
+}
+.fu-header__menu {
+  gap: 8px;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--fu-green-900);
+  color: var(--fu-green-900);
+  transition: background var(--fu-dur-base) var(--fu-ease),
+              border-color var(--fu-dur-base) var(--fu-ease);
+}
+.fu-header__menu-text {
+  display: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+@media (min-width: 640px) {
+  .fu-header__menu {
+    width: auto;
+    height: 36px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    align-items: center;
+  }
+  .fu-header__menu-text {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+@media (min-width: 960px) {
+  .fu-header__menu {
+    height: 36px;
+    padding: 0 14px;
+    box-sizing: border-box;
+  }
+  .fu-header__menu-text {
+    font-size: 14px;
+  }
 }
 .fu-avatar {
   width: 36px;
@@ -1495,6 +1532,13 @@ textarea.fu-input {
 /* -------- Account Screen -------- */
 .fu-account {
   padding: 28px 0 80px;
+  overflow-x: hidden;
+}
+@media (max-width: 639px) {
+  .fu-account-edge {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
 }
 .fu-account__hero {
   background: var(--fu-green-900);
@@ -1524,8 +1568,8 @@ textarea.fu-input {
 }
 .fu-account__stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(6px, 2vw, 12px);
   max-width: 540px;
 }
 .fu-account__stat {
@@ -1542,9 +1586,9 @@ textarea.fu-input {
   line-height: 1;
 }
 .fu-account__stat-label {
-  font-size: 11px;
+  font-size: clamp(9px, 2.4vw, 11px);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: clamp(0.05em, 0.5vw, 0.14em);
   color: #9fd1a2;
   margin-top: 4px;
 }

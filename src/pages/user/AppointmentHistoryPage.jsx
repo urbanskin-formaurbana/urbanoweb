@@ -214,7 +214,7 @@ export default function AppointmentHistoryPage() {
             )}
 
             {/* Tabs */}
-            <div className="fu-tabs">
+            <div className="fu-tabs fu-account-edge">
               {[
                 {key: "upcoming", label: `Próximas (${upcoming.length})`},
                 {
@@ -236,6 +236,7 @@ export default function AppointmentHistoryPage() {
             {/* Appointment list */}
             {list.length === 0 ? (
               <div
+                className="fu-account-edge"
                 style={{
                   textAlign: "center",
                   padding: 48,
@@ -277,7 +278,7 @@ export default function AppointmentHistoryPage() {
                 )}
               </div>
             ) : (
-              <div>
+              <div className="fu-account-edge">
                 {tab === "pending"
                   ? list.map((intent, idx) => (
                       <PendingIntentRow

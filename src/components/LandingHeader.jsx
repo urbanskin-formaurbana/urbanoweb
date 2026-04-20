@@ -53,15 +53,9 @@ export default function LandingHeader({
 
         <div className="fu-header__right">
           {isAuthenticated ? (
-            <>
-              <button className="fu-avatar" title={fullName(user) || "Socio"} type="button">
-                {initials}
-              </button>
-              <button className="fu-btn fu-btn--outlined fu-btn--sm fu-header__logout" type="button" onClick={onLogout}>
-                <LandingIcon name="logout" size={16} />
-                Cerrar sesión
-              </button>
-            </>
+            <button className="fu-avatar" title={fullName(user) || "Socio"} type="button">
+              {initials}
+            </button>
           ) : (
             <button className="fu-btn fu-btn--outlined fu-btn--sm" type="button" onClick={onLogin}>
               Iniciá sesión
@@ -70,6 +64,7 @@ export default function LandingHeader({
 
           <button className="fu-icon-btn fu-header__menu" type="button" aria-label="Menú" onClick={onMenu}>
             <LandingIcon name="menu" size={24} />
+            <span className="fu-header__menu-text">MENU</span>
           </button>
         </div>
       </div>

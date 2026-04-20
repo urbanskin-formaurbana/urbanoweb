@@ -189,7 +189,7 @@ export default function SchedulingPage() {
   const showSummary = Boolean(selectedDate && selectedTime);
 
   return (
-    <div className="fu-booking-page">
+    <div className="fu-booking-page" style={{overflowX: "clip"}}>
       <div className="fu-container" style={{paddingTop: 12}}>
         <button
           type="button"
