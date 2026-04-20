@@ -12,7 +12,7 @@ function formatDuration(treatment) {
   return null;
 }
 
-export default function TreatmentCard({ treatment, onClick }) {
+export default function TreatmentCard({ treatment, onClick, showDesde = false }) {
   const duration = formatDuration(treatment);
 
   return (
@@ -44,7 +44,7 @@ export default function TreatmentCard({ treatment, onClick }) {
 
         <div className="fu-tcard__foot">
           <div className="fu-tcard__price">
-            <small>Sesión</small>${formatPrice(treatment.price)}
+            <small>Sesión</small>{showDesde && "Desde "}${formatPrice(treatment.price)}
           </div>
           <span className="fu-tcard__go">
             Ver <LandingIcon name="arrow_forward" size={16} color="currentColor" />

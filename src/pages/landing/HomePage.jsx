@@ -270,6 +270,7 @@ export default function HomePage() {
                                   price: genderMinPrice || 0,
                                   image_url: imageField || null,
                                 }}
+                                showDesde={true}
                                 onClick={() => setCampaignModals((prev) => ({ ...prev, [`${productType}-${gender}`]: true }))}
                               />
                             );
@@ -283,6 +284,7 @@ export default function HomePage() {
                               price: overallMinPrice || 0,
                               image_url: campaign.image_url || null,
                             }}
+                            showDesde={true}
                             onClick={() => setCampaignModals((prev) => ({ ...prev, [productType]: true }))}
                           />
                         )}
