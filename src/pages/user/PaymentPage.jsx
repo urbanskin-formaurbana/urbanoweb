@@ -412,10 +412,28 @@ export default function PaymentPage() {
 
   useEffect(() => {
     if (paymentStatus === "approved") {
+      const purchaseValue = totalPrice || parsedBasePrice || 0;
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "purchase",
+        ecommerce: {
+          currency: "UYU",
+          value: purchaseValue,
+          items: [
+            {
+              item_id: treatment.slug,
+              item_name: treatment.name || "Sesión Urban Skin",
+              price: purchaseValue,
+              quantity: 1,
+            },
+          ],
+        },
+      });
+
       const timer = setTimeout(() => navigate("/my-appointments"), 2000);
       return () => clearTimeout(timer);
     }
-  }, [paymentStatus, navigate]);
+  }, [paymentStatus, navigate, totalPrice, parsedBasePrice, treatment]);
 
   useEffect(() => {
     if (!loading && user?.user_type === "employee") navigate("/admin");
