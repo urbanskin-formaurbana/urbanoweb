@@ -9,9 +9,6 @@ import SchedulingPage from '../pages/user/SchedulingPage.jsx'
 import AppointmentConfirmedPage from '../pages/user/AppointmentConfirmedPage.jsx'
 import ExistingAppointmentPage from '../pages/user/ExistingAppointmentPage.jsx'
 import AppointmentHistoryPage from '../pages/user/AppointmentHistoryPage.jsx'
-import BookingSuccessPage from '../pages/user/BookingSuccessPage.jsx'
-import BookingFailurePage from '../pages/user/BookingFailurePage.jsx'
-import BookingPendingPage from '../pages/user/BookingPendingPage.jsx'
 import ProtectedAdminRoute from '../components/ProtectedAdminRoute.jsx'
 import ProtectedUserRoute from '../components/ProtectedUserRoute.jsx'
 import AdminPage from '../pages/admin/AdminPage.jsx'
@@ -59,10 +56,6 @@ export default function AppRoutes() {
         <Route path="/appointment-confirmed" element={<ProtectedUserRoute><AppointmentConfirmedPage /></ProtectedUserRoute>} />
         <Route path="/my-appointments" element={<ProtectedUserRoute><AppointmentHistoryPage /></ProtectedUserRoute>} />
         <Route path="/appointment" element={<ProtectedUserRoute><ExistingAppointmentPage /></ProtectedUserRoute>} />
-        {/* MercadoPago Redirect Routes */}
-        <Route path="/booking/success" element={<ProtectedUserRoute><BookingSuccessPage /></ProtectedUserRoute>} />
-        <Route path="/booking/failure" element={<ProtectedUserRoute><BookingFailurePage /></ProtectedUserRoute>} />
-        <Route path="/booking/pending" element={<ProtectedUserRoute><BookingPendingPage /></ProtectedUserRoute>} />
       </Route>
       <Route
         path="/admin"
