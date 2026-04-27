@@ -19,31 +19,6 @@ export const authService = {
   },
 
   /**
-   * Send OTP via WhatsApp
-   * @param {string} phone - Phone number (format: 59891234567)
-   * @returns {Promise<object>} - OTP sent confirmation
-   */
-  async sendOTP(phone) {
-    return apiCall('/auth/whatsapp/send-otp', {
-      method: 'POST',
-      body: JSON.stringify({ phone }),
-    });
-  },
-
-  /**
-   * Verify OTP and authenticate user
-   * @param {string} phone - Phone number
-   * @param {string} otpCode - 6-digit OTP code
-   * @returns {Promise<object>} - Access and refresh tokens
-   */
-  async verifyOTP(phone, otpCode) {
-    return apiCall('/auth/whatsapp/verify-otp', {
-      method: 'POST',
-      body: JSON.stringify({ phone, otp_code: otpCode }),
-    });
-  },
-
-  /**
    * Get current authenticated user profile
    * @returns {Promise<object>} - User profile data
    */

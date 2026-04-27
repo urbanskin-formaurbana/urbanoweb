@@ -1,4 +1,5 @@
 import { Link as RouterLink } from "react-router-dom";
+import { Link } from "@mui/material";
 import LandingIcon from "./LandingIcon.jsx";
 import FormaBrandSVG from "./FormaBrandSVG.jsx";
 import logoSquare from "../assets/images/logo-square.png";
@@ -53,9 +54,16 @@ export default function LandingHeader({
 
         <div className="fu-header__right">
           {isAuthenticated ? (
-            <button className="fu-avatar" title={fullName(user) || "Socio"} type="button">
+            <Link
+              component={RouterLink}
+              className="fu-avatar"
+              to="/my-appointments"
+              underline="none"
+              title={fullName(user) || "Socio"}
+              aria-label="Mis sesiones"
+            >
               {initials}
-            </button>
+            </Link>
           ) : (
             <button className="fu-btn fu-btn--outlined fu-btn--sm" type="button" onClick={onLogin}>
               Iniciá sesión

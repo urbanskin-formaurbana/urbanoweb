@@ -28,6 +28,7 @@ import appointmentService from "../../services/appointment_service.js";
 import paymentService from "../../services/payment_service.js";
 import authService from "../../services/auth_service.js";
 import LoginModal from "../../components/LoginModal.jsx";
+import analytics from "../../utils/analytics.js";
 import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 
@@ -535,6 +536,12 @@ export default function CinturonAcero() {
           target="_blank"
           rel="noopener noreferrer"
           disabled={!whatsappLink}
+          onClick={() =>
+            analytics.trackWhatsAppClick({
+              source: "landing_cinturon",
+              context: { campaign: "acero" },
+            })
+          }
           sx={{fontWeight: "bold"}}
         >
           Escribinos ahora

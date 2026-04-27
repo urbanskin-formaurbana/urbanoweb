@@ -45,6 +45,7 @@ import {
   resolveConfirmationTemplate,
 } from '../../../utils/messageTemplates';
 import logger from '../../../utils/logger';
+import analytics from '../../../utils/analytics';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -188,6 +189,13 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, catego
   const handleWhatsappTemplateSelect = (template) => {
     const formattedMessage = formatTemplateMessage(template.message, appointment, categoryConfigs);
     const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(formattedMessage)}`;
+    analytics.trackWhatsAppClick({
+      source: 'admin_template',
+      context: {
+        appointmentId: appointment.id,
+        templateId: template.id,
+      },
+    });
     window.open(waLink, '_blank', 'noopener,noreferrer');
     handleWhatsappMenuClose();
   };
@@ -627,12 +635,20 @@ export default function AppointmentsTab({ activeTab }) {
       }
 
       const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(formattedMessage)}`;
+      analytics.trackWhatsAppClick({
+        source: 'admin_confirm',
+        context: { appointmentId },
+      });
       window.open(waLink, '_blank', 'noopener,noreferrer');
     }
 
     setConfirming(appointmentId);
     try {
       await adminService.confirmAppointment(appointmentId);
+      analytics.trackAppointmentConfirmed({
+        appointmentId,
+        treatmentSlug: existingAppointment?.treatment_slug,
+      });
       setAppointments(prev => prev.filter(appt => appt.id !== appointmentId));
       setSuccessMessage('Cita confirmada correctamente.');
       setTimeout(() => setSuccessMessage(''), 5000);
@@ -678,6 +694,13 @@ export default function AppointmentsTab({ activeTab }) {
       const utcTime = localTime.utc();
       const newDateTime = utcTime.toISOString();
       await adminService.rescheduleAppointment(selectedAppointmentForReschedule.id, newDateTime);
+      analytics.trackAppointmentRescheduled({
+        appointmentId: selectedAppointmentForReschedule.id,
+        actor: 'admin',
+        treatmentSlug: selectedAppointmentForReschedule.treatment_slug,
+        oldScheduledAt: selectedAppointmentForReschedule.scheduled_at,
+        newScheduledAt: newDateTime,
+      });
 
       setAppointments(prev => prev.filter(appt => appt.id !== selectedAppointmentForReschedule.id));
       setSuccessMessage('Cita reagendada correctamente.');
@@ -732,6 +755,10 @@ export default function AppointmentsTab({ activeTab }) {
 
           if (formattedMessage.trim()) {
             const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(formattedMessage)}`;
+            analytics.trackWhatsAppClick({
+              source: 'admin_confirm',
+              context: { appointmentId: appointmentForPaymentConfirm.id },
+            });
             window.open(waLink, '_blank', 'noopener,noreferrer');
           }
         }
@@ -763,6 +790,10 @@ export default function AppointmentsTab({ activeTab }) {
     }
     try {
       await adminService.markNoShow(appointment.id);
+      analytics.trackAppointmentNoShow({
+        appointmentId: appointment.id,
+        treatmentSlug: appointment.treatment_slug,
+      });
       setSuccessMessage('Cita marcada como no presentado');
       loadAppointments();
     } catch (error) {
@@ -774,6 +805,11 @@ export default function AppointmentsTab({ activeTab }) {
   const handleConfirmPayment = async (appointmentId, paymentData) => {
     try {
       await paymentService.confirmAppointmentPayment(appointmentId, paymentData);
+      analytics.trackOfflinePaymentConfirmed({
+        appointmentId,
+        paymentMethod: paymentData.method,
+        amount: paymentData.amount,
+      });
       await Promise.all([loadAppointments(), loadPendingDeposits()]);
       setSuccessMessage(`Pago confirmado (${paymentData.method})`);
       setTimeout(() => setSuccessMessage(''), 5000);
@@ -796,6 +832,10 @@ export default function AppointmentsTab({ activeTab }) {
         selectedAppointmentForCompletion.id,
         completionFeedback
       );
+      analytics.trackAppointmentCompleted({
+        appointmentId: selectedAppointmentForCompletion.id,
+        treatmentSlug: selectedAppointmentForCompletion.treatment_slug,
+      });
 
       setAppointments(prev =>
         prev.filter(appt => appt.id !== selectedAppointmentForCompletion.id)

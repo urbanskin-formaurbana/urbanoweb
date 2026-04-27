@@ -30,6 +30,7 @@ import authService from "../../services/auth_service.js";
 import LoginModal from "../../components/LoginModal.jsx";
 import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import analytics from "../../utils/analytics.js";
 
 export default function CinturonTitan() {
   const theme = useTheme();
@@ -593,6 +594,12 @@ export default function CinturonTitan() {
           target="_blank"
           rel="noopener noreferrer"
           disabled={!whatsappLink}
+          onClick={() =>
+            analytics.trackWhatsAppClick({
+              source: "landing_cinturon",
+              context: { campaign: "titan" },
+            })
+          }
           sx={{fontWeight: "bold"}}
         >
           Escribinos ahora

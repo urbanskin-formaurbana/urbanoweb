@@ -33,6 +33,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import bankService from "../../services/bank_service";
 import transferReceiptStore from "../../utils/transferReceiptStore";
+import analytics from "../../utils/analytics";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 
@@ -331,6 +332,11 @@ export default function PaymentPage() {
   const [createdAppointmentId, setCreatedAppointmentId] =
     useState(appointmentId);
 
+  const handleSelectPaymentMethod = (nuevoMetodo) => {
+    analytics.trackPaymentMethodSelected({ paymentMethod: nuevoMetodo, treatment });
+    setPaymentMethod(nuevoMetodo);
+  };
+
   const parsedBasePrice = Number(basePrice);
   const hasValidBasePrice = Number.isFinite(parsedBasePrice);
   const normalizedDepositAmount = getValidDepositAmount(depositAmountConfig);
@@ -413,27 +419,18 @@ export default function PaymentPage() {
   useEffect(() => {
     if (paymentStatus === "approved") {
       const purchaseValue = totalPrice || parsedBasePrice || 0;
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "purchase",
-        ecommerce: {
-          currency: "UYU",
-          value: purchaseValue,
-          items: [
-            {
-              item_id: treatment.slug,
-              item_name: treatment.name || "Sesión Urban Skin",
-              price: purchaseValue,
-              quantity: 1,
-            },
-          ],
-        },
+      analytics.trackPurchase({
+        treatment,
+        transactionId: paymentId,
+        value: purchaseValue,
+        paymentMethod,
+        isEvaluation,
+        packageId: selectedPackageId,
       });
-
       const timer = setTimeout(() => navigate("/my-appointments"), 2000);
       return () => clearTimeout(timer);
     }
-  }, [paymentStatus, navigate, totalPrice, parsedBasePrice, treatment]);
+  }, [paymentStatus, navigate, totalPrice, parsedBasePrice, treatment, paymentMethod, paymentId, isEvaluation, selectedPackageId]);
 
   useEffect(() => {
     if (!loading && user?.user_type === "employee") navigate("/admin");
@@ -525,12 +522,25 @@ export default function PaymentPage() {
       errs.email = "Ingresa un correo electrónico válido";
     const phoneError = validatePhoneNumber(profileData.whatsappPhone);
     if (phoneError) errs.whatsappPhone = phoneError;
+    Object.entries(errs).forEach(([fieldName, errorMessage]) => {
+      analytics.trackFormFieldError({
+        formName: "payment_profile",
+        fieldName,
+        errorMessage,
+      });
+    });
     setProfileErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const handleShowCardPayment = async () => {
     if (!validateProfile()) return;
+    analytics.trackAddPaymentInfo({
+      treatment,
+      paymentMethod,
+      value: totalPrice,
+      isEvaluation,
+    });
     setError("");
     setPaymentStatus("processing");
     try {
@@ -601,6 +611,12 @@ export default function PaymentPage() {
   };
 
   const handlePaymentError = (err) => {
+    analytics.trackPaymentFailed({
+      treatment,
+      paymentMethod,
+      error: err,
+      statusDetail: err?.statusDetail,
+    });
     setError(
       err?.message || "Error al procesar el pago. Por favor intenta de nuevo.",
     );
@@ -622,6 +638,12 @@ export default function PaymentPage() {
     }
     setProfileLoading(true);
     try {
+      analytics.trackAddPaymentInfo({
+        treatment,
+        paymentMethod: method,
+        value: basePrice,
+        isEvaluation,
+      });
       const intent = await paymentService.createPaymentIntent({
         treatmentId: treatment.slug || treatment.name || "unknown",
         treatmentName: treatment.name || "Tratamiento",
@@ -658,6 +680,13 @@ export default function PaymentPage() {
         } catch {}
       }
       setProfileLocked(true);
+      analytics.trackReservationCreatedNoPayment({
+        treatment,
+        paymentMethod: method,
+        value: basePrice,
+        isEvaluation,
+        appointmentId: appointmentIdToLink,
+      });
       navigate("/my-appointments");
     } catch (err) {
       setError(err.message || "Error creating payment intent");
@@ -678,7 +707,6 @@ export default function PaymentPage() {
     if (profileLoading || paymentStatus === "processing") return true;
     if (profileLocked) return true;
     if (fieldName === "email" && user?.auth_method === "google") return true;
-    if (fieldName === "phone" && user?.auth_method === "whatsapp") return true;
     if (fieldsFromDB.has(fieldName)) return true;
     return false;
   };
@@ -976,7 +1004,7 @@ export default function PaymentPage() {
                     <PaymentRadio
                       method="tarjeta"
                       selected={paymentMethod}
-                      onSelect={setPaymentMethod}
+                      onSelect={handleSelectPaymentMethod}
                       icon={
                         <CreditCardIcon sx={{fontSize: 18, color: "#2e7d32"}} />
                       }
@@ -989,7 +1017,7 @@ export default function PaymentPage() {
                     <PaymentRadio
                       method="deposito"
                       selected={paymentMethod}
-                      onSelect={setPaymentMethod}
+                      onSelect={handleSelectPaymentMethod}
                       icon={
                         <SavingsIcon sx={{fontSize: 18, color: "#2e7d32"}} />
                       }
@@ -1002,7 +1030,7 @@ export default function PaymentPage() {
                     <PaymentRadio
                       method="transferencia"
                       selected={paymentMethod}
-                      onSelect={setPaymentMethod}
+                      onSelect={handleSelectPaymentMethod}
                       icon={
                         <AccountBalanceIcon
                           sx={{fontSize: 18, color: "#2e7d32"}}
@@ -1016,7 +1044,7 @@ export default function PaymentPage() {
                     <PaymentRadio
                       method="efectivo"
                       selected={paymentMethod}
-                      onSelect={setPaymentMethod}
+                      onSelect={handleSelectPaymentMethod}
                       icon={
                         <PaymentsIcon sx={{fontSize: 18, color: "#2e7d32"}} />
                       }
@@ -1137,12 +1165,16 @@ export default function PaymentPage() {
                         <Button
                           variant="contained"
                           startIcon={<WhatsAppIcon />}
-                          onClick={() =>
+                          onClick={() => {
+                            analytics.trackWhatsAppClick({
+                              source: "payment_transfer_help",
+                              context: { treatmentSlug: treatment?.slug },
+                            });
                             window.open(
                               `https://wa.me/${whatsappPhone}?text=Hola%2C%20quiero%20datos%20bancarios`,
                               "_blank",
-                            )
-                          }
+                            );
+                          }}
                           sx={{
                             bgcolor: "#25d366",
                             "&:hover": {bgcolor: "#20c652"},

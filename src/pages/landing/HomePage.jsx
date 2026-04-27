@@ -12,6 +12,7 @@ import CampaignModal from "../../components/CampaignModal.jsx";
 import TreatmentCard from "../../components/TreatmentCard.jsx";
 import HeroSection from "../../components/HeroSection.jsx";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import analytics from "../../utils/analytics.js";
 import heroBg from "../../assets/images/hero-bg.png";
 
 function toPlainText(value) {
@@ -111,6 +112,18 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    if (bodyTreatments.length > 0) analytics.trackViewItemList("body", bodyTreatments);
+  }, [bodyTreatments]);
+
+  useEffect(() => {
+    if (facialTreatments.length > 0) analytics.trackViewItemList("facial", facialTreatments);
+  }, [facialTreatments]);
+
+  useEffect(() => {
+    if (complementaryTreatments.length > 0) analytics.trackViewItemList("complementarios", complementaryTreatments);
+  }, [complementaryTreatments]);
+
+  useEffect(() => {
     if (isAuthenticated && user?.user_type === "customer") {
       authService
         .getPurchaseEligibility()
@@ -129,7 +142,9 @@ export default function HomePage() {
   };
 
   const handleTreatmentClick = (treatment, productType = "body") => {
+    analytics.trackSelectItem(treatment, productType);
     if (!isAuthenticated) {
+      analytics.trackLoginModalOpened({ trigger: "treatment_click" });
       setLoginModalOpen(true);
       return;
     }
@@ -271,7 +286,10 @@ export default function HomePage() {
                                   image_url: imageField || null,
                                 }}
                                 showDesde={true}
-                                onClick={() => setCampaignModals((prev) => ({ ...prev, [`${productType}-${gender}`]: true }))}
+                                onClick={() => {
+                                  analytics.trackCampaignViewed({ productType, gender });
+                                  setCampaignModals((prev) => ({ ...prev, [`${productType}-${gender}`]: true }));
+                                }}
                               />
                             );
                           })
@@ -285,7 +303,10 @@ export default function HomePage() {
                               image_url: campaign.image_url || null,
                             }}
                             showDesde={true}
-                            onClick={() => setCampaignModals((prev) => ({ ...prev, [productType]: true }))}
+                            onClick={() => {
+                              analytics.trackCampaignViewed({ productType });
+                              setCampaignModals((prev) => ({ ...prev, [productType]: true }));
+                            }}
                           />
                         )}
                       </div>

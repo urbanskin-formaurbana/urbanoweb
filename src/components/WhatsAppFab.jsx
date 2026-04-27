@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import LandingIcon from "./LandingIcon.jsx";
+import analytics from "../utils/analytics";
 
 export default function WhatsAppFab({ phone }) {
   const [wide, setWide] = useState(typeof window !== "undefined" && window.innerWidth >= 960);
@@ -12,6 +13,13 @@ export default function WhatsAppFab({ phone }) {
 
   if (!phone) return null;
 
+  const handleClick = () => {
+    analytics.trackWhatsAppClick({
+      source: "fab",
+      context: { page: typeof window !== "undefined" ? window.location.pathname : null },
+    });
+  };
+
   return (
     <a
       className="fu-wa"
@@ -19,6 +27,7 @@ export default function WhatsAppFab({ phone }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chatear por WhatsApp"
+      onClick={handleClick}
     >
       <span className="fu-wa__pulse" aria-hidden="true" />
       <LandingIcon name="whatsapp_icon" size={24} color="currentColor" />

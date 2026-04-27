@@ -39,7 +39,6 @@ export default function ProtectedAdminRoute({ children }) {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('user');
-          localStorage.removeItem('login_method');
           window.dispatchEvent(new CustomEvent('auth:logout'));
           setSessionValid(false);
         } else if (response.ok) {

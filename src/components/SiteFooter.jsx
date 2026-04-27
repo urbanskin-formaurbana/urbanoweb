@@ -2,6 +2,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { Box } from "@mui/material";
 import LandingIcon from "./LandingIcon.jsx";
 import FormaBrandSVG from "./FormaBrandSVG.jsx";
+import analytics from "../utils/analytics";
 
 export default function SiteFooter({ sections = [], onSectionClick, whatsappPhone, businessEmail, businessAddress }) {
   return (
@@ -29,7 +30,13 @@ export default function SiteFooter({ sections = [], onSectionClick, whatsappPhon
           <div>
             <h4>Contacto</h4>
             {whatsappPhone && (
-              <a className="fu-footer__link" href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noopener noreferrer">
+              <a
+                className="fu-footer__link"
+                href={`https://wa.me/${whatsappPhone}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => analytics.trackWhatsAppClick({ source: "footer" })}
+              >
                 WhatsApp
               </a>
             )}

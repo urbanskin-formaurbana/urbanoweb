@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../contexts/AuthContext";
+import analytics from "../utils/analytics";
 
 export default function LoginModal({ open, onClose, onSuccess, context }) {
   const navigate = useNavigate();
@@ -48,16 +49,25 @@ export default function LoginModal({ open, onClose, onSuccess, context }) {
   };
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
+    analytics.trackLoginAttempt("google");
     setLoading(true);
     setError("");
     try {
-      const success = await loginWithGoogle(credentialResponse.credential);
-      if (success) {
+      const result = await loginWithGoogle(credentialResponse.credential);
+      if (result?.success) {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+        analytics.trackLogin({
+          authMethod: "google",
+          userId: storedUser?.id,
+          isNewUser: Boolean(result.isNewUser),
+        });
         setTimeout(() => handlePostLogin(), 450);
       } else {
+        analytics.trackLoginError({ authMethod: "google", error: new Error("No se pudo iniciar sesión con Google.") });
         setError("No se pudo iniciar sesión con Google.");
       }
     } catch (err) {
+      analytics.trackLoginError({ authMethod: "google", error: err });
       setError(err.message || "Error al iniciar sesión con Google.");
     } finally {
       setLoading(false);
@@ -87,7 +97,10 @@ export default function LoginModal({ open, onClose, onSuccess, context }) {
         <div className="fu-modal__google-wrap" ref={googleWrapRef}>
           <GoogleLogin
             onSuccess={handleGoogleLoginSuccess}
-            onError={() => setError("Error al iniciar sesión con Google.")}
+            onError={() => {
+              analytics.trackLoginError({ authMethod: "google", error: new Error("Error al iniciar sesión con Google.") });
+              setError("Error al iniciar sesión con Google.");
+            }}
             useOneTap={false}
             theme="outline"
             size="large"

@@ -1738,6 +1738,10 @@ textarea.fu-input {
   border: 1px solid #f0d9a3;
   border-radius: var(--fu-radius-lg);
 }
+.fu-attn--info {
+  background: #eef5ff;
+  border-color: #c9dcf5;
+}
 .fu-attn__icon {
   width: 36px;
   height: 36px;
@@ -1747,6 +1751,9 @@ textarea.fu-input {
   display: grid;
   place-items: center;
   flex-shrink: 0;
+}
+.fu-attn--info .fu-attn__icon {
+  background: #3a7bd5;
 }
 .fu-attn__title {
   font-weight: 700;

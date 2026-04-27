@@ -141,7 +141,9 @@ export default function MercadoPagoBrick({ preferenceId, paymentId, amount, onPa
                   onPaymentSuccessRef.current?.(result.payment_id);
                 } else {
                   const friendlyErrorMsg = mapMpError(result.status, result.status_detail);
-                  onPaymentErrorRef.current?.(new Error(friendlyErrorMsg));
+                  const paymentError = new Error(friendlyErrorMsg);
+                  paymentError.statusDetail = result.status_detail;
+                  onPaymentErrorRef.current?.(paymentError);
                 }
               } catch (error) {
                 onPaymentErrorRef.current?.(error);

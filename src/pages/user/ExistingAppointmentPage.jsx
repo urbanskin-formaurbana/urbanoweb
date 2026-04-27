@@ -40,6 +40,7 @@ import AppointmentDetailFields from "../../components/AppointmentDetailFields";
 import LocationMapCard from "../../components/LocationMapCard";
 import BeforeSessionChecklist from "../../components/BeforeSessionChecklist";
 import TransferReceiptUpload from "../../components/TransferReceiptUpload";
+import analytics from "../../utils/analytics";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -250,6 +251,10 @@ export default function ExistingAppointmentPage() {
 
   const handleWhatsAppContact = () => {
     const message = `Hola FORMA Urbana, tengo una consulta sobre mi cita #${appointmentId}`;
+    analytics.trackWhatsAppClick({
+      source: "appointment_detail",
+      context: { appointmentId },
+    });
     window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
@@ -279,27 +284,38 @@ export default function ExistingAppointmentPage() {
     setDeleting(true);
     try {
       if (isIntentMode) {
-        // Cancel pending payment intent
         await paymentService.cancelPaymentIntent(pendingIntent._id);
         setSnackbarMessage("Solicitud cancelada correctamente");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
+        setDeleteConfirmOpen(false);
         deleteTimerRef.current = setTimeout(() => navigate("/my-appointments"), 2000);
       } else {
-        // Cancel appointment
-        await appointmentService.deleteAppointment(appointmentId);
-        setSnackbarMessage("Cita eliminada correctamente");
+        const wasHardDelete =
+          appointmentData?.status === "pending" &&
+          appointmentData?.payment_status === "awaiting_payment";
+        const response = await appointmentService.deleteAppointment(appointmentId);
+        analytics.trackAppointmentCancelled({
+          appointmentId,
+          actor: "customer",
+          treatmentSlug: appointmentData?.treatment_slug,
+        });
+        if (!wasHardDelete) {
+          setAppointmentData((prev) => ({...prev, status: "cancelled"}));
+        }
+        setSnackbarMessage(response?.message || "Cita cancelada correctamente");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
+        setDeleteConfirmOpen(false);
         deleteTimerRef.current = setTimeout(() => navigate("/my-appointments"), 2000);
       }
     } catch (err) {
-      setSnackbarMessage(isIntentMode ? "Error al cancelar la solicitud" : "Error al eliminar la cita");
+      const fallback = isIntentMode ? "Error al cancelar la solicitud" : "Error al cancelar la cita";
+      setSnackbarMessage(err?.message || fallback);
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
       setDeleting(false);
-      setDeleteConfirmOpen(false);
     }
   };
 
@@ -315,7 +331,15 @@ export default function ExistingAppointmentPage() {
         .tz(`${rescheduleDate.format("YYYY-MM-DD")} ${rescheduleTime}`, "America/Montevideo")
         .utc()
         .toISOString();
+      const oldScheduledAt = appointmentData?.scheduled_at;
       const result = await appointmentService.rescheduleAppointment(appointmentId, newDateTime);
+      analytics.trackAppointmentRescheduled({
+        appointmentId,
+        actor: "customer",
+        treatmentSlug: appointmentData?.treatment_slug,
+        oldScheduledAt,
+        newScheduledAt: newDateTime,
+      });
       setAppointmentData(prev => ({
         ...prev,
         scheduled_at: newDateTime,

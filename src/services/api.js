@@ -45,7 +45,6 @@ async function rawApiCall(endpoint, options = {}) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
-      localStorage.removeItem('login_method');
       window.dispatchEvent(new CustomEvent('auth:logout'));
       const err = new Error('Session expired - please log in again');
       err._silent = true;

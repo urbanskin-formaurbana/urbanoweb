@@ -137,10 +137,53 @@ export default function AppointmentHistoryPage() {
   const {cuponeras, pendingTransfers, upcoming, past} =
     organizeTimeline(appointments);
 
-  const allPending = [
-    ...upcoming.filter((a) => a.status === "pending"),
-    ...pendingTransfers,
-  ];
+  const PREPAID_METHODS = ["tarjeta", "seña", "deposito"];
+  const upcomingPending = upcoming.filter((a) => a.status === "pending");
+  const awaitingAdminConfirmation = upcomingPending.filter((a) =>
+    PREPAID_METHODS.includes(a.payment_method_expected),
+  );
+  const cashPending = upcomingPending.filter(
+    (a) => a.payment_method_expected === "efectivo",
+  );
+  const transferPending = upcomingPending.filter(
+    (a) => a.payment_method_expected === "transferencia",
+  );
+
+  const actionableCount =
+    cashPending.length + transferPending.length + pendingIntents.length;
+
+  let banner = null;
+  if (actionableCount > 0) {
+    const subtitleParts = [];
+    if (pendingIntents.length > 0) {
+      subtitleParts.push("Agendá tu sesión ya pagada.");
+    }
+    if (transferPending.length > 0) {
+      subtitleParts.push("Subí el comprobante de transferencia para confirmar tu sesión.");
+    }
+    if (cashPending.length > 0) {
+      subtitleParts.push("Te esperamos en el local — recordá traer el pago en efectivo.");
+    }
+    banner = {
+      tone: "urgent",
+      title:
+        actionableCount === 1
+          ? "Hay una reserva que necesita tu atención"
+          : `Hay ${actionableCount} reservas que necesitan tu atención`,
+      subtitle: subtitleParts.join(" "),
+    };
+  } else if (awaitingAdminConfirmation.length > 0) {
+    banner = {
+      tone: "info",
+      title:
+        awaitingAdminConfirmation.length === 1
+          ? "Tu sesión está pendiente de confirmación"
+          : `Tenés ${awaitingAdminConfirmation.length} sesiones pendientes de confirmación`,
+      subtitle:
+        "Una de nuestras esteticistas confirmará tu reserva en breve. No necesitás hacer nada más.",
+    };
+  }
+
   const totalRemaining = cuponeras.reduce((acc, c) => acc + c.available, 0);
 
   const fullName =
@@ -185,16 +228,12 @@ export default function AppointmentHistoryPage() {
         ) : (
           <>
             {/* Attention banner */}
-            {allPending.length > 0 && (
+            {banner && (
               <div style={{marginBottom: 32}}>
                 <AttentionBanner
-                  title={`Hay ${allPending.length === 1 ? "una reserva que necesita" : `${allPending.length} reservas que necesitan`} tu atención`}
-                  subtitle={
-                    pendingTransfers.length > 0
-                      ? "Subí el comprobante de transferencia para confirmar tu sesión."
-                      : "Te esperamos en el local — recordá traer el pago en efectivo."
-                  }
-                  iconName="priority_high"
+                  tone={banner.tone}
+                  title={banner.title}
+                  subtitle={banner.subtitle}
                 />
               </div>
             )}

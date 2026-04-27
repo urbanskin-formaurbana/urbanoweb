@@ -21,6 +21,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { createCampaignService } from "../services/campaign_service";
+import analytics from "../utils/analytics";
 
 function TabPanel({ children, value, index }) {
   return (
@@ -76,7 +77,9 @@ function CampaignModal({
   const campaignService = createCampaignService(productType);
 
   const handleContratar = async (item) => {
+    analytics.trackCampaignItemSelected({ productType, gender, item });
     if (!isAuthenticated) {
+      analytics.trackLoginModalOpened({ trigger: "campaign_click" });
       onLoginRequired();
       return;
     }
@@ -136,6 +139,7 @@ function CampaignModal({
     try {
       setWaitlistJoining(true);
       await campaignService.joinWaitlist();
+      analytics.trackJoinWaitlist({ productType, gender });
       setIsOnWaitlist(true);
     } catch (error) {
     } finally {
@@ -161,6 +165,14 @@ function CampaignModal({
     }
     const lines = selectedZones.map((z) => `• ${z.name}`).join("\n");
     const msg = `Hola! Me gustaría consultar sobre un paquete personalizado de ${modalTitle.toLowerCase()}.\n\nZonas de interés:\n${lines}\n\n¿Podrían indicarme el precio?`;
+    analytics.trackWhatsAppClick({
+      source: "campaign_modal",
+      context: {
+        productType,
+        gender,
+        selectedZones: selectedZones.map((z) => z.slug),
+      },
+    });
     window.open(
       `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`,
       "_blank"

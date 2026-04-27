@@ -20,6 +20,7 @@ import {
   isCampaignTreatment,
   filterSlotsForCustomer,
 } from "../../utils/slotUtils";
+import analytics from "../../utils/analytics";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -71,6 +72,8 @@ export default function SchedulingPage() {
   );
 
   const purchasedPackageId = location.state?.purchased_package_id;
+  const selectedPackageId =
+    location.state?.selectedPackageId || location.state?.purchasedPackageId || null;
   const sessionInfo = location.state?.sessionInfo;
   const isEvaluation = location.state?.isEvaluation ?? false;
   const campaignItemType = location.state?.campaignItemType;
@@ -83,6 +86,12 @@ export default function SchedulingPage() {
   useEffect(() => {
     requestAnimationFrame(() => window.scrollTo(0, 0));
   }, []);
+
+  useEffect(() => {
+    if (treatment?.slug) {
+      analytics.trackBeginCheckout({ treatment, isEvaluation, packageId: selectedPackageId });
+    }
+  }, [treatment?.slug]);
 
   useEffect(() => {
     if (restoredDate && restoredTime) {
@@ -161,6 +170,12 @@ export default function SchedulingPage() {
         await appointmentService.createAppointment(appointmentData);
         navigate("/my-appointments");
       } else {
+        analytics.trackAddShippingInfo({
+          treatment,
+          selectedDate: selectedDate.format("YYYY-MM-DD"),
+          selectedTime,
+          isEvaluation,
+        });
         navigate("/payment", {
           state: {
             treatment,
@@ -271,11 +286,22 @@ export default function SchedulingPage() {
                   paymentMode={isEvaluation ? "evaluacion" : null}
                   selectedDate={selectedDate}
                   onDateChange={(d) => {
+                    analytics.trackDateSelected({
+                      treatment,
+                      selectedDate: d ? d.format("YYYY-MM-DD") : null,
+                    });
                     setSelectedDate(d);
                     setSelectedTime(null);
                   }}
                   selectedTime={selectedTime}
-                  onTimeChange={setSelectedTime}
+                  onTimeChange={(nuevoTime) => {
+                    analytics.trackTimeSlotSelected({
+                      treatment,
+                      selectedDate: selectedDate ? selectedDate.format("YYYY-MM-DD") : null,
+                      selectedTime: nuevoTime,
+                    });
+                    setSelectedTime(nuevoTime);
+                  }}
                 />
 
                 {selectedDate && selectedTime && (

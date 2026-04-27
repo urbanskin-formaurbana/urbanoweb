@@ -13,6 +13,7 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 import FormaUrbanaLogo from "../assets/images/FormaUrbanaLogo.svg";
 import { useBusiness } from "../contexts/BusinessContext";
+import analytics from "../utils/analytics";
 
 const LANDING_LINKS = [
   {
@@ -122,6 +123,7 @@ export default function NotFound() {
               variant="outlined"
               color="inherit"
               size="large"
+              onClick={() => analytics.trackWhatsAppClick({ source: "not_found" })}
               sx={{ alignSelf: "center" }}
             >
               Hablar por WhatsApp
