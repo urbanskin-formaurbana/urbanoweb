@@ -17,6 +17,7 @@ import {
   IconButton,
   Typography,
   Alert,
+  Chip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -28,6 +29,75 @@ function TabPanel({ children, value, index }) {
     <div role="tabpanel" hidden={value !== index}>
       {value === index && <Box sx={{ py: 2 }}>{children}</Box>}
     </div>
+  );
+}
+
+function CampaignItemRow({ item, onContratar }) {
+  const hasSessionPromo =
+    item.is_session_promo &&
+    typeof item.promo_price === "number" &&
+    item.promo_price > 0;
+  const hasCuponeraPromo = !!item.is_cuponera_promo;
+  const isFeatured = hasSessionPromo || hasCuponeraPromo;
+
+  return (
+    <ListItem
+      disablePadding
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        p: 1,
+        borderBottom: "1px solid #eee",
+        "&:last-child": { borderBottom: "none" },
+        ...(isFeatured && {
+          border: "2px solid #2e7d32",
+          borderRadius: 1,
+          backgroundColor: "#f2f8f3",
+          mb: 1,
+          position: "relative",
+          overflow: "visible",
+        }),
+      }}
+    >
+      <Box sx={{ flex: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.25 }}>
+          <Typography variant="body2" fontWeight="500">
+            {item.name}
+          </Typography>
+          {hasSessionPromo && (
+            <Chip
+              label="Oferta"
+              size="small"
+              sx={{ backgroundColor: "#2e7d32", color: "#fff", height: 18, fontSize: 10, fontWeight: 700 }}
+            />
+          )}
+          {hasCuponeraPromo && !hasSessionPromo && (
+            <Chip
+              label="Promo en cuponera"
+              size="small"
+              sx={{ backgroundColor: "#14331b", color: "#fff", height: 18, fontSize: 10, fontWeight: 700 }}
+            />
+          )}
+        </Box>
+        {hasSessionPromo ? (
+          <Typography variant="body2" color="text.secondary">
+            <span style={{ textDecoration: "line-through", marginRight: 6 }}>${item.price}</span>
+            <span style={{ color: "#2e7d32", fontWeight: 700 }}>${item.promo_price}</span>
+          </Typography>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            $ {item.price}
+          </Typography>
+        )}
+        <Typography variant="body2" color="text.secondary">
+          {item.duration_minutes} min
+        </Typography>
+      </Box>
+      <Button size="small" variant="outlined" color="success" onClick={() => onContratar(item)}>
+        Contratar
+      </Button>
+    </ListItem>
   );
 }
 
@@ -242,38 +312,7 @@ function CampaignModal({
               <TabPanel value={tabValue} index={zonas.length > 0 ? 0 : -1}>
                 <List sx={{ width: "100%" }}>
                   {zonas.map((zona) => (
-                    <ListItem
-                      key={zona.slug}
-                      disablePadding
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        p: 1,
-                        borderBottom: "1px solid #eee",
-                        "&:last-child": { borderBottom: "none" },
-                      }}
-                    >
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" fontWeight="500">
-                          {zona.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          $ {zona.price}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {zona.duration_minutes} min
-                        </Typography>
-                      </Box>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="success"
-                        onClick={() => handleContratar(zona)}
-                      >
-                        Contratar
-                      </Button>
-                    </ListItem>
+                    <CampaignItemRow key={zona.slug} item={zona} onContratar={handleContratar} />
                   ))}
                 </List>
               </TabPanel>
@@ -287,38 +326,7 @@ function CampaignModal({
               >
                 <List sx={{ width: "100%" }}>
                   {paquetes.map((paquete) => (
-                    <ListItem
-                      key={paquete.slug}
-                      disablePadding
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        p: 1,
-                        borderBottom: "1px solid #eee",
-                        "&:last-child": { borderBottom: "none" },
-                      }}
-                    >
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" fontWeight="500">
-                          {paquete.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          $ {paquete.price}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {paquete.duration_minutes} min
-                        </Typography>
-                      </Box>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="success"
-                        onClick={() => handleContratar(paquete)}
-                      >
-                        Contratar
-                      </Button>
-                    </ListItem>
+                    <CampaignItemRow key={paquete.slug} item={paquete} onContratar={handleContratar} />
                   ))}
 
                   {/* Consulta por tu propio paquete */}

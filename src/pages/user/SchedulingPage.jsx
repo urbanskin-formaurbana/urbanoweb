@@ -89,6 +89,7 @@ export default function SchedulingPage() {
 
   useEffect(() => {
     if (treatment?.slug) {
+      analytics.trackViewItem(treatment);
       analytics.trackBeginCheckout({ treatment, isEvaluation, packageId: selectedPackageId });
     }
   }, [treatment?.slug]);

@@ -751,6 +751,102 @@
   gap: 4px;
 }
 
+/* Promotions banner (above sections, after hero) */
+.fu-promo-banner-wrap {
+  padding: 20px 0 0;
+}
+.fu-promo-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 14px 20px;
+  border-radius: var(--fu-radius-lg);
+  background: var(--fu-green-50);
+  border: 1px solid var(--fu-green-100);
+}
+.fu-promo-banner__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fu-accent);
+  background: #fff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--fu-green-100);
+}
+.fu-promo-banner__text {
+  color: var(--fu-ink-700);
+  font-weight: 500;
+  font-size: 14px;
+}
+.fu-promo-banner__list {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.fu-promo-banner__link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--fu-accent);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+}
+.fu-promo-banner__link:hover {
+  color: var(--fu-accent-hover);
+}
+
+/* Featured promotion styles */
+.fu-tcard--promo {
+  border: 2px solid var(--fu-accent);
+  box-shadow: 0 0 0 4px var(--fu-green-50);
+}
+.fu-tcard--promo:hover {
+  border-color: var(--fu-accent);
+  box-shadow:
+    0 0 0 4px var(--fu-green-50),
+    0 4px 12px rgba(46, 125, 50, 0.18);
+}
+.fu-tcard__promo-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--fu-accent);
+  color: #fff;
+}
+.fu-tcard__promo-badge--cuponera {
+  background: var(--fu-green-900);
+}
+.fu-tcard__price-old {
+  text-decoration: line-through;
+  color: var(--fu-ink-400);
+  font-weight: 500;
+  margin-right: 4px;
+  font-size: 14px;
+}
+.fu-tcard__price-new {
+  color: var(--fu-accent);
+}
+.fu-tcard__promo-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fu-accent);
+  letter-spacing: 0.02em;
+}
+
 .fu-modal-scrim {
   position: fixed;
   inset: 0;

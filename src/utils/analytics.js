@@ -24,6 +24,10 @@
 const isDev = import.meta.env.DEV;
 const CURRENCY = "UYU";
 
+// Treatment slugs that already fired `view_item` in the current SPA session.
+// Cleared on full page reload, persists across React Router navigation.
+const firedViewItemSlugs = new Set();
+
 function push(payload) {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
@@ -93,6 +97,11 @@ const analytics = {
    * Detail surface opened (PurchaseOptionsDialog, treatment description, etc.).
    */
   trackViewItem(treatment) {
+    const slug = treatment?.slug || treatment?.id;
+    if (slug) {
+      if (firedViewItemSlugs.has(slug)) return;
+      firedViewItemSlugs.add(slug);
+    }
     const price = Number(treatment?.price ?? 0);
     push({
       event: "view_item",

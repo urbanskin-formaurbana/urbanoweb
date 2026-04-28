@@ -45,6 +45,23 @@ export default function HomePage() {
   const [campaignProducts, setCampaignProducts] = useState([]);
   const [treatmentsByCategory, setTreatmentsByCategory] = useState({});
 
+  const DEDICATED_CATEGORIES = ["body", "facial", "complementarios"];
+
+  const promotedTreatments = useMemo(() => {
+    const all = Object.values(treatmentsByCategory).flat();
+    return all.filter((t) => t.is_session_promo || t.is_cuponera_promo);
+  }, [treatmentsByCategory]);
+
+  const scrollToTreatment = (treatment) => {
+    const targetId = DEDICATED_CATEGORIES.includes(treatment.category)
+      ? `treatment-${treatment.slug}`
+      : treatment.category;
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  };
+
   const heroCategories = useMemo(() => {
     const dynamic = campaignProducts.map((campaign) => ({
       label:
@@ -155,6 +172,7 @@ export default function HomePage() {
 
     // Only show purchase dialog for body treatments when user can purchase packages
     if (productType === "body" && canPurchasePackages) {
+      analytics.trackViewItem(treatment);
       setSelectedTreatmentForPurchase(treatment);
       setPurchaseDialogOpen(true);
       return;
@@ -197,6 +215,34 @@ export default function HomePage() {
       {treatmentsError && !treatmentsLoading && (
         <div className="fu-container" style={{ paddingTop: 24, paddingBottom: 24 }}>
           <Alert severity="error">{treatmentsError}</Alert>
+        </div>
+      )}
+
+      {!treatmentsLoading && !treatmentsError && promotedTreatments.length > 0 && (
+        <div className="fu-promo-banner-wrap">
+          <div className="fu-container">
+            <div className="fu-promo-banner" role="region" aria-label="Tratamientos en oferta">
+              <span className="fu-promo-banner__label">🌿 Ofertas activas</span>
+              <span className="fu-promo-banner__text">
+                {promotedTreatments.length === 1
+                  ? "Tenemos un tratamiento en oferta:"
+                  : "Tenemos tratamientos en oferta:"}
+              </span>
+              <div className="fu-promo-banner__list">
+                {promotedTreatments.map((t, idx) => (
+                  <button
+                    key={t.slug}
+                    type="button"
+                    className="fu-promo-banner__link"
+                    onClick={() => scrollToTreatment(t)}
+                  >
+                    {t.name}
+                    {idx < promotedTreatments.length - 1 ? "," : ""}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

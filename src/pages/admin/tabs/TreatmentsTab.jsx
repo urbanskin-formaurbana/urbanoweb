@@ -25,6 +25,9 @@ import {
   Tab,
   ToggleButtonGroup,
   ToggleButton,
+  FormControlLabel,
+  Checkbox,
+  Divider,
 } from "@mui/material";
 import adminService from "../../../services/admin_service";
 import RichTextDescriptionEditor from "../../../components/RichTextDescriptionEditor";
@@ -85,6 +88,9 @@ export default function TreatmentsTab() {
     gender: "",
     item_type: "",
     is_active: true,
+    is_session_promo: false,
+    promo_price: "",
+    is_cuponera_promo: false,
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [creatingTreatment, setCreatingTreatment] = useState(false);
@@ -105,6 +111,9 @@ export default function TreatmentsTab() {
     gender: "",
     item_type: "",
     is_active: true,
+    is_session_promo: false,
+    promo_price: "",
+    is_cuponera_promo: false,
   });
   const [savingTreatment, setSavingTreatment] = useState(false);
 
@@ -174,6 +183,9 @@ export default function TreatmentsTab() {
       gender: "",
       item_type: "",
       is_active: true,
+      is_session_promo: false,
+      promo_price: "",
+      is_cuponera_promo: false,
     });
     setSlugManuallyEdited(false);
     setCreateTreatmentOpen(true);
@@ -228,6 +240,12 @@ export default function TreatmentsTab() {
             ? createTreatmentForm.item_type || null
             : null,
         is_active: createTreatmentForm.is_active,
+        is_session_promo: createTreatmentForm.is_session_promo,
+        promo_price:
+          createTreatmentForm.is_session_promo && createTreatmentForm.promo_price !== ""
+            ? Number(createTreatmentForm.promo_price)
+            : null,
+        is_cuponera_promo: createTreatmentForm.is_cuponera_promo,
       });
       setSuccessMessage("Tratamiento creado exitosamente");
       closeCreateTreatmentDialog();
@@ -283,6 +301,9 @@ export default function TreatmentsTab() {
       item_type: treatment.item_type || "",
       is_active: treatment.is_active,
       image_url: treatment.image_url || "",
+      is_session_promo: treatment.is_session_promo || false,
+      promo_price: treatment.promo_price ?? "",
+      is_cuponera_promo: treatment.is_cuponera_promo || false,
     });
     setEditTreatmentOpen(true);
   };
@@ -318,6 +339,12 @@ export default function TreatmentsTab() {
             ? editTreatmentForm.item_type || null
             : null,
         is_active: editTreatmentForm.is_active,
+        is_session_promo: editTreatmentForm.is_session_promo,
+        promo_price:
+          editTreatmentForm.is_session_promo && editTreatmentForm.promo_price !== ""
+            ? Number(editTreatmentForm.promo_price)
+            : null,
+        is_cuponera_promo: editTreatmentForm.is_cuponera_promo,
       });
       setSuccessMessage("Tratamiento actualizado");
       closeEditTreatmentDialog();
@@ -892,6 +919,55 @@ export default function TreatmentsTab() {
                 }))
               }
             />
+            <Divider sx={{ my: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                PROMOCIONES DESTACADAS
+              </Typography>
+            </Divider>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={createTreatmentForm.is_session_promo}
+                  onChange={(e) =>
+                    setCreateTreatmentForm((f) => ({
+                      ...f,
+                      is_session_promo: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Sesión en oferta destacada"
+            />
+            {createTreatmentForm.is_session_promo && (
+              <TextField
+                label="Precio de oferta ($) *"
+                size="small"
+                type="number"
+                fullWidth
+                value={createTreatmentForm.promo_price}
+                onChange={(e) =>
+                  setCreateTreatmentForm((f) => ({
+                    ...f,
+                    promo_price: e.target.value,
+                  }))
+                }
+                helperText="Precio rebajado que se mostrará en la home"
+              />
+            )}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={createTreatmentForm.is_cuponera_promo}
+                  onChange={(e) =>
+                    setCreateTreatmentForm((f) => ({
+                      ...f,
+                      is_cuponera_promo: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Cuponera en oferta destacada"
+            />
             <FormControl size="small" fullWidth>
               <InputLabel>Estado</InputLabel>
               <Select
@@ -1130,6 +1206,60 @@ export default function TreatmentsTab() {
                   <MenuItem value="paquete">Paquete</MenuItem>
                 </Select>
               </FormControl>
+            )}
+            <Divider sx={{ my: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                PROMOCIONES DESTACADAS
+              </Typography>
+            </Divider>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={editTreatmentForm.is_session_promo}
+                  onChange={(e) =>
+                    setEditTreatmentForm((f) => ({
+                      ...f,
+                      is_session_promo: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Sesión en oferta destacada"
+            />
+            {editTreatmentForm.is_session_promo && (
+              <TextField
+                label="Precio de oferta ($) *"
+                size="small"
+                type="number"
+                fullWidth
+                value={editTreatmentForm.promo_price}
+                onChange={(e) =>
+                  setEditTreatmentForm((f) => ({
+                    ...f,
+                    promo_price: e.target.value,
+                  }))
+                }
+                helperText="Precio rebajado que se mostrará en la home"
+              />
+            )}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={editTreatmentForm.is_cuponera_promo}
+                  onChange={(e) =>
+                    setEditTreatmentForm((f) => ({
+                      ...f,
+                      is_cuponera_promo: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Cuponera en oferta destacada"
+            />
+            {editTreatmentForm.is_cuponera_promo && (
+              <Typography variant="caption" color="text.secondary" sx={{ pl: 4, mt: -1 }}>
+                Recordá marcar al menos una cuponera de este tratamiento como promocional para que se muestre la oferta en el modal.
+              </Typography>
             )}
             <FormControl size="small" fullWidth>
               <InputLabel>Estado</InputLabel>
