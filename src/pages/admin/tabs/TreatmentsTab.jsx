@@ -91,6 +91,7 @@ export default function TreatmentsTab() {
     is_session_promo: false,
     promo_price: "",
     is_cuponera_promo: false,
+    disable_single_session: false,
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [creatingTreatment, setCreatingTreatment] = useState(false);
@@ -114,6 +115,7 @@ export default function TreatmentsTab() {
     is_session_promo: false,
     promo_price: "",
     is_cuponera_promo: false,
+    disable_single_session: false,
   });
   const [savingTreatment, setSavingTreatment] = useState(false);
 
@@ -186,6 +188,7 @@ export default function TreatmentsTab() {
       is_session_promo: false,
       promo_price: "",
       is_cuponera_promo: false,
+      disable_single_session: false,
     });
     setSlugManuallyEdited(false);
     setCreateTreatmentOpen(true);
@@ -246,6 +249,7 @@ export default function TreatmentsTab() {
             ? Number(createTreatmentForm.promo_price)
             : null,
         is_cuponera_promo: createTreatmentForm.is_cuponera_promo,
+        disable_single_session: createTreatmentForm.disable_single_session,
       });
       setSuccessMessage("Tratamiento creado exitosamente");
       closeCreateTreatmentDialog();
@@ -304,6 +308,7 @@ export default function TreatmentsTab() {
       is_session_promo: treatment.is_session_promo || false,
       promo_price: treatment.promo_price ?? "",
       is_cuponera_promo: treatment.is_cuponera_promo || false,
+      disable_single_session: treatment.disable_single_session || false,
     });
     setEditTreatmentOpen(true);
   };
@@ -345,6 +350,7 @@ export default function TreatmentsTab() {
             ? Number(editTreatmentForm.promo_price)
             : null,
         is_cuponera_promo: editTreatmentForm.is_cuponera_promo,
+        disable_single_session: editTreatmentForm.disable_single_session,
       });
       setSuccessMessage("Tratamiento actualizado");
       closeEditTreatmentDialog();
@@ -968,6 +974,30 @@ export default function TreatmentsTab() {
               }
               label="Cuponera en oferta destacada"
             />
+            <Divider sx={{ my: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                OPCIONES DE COMPRA
+              </Typography>
+            </Divider>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={createTreatmentForm.disable_single_session}
+                  onChange={(e) =>
+                    setCreateTreatmentForm((f) => ({
+                      ...f,
+                      disable_single_session: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Deshabilitar compra por sesión individual"
+            />
+            {createTreatmentForm.disable_single_session && (
+              <Typography variant="caption" color="text.secondary" sx={{ pl: 4, mt: -1 }}>
+                Solo se mostrarán cuponeras como opciones de compra.
+              </Typography>
+            )}
             <FormControl size="small" fullWidth>
               <InputLabel>Estado</InputLabel>
               <Select
@@ -1259,6 +1289,30 @@ export default function TreatmentsTab() {
             {editTreatmentForm.is_cuponera_promo && (
               <Typography variant="caption" color="text.secondary" sx={{ pl: 4, mt: -1 }}>
                 Recordá marcar al menos una cuponera de este tratamiento como promocional para que se muestre la oferta en el modal.
+              </Typography>
+            )}
+            <Divider sx={{ my: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                OPCIONES DE COMPRA
+              </Typography>
+            </Divider>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={editTreatmentForm.disable_single_session}
+                  onChange={(e) =>
+                    setEditTreatmentForm((f) => ({
+                      ...f,
+                      disable_single_session: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Deshabilitar compra por sesión individual"
+            />
+            {editTreatmentForm.disable_single_session && (
+              <Typography variant="caption" color="text.secondary" sx={{ pl: 4, mt: -1 }}>
+                Solo se mostrarán cuponeras como opciones de compra.
               </Typography>
             )}
             <FormControl size="small" fullWidth>
