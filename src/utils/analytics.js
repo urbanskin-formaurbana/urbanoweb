@@ -158,7 +158,7 @@ const analytics = {
     push({
       event: isNewUser ? "sign_up" : "login",
       method: authMethod,
-      user_id: userId || null,
+      crm_id: userId || null,
     });
   },
 
