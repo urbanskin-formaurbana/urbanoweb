@@ -1,12 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap");
 
 :root {
+  --fu-green-950: #0e2a13;
   --fu-green-900: #14331b;
   --fu-green-800: #1f4f29;
   --fu-green-700: #2e7d32;
   --fu-green-600: #3b8a3f;
   --fu-green-100: #e4f0e5;
   --fu-green-50: #f2f8f3;
+  --fu-lime-300: #d6f584;
+  --fu-cream-50: #fafaf2;
   --fu-ink-900: #141414;
   --fu-ink-700: #2a2a2a;
   --fu-ink-500: #5b5b5b;
@@ -751,83 +754,237 @@
   gap: 4px;
 }
 
-/* Promotions banner (above sections, after hero) */
-.fu-promo-banner-wrap {
+/* Promo Offers Block — verde profundo, atajos a tratamientos en oferta */
+.fu-promo-block-wrap {
   padding: 20px 0 0;
 }
-.fu-promo-banner {
+.fu-promo-block {
+  position: relative;
+  background: var(--fu-green-900);
+  border-radius: 16px;
+  overflow: hidden;
+  color: #fff;
+  box-shadow: 0 18px 40px -22px rgba(20, 51, 27, 0.55);
+}
+.fu-promo-block::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(
+    circle,
+    rgba(214, 245, 132, 0.18),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+.fu-promo-block__inner {
+  padding: 28px 36px;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  align-items: center;
+  gap: 24px;
+}
+.fu-promo-block__header {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 12px;
-  padding: 18px 20px;
-  border-radius: var(--fu-radius-lg);
-  background: var(--fu-green-50);
-  border: 1px solid var(--fu-green-100);
-  text-align: left;
 }
-.fu-promo-banner__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 14px;
-}
-.fu-promo-banner__label {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fu-accent);
-  background: #fff;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--fu-green-100);
-  white-space: nowrap;
-}
-.fu-promo-banner__text {
-  color: var(--fu-ink-700);
-  font-weight: 500;
-  font-size: 14px;
-}
-.fu-promo-banner__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-  justify-content: flex-start;
-}
-.fu-promo-banner__link {
+.fu-promo-block__label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border: 1px solid var(--fu-green-100);
-  padding: 8px 14px;
+  width: max-content;
+  background: var(--fu-lime-300);
+  color: var(--fu-green-950);
+  font-family: var(--fu-font-display);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 7px 12px;
   border-radius: 999px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--fu-accent);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  text-transform: uppercase;
 }
-.fu-promo-banner__link:hover {
-  background: var(--fu-accent);
-  border-color: var(--fu-accent);
+.fu-promo-block__title {
+  font-family: var(--fu-font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   color: #fff;
-  transform: translateY(-1px);
 }
-.fu-promo-banner__link-arrow {
+.fu-promo-block__title-em {
+  font-family: var(--fu-font-serif);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--fu-lime-300);
+}
+.fu-promo-block__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.fu-promo-block__btn {
+  width: 100%;
+  text-align: left;
+  background: var(--fu-cream-50);
+  border: 0;
+  border-radius: 12px;
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--fu-ink-900);
+  font-family: var(--fu-font-body);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+  height: 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fu-promo-block__btn {
+    transition: transform 200ms var(--fu-ease),
+      box-shadow 200ms var(--fu-ease);
+  }
+}
+.fu-promo-block__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.4);
+}
+.fu-promo-block__btn:focus-visible {
+  outline: 2px solid var(--fu-lime-300);
+  outline-offset: 2px;
+}
+.fu-promo-block__btn-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.fu-promo-block__discount {
+  background: var(--fu-green-950);
+  color: var(--fu-lime-300);
+  font-weight: 800;
+  font-size: 12px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-family: var(--fu-font-display);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.fu-promo-block__discount--soft {
+  background: var(--fu-green-700);
+  color: #fff;
+}
+.fu-promo-block__tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fu-ink-500);
+  white-space: nowrap;
+  text-align: right;
+  min-width: 0;
+}
+.fu-promo-block__name {
+  font-family: var(--fu-font-display);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+.fu-promo-block__btn-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed rgba(10, 10, 10, 0.12);
+  padding-top: 8px;
+  margin-top: 2px;
+}
+.fu-promo-block__price {
+  font-size: 13px;
+  color: var(--fu-ink-500);
+}
+.fu-promo-block__price strong {
+  color: var(--fu-ink-900);
+  font-weight: 700;
   font-size: 14px;
-  line-height: 1;
-  transition: transform 0.15s ease;
 }
-.fu-promo-banner__link:hover .fu-promo-banner__link-arrow {
-  transform: translateX(2px);
+.fu-promo-block__arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--fu-green-950);
+  color: var(--fu-lime-300);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.fu-promo-block__dots {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .fu-promo-block__inner {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    padding: 22px 20px;
+    gap: 18px;
+  }
+  .fu-promo-block__header {
+    gap: 10px;
+  }
+  .fu-promo-block__title {
+    font-size: 20px;
+  }
+  .fu-promo-block__list {
+    display: flex;
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 20px;
+    margin: 0 -20px;
+    padding: 4px 20px 14px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .fu-promo-block__list::-webkit-scrollbar {
+    display: none;
+  }
+  .fu-promo-block__item {
+    flex: 0 0 78%;
+    max-width: 280px;
+    scroll-snap-align: start;
+  }
+  .fu-promo-block__dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .fu-promo-block__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .fu-promo-block__dot {
+      transition: background 200ms var(--fu-ease),
+        width 200ms var(--fu-ease);
+    }
+  }
+  .fu-promo-block__dot--active {
+    background: var(--fu-lime-300);
+    width: 18px;
+    border-radius: 999px;
+  }
 }
 
 /* Featured promotion styles */

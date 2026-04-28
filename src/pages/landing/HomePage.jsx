@@ -11,6 +11,7 @@ import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
 import CampaignModal from "../../components/CampaignModal.jsx";
 import TreatmentCard from "../../components/TreatmentCard.jsx";
 import HeroSection from "../../components/HeroSection.jsx";
+import PromoOffersBlock from "../../components/PromoOffersBlock.jsx";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import analytics from "../../utils/analytics.js";
 import heroBg from "../../assets/images/hero-bg.png";
@@ -219,34 +220,10 @@ export default function HomePage() {
       )}
 
       {!treatmentsLoading && !treatmentsError && promotedTreatments.length > 0 && (
-        <div className="fu-promo-banner-wrap">
-          <div className="fu-container">
-            <div className="fu-promo-banner" role="region" aria-label="Tratamientos en oferta">
-              <div className="fu-promo-banner__header">
-                <span className="fu-promo-banner__label">🌿 Ofertas activas</span>
-                <span className="fu-promo-banner__text">
-                  {promotedTreatments.length === 1
-                    ? "Tenemos un tratamiento en oferta:"
-                    : "Tenemos tratamientos en oferta:"}
-                </span>
-              </div>
-              <ul className="fu-promo-banner__list">
-                {promotedTreatments.map((t) => (
-                  <li key={t.slug}>
-                    <button
-                      type="button"
-                      className="fu-promo-banner__link"
-                      onClick={() => scrollToTreatment(t)}
-                    >
-                      <span className="fu-promo-banner__link-name">{t.name}</span>
-                      <span className="fu-promo-banner__link-arrow" aria-hidden="true">→</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <PromoOffersBlock
+          treatments={promotedTreatments}
+          onSelect={scrollToTreatment}
+        />
       )}
 
       {!treatmentsLoading && !treatmentsError && (
