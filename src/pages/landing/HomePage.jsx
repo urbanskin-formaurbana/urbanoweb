@@ -222,25 +222,28 @@ export default function HomePage() {
         <div className="fu-promo-banner-wrap">
           <div className="fu-container">
             <div className="fu-promo-banner" role="region" aria-label="Tratamientos en oferta">
-              <span className="fu-promo-banner__label">🌿 Ofertas activas</span>
-              <span className="fu-promo-banner__text">
-                {promotedTreatments.length === 1
-                  ? "Tenemos un tratamiento en oferta:"
-                  : "Tenemos tratamientos en oferta:"}
-              </span>
-              <div className="fu-promo-banner__list">
-                {promotedTreatments.map((t, idx) => (
-                  <button
-                    key={t.slug}
-                    type="button"
-                    className="fu-promo-banner__link"
-                    onClick={() => scrollToTreatment(t)}
-                  >
-                    {t.name}
-                    {idx < promotedTreatments.length - 1 ? "," : ""}
-                  </button>
-                ))}
+              <div className="fu-promo-banner__header">
+                <span className="fu-promo-banner__label">🌿 Ofertas activas</span>
+                <span className="fu-promo-banner__text">
+                  {promotedTreatments.length === 1
+                    ? "Tenemos un tratamiento en oferta:"
+                    : "Tenemos tratamientos en oferta:"}
+                </span>
               </div>
+              <ul className="fu-promo-banner__list">
+                {promotedTreatments.map((t) => (
+                  <li key={t.slug}>
+                    <button
+                      type="button"
+                      className="fu-promo-banner__link"
+                      onClick={() => scrollToTreatment(t)}
+                    >
+                      <span className="fu-promo-banner__link-name">{t.name}</span>
+                      <span className="fu-promo-banner__link-arrow" aria-hidden="true">→</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
