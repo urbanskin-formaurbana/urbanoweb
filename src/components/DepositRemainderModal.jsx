@@ -14,6 +14,12 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+function formatMoney(value) {
+  const n = Number(value);
+  if (!isFinite(n)) return '0.00';
+  return n.toFixed(2);
+}
+
 export default function DepositRemainderModal({
   open,
   onClose,
@@ -22,17 +28,25 @@ export default function DepositRemainderModal({
   setRemainderAmount,
   remainderMethod,
   setRemainderMethod,
+  remainderDiscount = '',
+  setRemainderDiscount,
   savingRemainder,
   onConfirm,
   title = 'Agregar Pago',
 }) {
+  const total = Number(selectedDeposit?.full_amount ?? 0);
+  const paid = Number(selectedDeposit?.paid_amount ?? 0);
+  const existingDiscount = Number(selectedDeposit?.discount_amount ?? 0);
+  const inputAmount = parseFloat(remainderAmount) || 0;
+  const inputDiscount = parseFloat(remainderDiscount) || 0;
+  const projectedRemaining = Math.max(
+    total - paid - existingDiscount - inputAmount - inputDiscount,
+    0,
+  );
+  const supportsDiscount = typeof setRemainderDiscount === 'function';
+
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ pt: 2 }}>
         {selectedDeposit && (
@@ -45,17 +59,22 @@ export default function DepositRemainderModal({
                 Tratamiento: {selectedDeposit.treatment_name}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Total contratado: ${selectedDeposit.full_amount.toFixed(2)}
+                Total contratado: ${formatMoney(total)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Ya pagado: ${selectedDeposit.paid_amount.toFixed(2)}
+                Ya pagado: ${formatMoney(paid)}
               </Typography>
+              {existingDiscount > 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  Descuento aplicado: ${formatMoney(existingDiscount)}
+                </Typography>
+              )}
               <Typography
                 variant="body2"
                 color="error"
                 sx={{ fontWeight: 'bold', mt: 1 }}
               >
-                Resta: ${selectedDeposit.remaining.toFixed(2)}
+                Resta tras este movimiento: ${formatMoney(projectedRemaining)}
               </Typography>
             </Box>
 
@@ -63,21 +82,9 @@ export default function DepositRemainderModal({
               value={remainderMethod}
               onChange={(e) => setRemainderMethod(e.target.value)}
             >
-              <FormControlLabel
-                value="efectivo"
-                control={<Radio />}
-                label="Efectivo"
-              />
-              <FormControlLabel
-                value="transferencia"
-                control={<Radio />}
-                label="Transferencia Bancaria"
-              />
-              <FormControlLabel
-                value="posnet"
-                control={<Radio />}
-                label="POSNet"
-              />
+              <FormControlLabel value="efectivo" control={<Radio />} label="Efectivo" />
+              <FormControlLabel value="transferencia" control={<Radio />} label="Transferencia Bancaria" />
+              <FormControlLabel value="posnet" control={<Radio />} label="POSNet" />
             </RadioGroup>
 
             <TextField
@@ -89,6 +96,19 @@ export default function DepositRemainderModal({
               onChange={(e) => setRemainderAmount(e.target.value)}
               fullWidth
             />
+
+            {supportsDiscount && (
+              <TextField
+                label="Descuento ($)"
+                type="number"
+                size="small"
+                inputProps={{ step: '0.01', min: '0' }}
+                value={remainderDiscount}
+                onChange={(e) => setRemainderDiscount(e.target.value)}
+                helperText="Cierra parte del saldo sin contar como pago faltante."
+                fullWidth
+              />
+            )}
           </Stack>
         )}
       </DialogContent>
@@ -100,11 +120,7 @@ export default function DepositRemainderModal({
           color="primary"
           disabled={savingRemainder}
         >
-          {savingRemainder ? (
-            <CircularProgress size={20} />
-          ) : (
-            'Registrar Cobro'
-          )}
+          {savingRemainder ? <CircularProgress size={20} /> : 'Registrar Cobro'}
         </Button>
       </DialogActions>
     </Dialog>

@@ -163,16 +163,27 @@ export const paymentService = {
   },
 
   /**
-   * Record remainder payment for deposit
-   * @param {string} appointmentId - Appointment ID
-   * @param {object} data - { method: 'efectivo'|'transferencia'|'posnet', amount }
-   * @returns {Promise<object>} - { payment_id, appointment_id, deposit_amount, remainder_amount, total_amount, method, status }
+   * Record an appointment payment (cash, transfer, posnet) with optional discount.
+   * Works for deposits, cash, transfer, and posnet alike.
+   * @param {string} appointmentId
+   * @param {object} data - { method, amount, discount? }
+   * @returns {Promise<object>} - { payment_id, appointment_id, amount, discount_applied, paid_amount, remaining_amount, method, status }
    */
-  async addDepositRemainder(appointmentId, data) {
+  async addAppointmentPayment(appointmentId, data) {
+    const payload = {
+      method: data.method,
+      amount: Number(data.amount) || 0,
+      discount: Number(data.discount) || 0,
+    };
     return apiCall(`/payments/admin/${appointmentId}/add-deposit-remainder`, {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
+  },
+
+  // Legacy alias kept for callers that haven't migrated yet.
+  async addDepositRemainder(appointmentId, data) {
+    return this.addAppointmentPayment(appointmentId, data);
   },
 
   /**
