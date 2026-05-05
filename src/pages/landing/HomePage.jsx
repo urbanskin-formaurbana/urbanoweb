@@ -3,11 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SEO from "../../components/SEO.jsx";
 import { Alert, Box, CircularProgress } from "@mui/material";
-import authService from "../../services/auth_service.js";
 import { getProductTypes } from "../../services/campaign_service.js";
 import treatmentService from "../../services/treatment_service.js";
 import LoginModal from "../../components/LoginModal.jsx";
-import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
 import CampaignModal from "../../components/CampaignModal.jsx";
 import TreatmentCard from "../../components/TreatmentCard.jsx";
 import HeroSection from "../../components/HeroSection.jsx";
@@ -39,9 +37,6 @@ export default function HomePage() {
   const [complementaryTreatments, setComplementaryTreatments] = useState([]);
   const [treatmentsLoading, setTreatmentsLoading] = useState(true);
   const [treatmentsError, setTreatmentsError] = useState(null);
-  const [canPurchasePackages, setCanPurchasePackages] = useState(false);
-  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-  const [selectedTreatmentForPurchase, setSelectedTreatmentForPurchase] = useState(null);
   const [campaignModals, setCampaignModals] = useState({});
   const [campaignProducts, setCampaignProducts] = useState([]);
   const [treatmentsByCategory, setTreatmentsByCategory] = useState({});
@@ -141,17 +136,6 @@ export default function HomePage() {
     if (complementaryTreatments.length > 0) analytics.trackViewItemList("complementarios", complementaryTreatments);
   }, [complementaryTreatments]);
 
-  useEffect(() => {
-    if (isAuthenticated && user?.user_type === "customer") {
-      authService
-        .getPurchaseEligibility()
-        .then((data) => setCanPurchasePackages(data.can_purchase_packages))
-        .catch(() => setCanPurchasePackages(false));
-      return;
-    }
-    setCanPurchasePackages(false);
-  }, [isAuthenticated, user]);
-
   const scrollToSection = (anchor) => {
     const el = document.getElementById(anchor);
     if (!el) return;
@@ -171,25 +155,7 @@ export default function HomePage() {
       return;
     }
 
-    // Only show purchase dialog for body treatments when user can purchase packages
-    if (productType === "body" && canPurchasePackages) {
-      analytics.trackViewItem(treatment);
-      setSelectedTreatmentForPurchase(treatment);
-      setPurchaseDialogOpen(true);
-      return;
-    }
-
     navigate("/schedule", { state: { treatment, productType } });
-  };
-
-  const handlePurchaseConfirm = (packageId) => {
-    navigate("/schedule", {
-      state: {
-        treatment: { name: selectedTreatmentForPurchase.name, slug: selectedTreatmentForPurchase.slug },
-        selectedPackageId: packageId,
-        productType: "body",
-      },
-    });
   };
 
   return (
@@ -367,13 +333,6 @@ export default function HomePage() {
       )}
 
       <LoginModal open={loginModalOpen} onClose={() => setLoginModalOpen(false)} onSuccess={() => setLoginModalOpen(false)} />
-
-      <PurchaseOptionsDialog
-        open={purchaseDialogOpen}
-        onClose={() => setPurchaseDialogOpen(false)}
-        treatment={selectedTreatmentForPurchase}
-        onConfirm={handlePurchaseConfirm}
-      />
 
       {campaignProducts.map((campaign) => {
         const productType = campaign.product_type;

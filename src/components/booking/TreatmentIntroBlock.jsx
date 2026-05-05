@@ -10,7 +10,17 @@ function safeCategoryLabel(category) {
   return map[category] || category;
 }
 
+function hasDescriptionContent(value) {
+  if (!value) return false;
+  const stripped = String(value)
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .trim();
+  return stripped.length > 0;
+}
+
 export default function TreatmentIntroBlock({ category, title, subtitle, description, duration, price, evaluationPrice }) {
+  const showDescription = hasDescriptionContent(description);
   return (
     <section className="fu-detail__hero">
       <div className="fu-container">
@@ -19,7 +29,7 @@ export default function TreatmentIntroBlock({ category, title, subtitle, descrip
             <div className="fu-detail__tag">{safeCategoryLabel(category)}</div>
             <h1 className="fu-detail__title" style={{ fontSize: "clamp(34px, 5vw, 56px)" }}>{title}</h1>
             {subtitle && <p className="fu-detail__sub">{subtitle}.</p>}
-            {description && (
+            {showDescription ? (
               <RichTextDescriptionEditor
                 value={description}
                 readOnly
@@ -33,6 +43,17 @@ export default function TreatmentIntroBlock({ category, title, subtitle, descrip
                   "& a": { color: "#9fd1a2" },
                 }}
               />
+            ) : (
+              <p
+                className="fu-detail__sub"
+                style={{
+                  fontStyle: "italic",
+                  color: "rgba(255,255,255,0.7)",
+                  maxWidth: 780,
+                }}
+              >
+                Descripción no disponible.
+              </p>
             )}
             <div className="fu-detail__metaline" style={{ marginBottom: 0 }}>
               <div>
