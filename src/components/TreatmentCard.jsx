@@ -19,9 +19,10 @@ export default function TreatmentCard({ treatment, onClick, showDesde = false })
     typeof treatment.promo_price === "number" &&
     treatment.promo_price > 0;
   const hasCuponeraPromo = !!treatment.is_cuponera_promo;
-  const isFeatured = hasSessionPromo || hasCuponeraPromo;
+  const isNew = !!treatment.is_new;
+  const isHighlighted = hasSessionPromo || hasCuponeraPromo || isNew;
 
-  const className = `fu-tcard${isFeatured ? " fu-tcard--promo" : ""}`;
+  const className = `fu-tcard${hasSessionPromo ? " fu-tcard--promo" : ""}${hasCuponeraPromo && !hasSessionPromo ? " fu-tcard--cuponera" : ""}${isNew ? " fu-tcard--new" : ""}${isHighlighted ? " fu-tcard--shine" : ""}`;
 
   return (
     <article
@@ -46,13 +47,13 @@ export default function TreatmentCard({ treatment, onClick, showDesde = false })
 
         {duration && <span className="fu-tcard__tag">{duration}</span>}
 
+        {isNew && <span className="fu-tcard__new-badge">Nuevo</span>}
+
         {hasSessionPromo && (
           <span className="fu-tcard__promo-badge">Oferta</span>
         )}
         {hasCuponeraPromo && !hasSessionPromo && (
-          <span className="fu-tcard__promo-badge fu-tcard__promo-badge--cuponera">
-            Promo en cuponera
-          </span>
+          <span className="fu-tcard__promo-badge">Promo en cuponera</span>
         )}
       </div>
 
@@ -78,10 +79,6 @@ export default function TreatmentCard({ treatment, onClick, showDesde = false })
             Ver <LandingIcon name="arrow_forward" size={16} color="currentColor" />
           </span>
         </div>
-
-        {hasCuponeraPromo && (
-          <div className="fu-tcard__promo-hint">Promo disponible en cuponera</div>
-        )}
       </div>
     </article>
   );

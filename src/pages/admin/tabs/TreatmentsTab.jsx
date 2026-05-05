@@ -91,6 +91,7 @@ export default function TreatmentsTab() {
     is_session_promo: false,
     promo_price: "",
     is_cuponera_promo: false,
+    is_new: false,
     disable_single_session: false,
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
@@ -115,6 +116,7 @@ export default function TreatmentsTab() {
     is_session_promo: false,
     promo_price: "",
     is_cuponera_promo: false,
+    is_new: false,
     disable_single_session: false,
   });
   const [savingTreatment, setSavingTreatment] = useState(false);
@@ -188,6 +190,7 @@ export default function TreatmentsTab() {
       is_session_promo: false,
       promo_price: "",
       is_cuponera_promo: false,
+      is_new: false,
       disable_single_session: false,
     });
     setSlugManuallyEdited(false);
@@ -249,6 +252,7 @@ export default function TreatmentsTab() {
             ? Number(createTreatmentForm.promo_price)
             : null,
         is_cuponera_promo: createTreatmentForm.is_cuponera_promo,
+        is_new: createTreatmentForm.is_new,
         disable_single_session: createTreatmentForm.disable_single_session,
       });
       setSuccessMessage("Tratamiento creado exitosamente");
@@ -308,6 +312,7 @@ export default function TreatmentsTab() {
       is_session_promo: treatment.is_session_promo || false,
       promo_price: treatment.promo_price ?? "",
       is_cuponera_promo: treatment.is_cuponera_promo || false,
+      is_new: treatment.is_new || false,
       disable_single_session: treatment.disable_single_session || false,
     });
     setEditTreatmentOpen(true);
@@ -350,6 +355,7 @@ export default function TreatmentsTab() {
             ? Number(editTreatmentForm.promo_price)
             : null,
         is_cuponera_promo: editTreatmentForm.is_cuponera_promo,
+        is_new: editTreatmentForm.is_new,
         disable_single_session: editTreatmentForm.disable_single_session,
       });
       setSuccessMessage("Tratamiento actualizado");
@@ -974,6 +980,20 @@ export default function TreatmentsTab() {
               }
               label="Cuponera en oferta destacada"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={createTreatmentForm.is_new}
+                  onChange={(e) =>
+                    setCreateTreatmentForm((f) => ({
+                      ...f,
+                      is_new: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Nuevo tratamiento (destacar en home)"
+            />
             <Divider sx={{ my: 1 }}>
               <Typography variant="caption" color="text.secondary">
                 OPCIONES DE COMPRA
@@ -1291,6 +1311,20 @@ export default function TreatmentsTab() {
                 Recordá marcar al menos una cuponera de este tratamiento como promocional para que se muestre la oferta en el modal.
               </Typography>
             )}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={editTreatmentForm.is_new}
+                  onChange={(e) =>
+                    setEditTreatmentForm((f) => ({
+                      ...f,
+                      is_new: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Nuevo tratamiento (destacar en home)"
+            />
             <Divider sx={{ my: 1 }}>
               <Typography variant="caption" color="text.secondary">
                 OPCIONES DE COMPRA

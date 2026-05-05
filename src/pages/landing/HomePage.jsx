@@ -236,7 +236,7 @@ export default function HomePage() {
             const hasAltBackground = sectionIndex % 2 === 1;
 
             return (
-              <Box key={productType} id={productType} sx={{ py: { xs: 6, md: 9 }, backgroundColor: hasAltBackground ? "#f2f2f2" : "transparent" }}>
+              <Box key={productType} id={productType} className={hasAltBackground ? "fu-bg-alt" : undefined} sx={{ py: { xs: 6, md: 9 }, backgroundColor: hasAltBackground ? "#f2f2f2" : "transparent" }}>
                 <div className="fu-container">
                   <div className="fu-section__head">
                     <div className="fu-eyebrow">

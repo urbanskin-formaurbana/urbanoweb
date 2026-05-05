@@ -688,6 +688,7 @@
   position: absolute;
   top: 12px;
   left: 12px;
+  z-index: 2;
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 11px;
@@ -987,32 +988,107 @@
   }
 }
 
-/* Featured promotion styles */
+/* Featured promotion styles
+   ------------------------------------------------------------------------
+   Halo color is tuned per section background so that the perceived weight,
+   spread and saturation match across white and gray sections. Without this,
+   the same RGBA over a white bg reads as a "lighter glow" while over gray
+   it reads as a "deeper saturated halo" (simultaneous-contrast effect).
+   Defaults target light backgrounds; the .fu-section--alt / .fu-bg-alt
+   overrides apply on darker section backgrounds. */
 .fu-tcard--promo {
   border: 2px solid var(--fu-accent);
-  box-shadow: 0 0 0 4px var(--fu-green-50);
+  box-shadow:
+    0 0 6px 1px rgba(62, 148, 67, 1),
+    0 0 16px 5px rgba(62, 148, 67, 0.9),
+    0 0 36px 10px rgba(62, 148, 67, 0.53),
+    0 0 64px 16px rgba(8, 35, 15, 0.42);
 }
 .fu-tcard--promo:hover {
   border-color: var(--fu-accent);
   box-shadow:
-    0 0 0 4px var(--fu-green-50),
-    0 4px 12px rgba(46, 125, 50, 0.18);
+    0 0 4px 1px rgba(62, 148, 67, 1),
+    0 0 12px 4px rgba(62, 148, 67, 1),
+    0 0 26px 8px rgba(62, 148, 67, 0.78),
+    0 0 48px 14px rgba(62, 148, 67, 0.5),
+    0 0 76px 18px rgba(8, 35, 15, 0.5),
+    0 6px 14px rgba(62, 148, 67, 0.35);
+}
+
+.fu-tcard--cuponera {
+  border: 2px solid var(--fu-accent);
+  box-shadow:
+    0 0 5px 1px rgba(62, 148, 67, 0.78),
+    0 0 14px 4px rgba(62, 148, 67, 0.5),
+    0 0 28px 8px rgba(62, 148, 67, 0.3),
+    0 0 50px 12px rgba(8, 35, 15, 0.32);
+}
+.fu-tcard--cuponera:hover {
+  border-color: var(--fu-accent);
+  box-shadow:
+    0 0 4px 1px rgba(62, 148, 67, 0.95),
+    0 0 12px 4px rgba(62, 148, 67, 0.78),
+    0 0 24px 6px rgba(62, 148, 67, 0.5),
+    0 0 42px 10px rgba(62, 148, 67, 0.33),
+    0 0 60px 14px rgba(8, 35, 15, 0.38),
+    0 4px 12px rgba(62, 148, 67, 0.24);
+}
+
+/* Lighter accent halo on darker (gray) section backgrounds, so the
+   perceived saturation matches the white-bg version above. */
+.fu-section--alt .fu-tcard--promo,
+.fu-bg-alt .fu-tcard--promo {
+  box-shadow:
+    0 0 6px 1px rgba(46, 125, 50, 1),
+    0 0 16px 5px rgba(46, 125, 50, 0.9),
+    0 0 36px 10px rgba(46, 125, 50, 0.55),
+    0 0 64px 16px rgba(14, 50, 24, 0.32);
+}
+.fu-section--alt .fu-tcard--promo:hover,
+.fu-bg-alt .fu-tcard--promo:hover {
+  box-shadow:
+    0 0 4px 1px rgba(46, 125, 50, 1),
+    0 0 12px 4px rgba(46, 125, 50, 1),
+    0 0 26px 8px rgba(46, 125, 50, 0.8),
+    0 0 48px 14px rgba(46, 125, 50, 0.52),
+    0 0 76px 18px rgba(14, 50, 24, 0.38),
+    0 6px 14px rgba(46, 125, 50, 0.35);
+}
+.fu-section--alt .fu-tcard--cuponera,
+.fu-bg-alt .fu-tcard--cuponera {
+  box-shadow:
+    0 0 5px 1px rgba(46, 125, 50, 0.78),
+    0 0 14px 4px rgba(46, 125, 50, 0.5),
+    0 0 28px 8px rgba(46, 125, 50, 0.32),
+    0 0 50px 12px rgba(14, 50, 24, 0.24);
+}
+.fu-section--alt .fu-tcard--cuponera:hover,
+.fu-bg-alt .fu-tcard--cuponera:hover {
+  box-shadow:
+    0 0 4px 1px rgba(46, 125, 50, 0.95),
+    0 0 12px 4px rgba(46, 125, 50, 0.78),
+    0 0 24px 6px rgba(46, 125, 50, 0.52),
+    0 0 42px 10px rgba(46, 125, 50, 0.34),
+    0 0 60px 14px rgba(14, 50, 24, 0.3),
+    0 4px 12px rgba(46, 125, 50, 0.24);
 }
 .fu-tcard__promo-badge {
   position: absolute;
   top: 12px;
   right: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
+  line-height: 1;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
   background: var(--fu-accent);
   color: #fff;
-}
-.fu-tcard__promo-badge--cuponera {
-  background: var(--fu-green-900);
 }
 .fu-tcard__price-old {
   text-decoration: line-through;
@@ -1024,12 +1100,133 @@
 .fu-tcard__price-new {
   color: var(--fu-accent);
 }
-.fu-tcard__promo-hint {
-  margin-top: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--fu-accent);
-  letter-spacing: 0.02em;
+
+/* New treatment highlight — same per-bg strategy as promo */
+.fu-tcard--new {
+  border: 2px solid #c89b2a;
+  box-shadow:
+    0 0 6px 1px rgba(195, 150, 38, 1),
+    0 0 16px 5px rgba(195, 150, 38, 0.9),
+    0 0 36px 10px rgba(195, 150, 38, 0.53),
+    0 0 64px 16px rgba(70, 48, 8, 0.42);
+}
+.fu-tcard--new:hover {
+  border-color: #c89b2a;
+  box-shadow:
+    0 0 4px 1px rgba(195, 150, 38, 1),
+    0 0 12px 4px rgba(195, 150, 38, 1),
+    0 0 26px 8px rgba(195, 150, 38, 0.78),
+    0 0 48px 14px rgba(195, 150, 38, 0.5),
+    0 0 76px 18px rgba(70, 48, 8, 0.5),
+    0 6px 14px rgba(195, 150, 38, 0.35);
+}
+.fu-tcard--new.fu-tcard--promo {
+  border-color: var(--fu-accent);
+  box-shadow:
+    inset 0 0 0 2px #c89b2a,
+    0 0 6px 1px rgba(62, 148, 67, 1),
+    0 0 16px 5px rgba(62, 148, 67, 0.9),
+    0 0 36px 10px rgba(62, 148, 67, 0.53),
+    0 0 64px 16px rgba(8, 35, 15, 0.42);
+}
+.fu-tcard--new.fu-tcard--promo:hover {
+  box-shadow:
+    inset 0 0 0 2px #c89b2a,
+    0 0 4px 1px rgba(62, 148, 67, 1),
+    0 0 12px 4px rgba(62, 148, 67, 1),
+    0 0 26px 8px rgba(62, 148, 67, 0.78),
+    0 0 48px 14px rgba(62, 148, 67, 0.5),
+    0 0 76px 18px rgba(8, 35, 15, 0.5),
+    0 6px 14px rgba(62, 148, 67, 0.35);
+}
+
+.fu-section--alt .fu-tcard--new,
+.fu-bg-alt .fu-tcard--new {
+  box-shadow:
+    0 0 6px 1px rgba(200, 155, 42, 1),
+    0 0 16px 5px rgba(200, 155, 42, 0.92),
+    0 0 36px 10px rgba(200, 155, 42, 0.55),
+    0 0 64px 16px rgba(70, 50, 8, 0.3);
+}
+.fu-section--alt .fu-tcard--new:hover,
+.fu-bg-alt .fu-tcard--new:hover {
+  box-shadow:
+    0 0 4px 1px rgba(200, 155, 42, 1),
+    0 0 12px 4px rgba(200, 155, 42, 1),
+    0 0 26px 8px rgba(200, 155, 42, 0.8),
+    0 0 48px 14px rgba(200, 155, 42, 0.52),
+    0 0 76px 18px rgba(70, 50, 8, 0.36),
+    0 6px 14px rgba(200, 155, 42, 0.35);
+}
+.fu-section--alt .fu-tcard--new.fu-tcard--promo,
+.fu-bg-alt .fu-tcard--new.fu-tcard--promo {
+  box-shadow:
+    inset 0 0 0 2px #c89b2a,
+    0 0 6px 1px rgba(46, 125, 50, 1),
+    0 0 16px 5px rgba(46, 125, 50, 0.9),
+    0 0 36px 10px rgba(46, 125, 50, 0.55),
+    0 0 64px 16px rgba(14, 50, 24, 0.32);
+}
+.fu-section--alt .fu-tcard--new.fu-tcard--promo:hover,
+.fu-bg-alt .fu-tcard--new.fu-tcard--promo:hover {
+  box-shadow:
+    inset 0 0 0 2px #c89b2a,
+    0 0 4px 1px rgba(46, 125, 50, 1),
+    0 0 12px 4px rgba(46, 125, 50, 1),
+    0 0 26px 8px rgba(46, 125, 50, 0.8),
+    0 0 48px 14px rgba(46, 125, 50, 0.52),
+    0 0 76px 18px rgba(14, 50, 24, 0.38),
+    0 6px 14px rgba(46, 125, 50, 0.35);
+}
+
+/* Metallic shine sweep — applied to every highlighted card (promo, cuponera,
+   nuevo) regardless of category, via the .fu-tcard--shine modifier. The
+   reflection is limited to the image area so it doesn't wash over text. */
+.fu-tcard--shine .fu-tcard__media {
+  isolation: isolate;
+}
+.fu-tcard--shine .fu-tcard__media::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 60%;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 100%
+  );
+  animation: fu-tcard-shine 4.5s ease-in-out infinite;
+  z-index: 1;
+}
+.fu-tcard--shine:hover .fu-tcard__media::after {
+  animation-duration: 1.8s;
+}
+@keyframes fu-tcard-shine {
+  0% { transform: translateX(0); }
+  55%, 100% { transform: translateX(285%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fu-tcard--shine .fu-tcard__media::after { display: none; }
+}
+
+.fu-tcard__new-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 2;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #c89b2a;
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
 
 .fu-modal-scrim {
