@@ -8,18 +8,34 @@ import {
   Box,
   CircularProgress,
   Typography,
+  TextField,
+  Alert,
 } from '@mui/material';
 import * as pdfjsLib from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import paymentService from '../services/payment_service';
 
 // Set up PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
-export default function ReceiptModal({ open, receiptUrl, isPdf, onClose, canConfirm = false, onConfirm }) {
+export default function ReceiptModal({
+  open,
+  receiptUrl,
+  isPdf,
+  onClose,
+  canConfirm = false,
+  onConfirm,
+  paymentId,
+  onReject,
+}) {
   const [pdfPages, setPdfPages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [confirmStep, setConfirmStep] = useState(false);
+  const [rejectStep, setRejectStep] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectError, setRejectError] = useState(null);
+  const [rejecting, setRejecting] = useState(false);
 
   useEffect(() => {
     if (!open || !receiptUrl || !isPdf) {
@@ -53,7 +69,7 @@ export default function ReceiptModal({ open, receiptUrl, isPdf, onClose, canConf
         }
 
         setPdfPages(pages);
-      } catch (err) {
+      } catch {
         setError('No se pudo cargar el PDF');
       } finally {
         setLoading(false);
@@ -65,6 +81,9 @@ export default function ReceiptModal({ open, receiptUrl, isPdf, onClose, canConf
 
   const handleClose = () => {
     setConfirmStep(false);
+    setRejectStep(false);
+    setRejectReason('');
+    setRejectError(null);
     onClose();
   };
 
@@ -77,6 +96,24 @@ export default function ReceiptModal({ open, receiptUrl, isPdf, onClose, canConf
       } finally {
         setConfirmStep(false);
       }
+    }
+  };
+
+  const handleRejectSubmit = async () => {
+    if (rejectReason.trim().length < 5) {
+      setRejectError('El motivo debe tener al menos 5 caracteres.');
+      return;
+    }
+    setRejecting(true);
+    setRejectError(null);
+    try {
+      await paymentService.rejectTransfer(paymentId, { reason: rejectReason.trim() });
+      onReject?.();
+      handleClose();
+    } catch (err) {
+      setRejectError(err?.message || 'No se pudo rechazar el pago. Intenta de nuevo.');
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -116,10 +153,43 @@ export default function ReceiptModal({ open, receiptUrl, isPdf, onClose, canConf
           </Box>
         )}
       </DialogContent>
+      {/* Reject reason form — shown inline above actions */}
+      {rejectStep && (
+        <Box sx={{ px: 3, pb: 1 }}>
+          <TextField
+            label="Motivo del rechazo"
+            multiline
+            minRows={2}
+            fullWidth
+            size="small"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            error={!!rejectError}
+            helperText={rejectError || ' '}
+          />
+          {rejectError && !rejectError.includes('caracteres') && (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {rejectError}
+            </Alert>
+          )}
+        </Box>
+      )}
+
       <DialogActions>
         <Button onClick={handleClose}>Cerrar</Button>
-        {canConfirm && (
+
+        {canConfirm && !rejectStep && (
           <>
+            {/* Reject trigger */}
+            {paymentId && (
+              <Button
+                onClick={() => { setConfirmStep(false); setRejectStep(true); }}
+                color="error"
+              >
+                Rechazar
+              </Button>
+            )}
+
             {!confirmStep ? (
               <Button
                 onClick={handleConfirmClick}
@@ -145,6 +215,22 @@ export default function ReceiptModal({ open, receiptUrl, isPdf, onClose, canConf
                 </Button>
               </>
             )}
+          </>
+        )}
+
+        {rejectStep && (
+          <>
+            <Button onClick={() => { setRejectStep(false); setRejectError(null); }}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleRejectSubmit}
+              variant="contained"
+              color="error"
+              disabled={rejecting}
+            >
+              {rejecting ? <CircularProgress size={20} /> : 'Confirmar rechazo'}
+            </Button>
           </>
         )}
       </DialogActions>

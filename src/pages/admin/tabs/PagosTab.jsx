@@ -1,47 +1,40 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import {
   Stack,
   Typography,
   LinearProgress,
   Alert,
-  Button,
   Box,
   Snackbar,
-  Card,
-  CardContent,
-  CardActions,
-  Chip,
-  ToggleButton,
-  ToggleButtonGroup,
+  Link,
 } from "@mui/material";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import { useNavigate } from "react-router-dom";
 import paymentService from "../../../services/payment_service";
 import ReceiptModal from "../../../components/ReceiptModal";
 import DepositRemainderModal from "../../../components/DepositRemainderModal";
-
-const FILTER_OPTIONS = {
-  all: "all",
-  depositos: "depositos",
-  sin_agendar: "sin_agendar",
-  agendadas: "agendadas",
-};
+import PaymentCard from "../../../components/admin/PaymentCard";
+import PaymentHistoryModal from "../../../components/admin/PaymentHistoryModal";
 
 export default function PagosTab() {
-  const [filter, setFilter] = useState(FILTER_OPTIONS.all);
-  const [deposits, setDeposits] = useState([]);
-  const [transfers, setTransfers] = useState([]);
+  const navigate = useNavigate();
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Modals
-  const [depositRemainderModalOpen, setDepositRemainderModalOpen] =
-    useState(false);
+  // Deposit remainder modal
+  const [depositRemainderOpen, setDepositRemainderOpen] = useState(false);
   const [selectedDeposit, setSelectedDeposit] = useState(null);
   const [remainderAmount, setRemainderAmount] = useState("");
   const [remainderMethod, setRemainderMethod] = useState("efectivo");
+  const [remainderDiscount, setRemainderDiscount] = useState("");
   const [savingRemainder, setSavingRemainder] = useState(false);
+
+  // Receipt modal
   const [receiptItem, setReceiptItem] = useState(null);
+
+  // History modal
+  const [historyAppointmentId, setHistoryAppointmentId] = useState(null);
 
   useEffect(() => {
     loadPayments();
@@ -51,478 +44,141 @@ export default function PagosTab() {
     setLoading(true);
     setError(null);
     try {
-      const [depositsResult, transfersResult] = await Promise.all([
-        paymentService.getPendingDeposits(),
-        paymentService.getTransfersWithReceipt(),
-      ]);
-      setDeposits(depositsResult.deposits || []);
-      setTransfers(transfersResult.transfers || []);
-    } catch (err) {
+      const result = await paymentService.listPayments({
+        needs_attention: true,
+        limit: 50,
+      });
+      setItems(result.items || []);
+    } catch {
       setError("No se pudieron cargar los pagos");
     } finally {
       setLoading(false);
     }
   };
 
-  const getFilteredItems = () => {
-    const items = [];
-
-    if (filter === FILTER_OPTIONS.all || filter === FILTER_OPTIONS.depositos) {
-      items.push(
-        ...deposits.map((d) => ({
-          type: "deposit",
-          ...d,
-        })),
-      );
-    }
-
-    if (
-      filter === FILTER_OPTIONS.all ||
-      filter === FILTER_OPTIONS.sin_agendar
-    ) {
-      items.push(
-        ...transfers
-          .filter((t) => !t.is_scheduled)
-          .map((t) => ({
-            type: "transfer_pending",
-            ...t,
-          })),
-      );
-    }
-
-    if (filter === FILTER_OPTIONS.all || filter === FILTER_OPTIONS.agendadas) {
-      items.push(
-        ...transfers
-          .filter((t) => t.is_scheduled)
-          .map((t) => ({
-            type: "transfer_scheduled",
-            ...t,
-          })),
-      );
-    }
-
-    return items;
-  };
-
-  const handleAddRemainderClick = (deposit) => {
-    setSelectedDeposit(deposit);
-    setRemainderAmount((deposit.remaining || 0).toString());
+  const handleAddRemainderClick = (payment) => {
+    setSelectedDeposit(payment);
+    setRemainderAmount((payment.remaining || 0).toString());
     setRemainderMethod("efectivo");
-    setDepositRemainderModalOpen(true);
+    setRemainderDiscount("");
+    setDepositRemainderOpen(true);
   };
 
-  const handleRemainderModalClose = () => {
-    setDepositRemainderModalOpen(false);
+  const handleRemainderClose = () => {
+    setDepositRemainderOpen(false);
     setSelectedDeposit(null);
     setRemainderAmount("");
     setRemainderMethod("efectivo");
+    setRemainderDiscount("");
   };
 
   const handleAddDepositRemainder = async () => {
-    if (
-      !selectedDeposit ||
-      !remainderAmount ||
-      parseFloat(remainderAmount) <= 0
-    ) {
+    if (!selectedDeposit || !remainderAmount || parseFloat(remainderAmount) <= 0) {
       setError("Por favor ingresa un monto válido");
       return;
     }
-
     setSavingRemainder(true);
     try {
-      await paymentService.addDepositRemainder(selectedDeposit.appointment_id, {
+      await paymentService.addDepositRemainder(selectedDeposit.appointment?.id || selectedDeposit.appointment_id, {
         method: remainderMethod,
         amount: parseFloat(remainderAmount),
+        discount: parseFloat(remainderDiscount) || 0,
       });
       setSuccessMessage(`Cobro de ${remainderMethod} registrado`);
       loadPayments();
-      handleRemainderModalClose();
-    } catch (err) {
+      handleRemainderClose();
+    } catch {
       setError("No se pudo registrar el cobro");
     } finally {
       setSavingRemainder(false);
     }
   };
 
-  const handleConfirmTransfer = async (transferId) => {
+  const handleConfirmTransfer = async (paymentId) => {
     try {
-      await paymentService.confirmTransferPayment(transferId);
+      await paymentService.confirmTransferPayment(paymentId);
       setSuccessMessage("Pago de transferencia confirmado");
       loadPayments();
-    } catch (err) {
+    } catch {
       setError("No se pudo confirmar la transferencia");
     }
   };
 
-  const isPdf = (item) =>
-    /\.pdf($|\?)/i.test(item.comprobante_url) ||
-    item.comprobante_filename?.endsWith(".pdf");
-
-  const filteredItems = getFilteredItems();
+  // DepositRemainderModal expects the same shape as the old deposit objects.
+  // Map the unified payment item to that shape.
+  const depositForModal = selectedDeposit
+    ? {
+        customer_name:
+          selectedDeposit.customer?.full_name ||
+          selectedDeposit.customer_name ||
+          "—",
+        treatment_name:
+          selectedDeposit.treatment?.name ||
+          selectedDeposit.treatment_name ||
+          "—",
+        full_amount: selectedDeposit.full_amount || 0,
+        paid_amount: selectedDeposit.paid_amount || selectedDeposit.amount || 0,
+        discount_amount: 0,
+      }
+    : null;
 
   return (
     <>
       {loading && <LinearProgress />}
 
       {error && (
-        <Alert severity="error" sx={{mb: 2}} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
-      {/* Filter Bar */}
-      <Box sx={{mb: 3, overflowX: "auto", whiteSpace: "nowrap", pb: 0.5}}>
-        <ToggleButtonGroup
-          value={filter}
-          exclusive
-          onChange={(_, newFilter) => {
-            if (newFilter !== null) setFilter(newFilter);
-          }}
-          size="small"
+      {/* Top-right CTA */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <Link
+          component="button"
+          variant="body2"
+          onClick={() => navigate("/admin/pagos")}
+          underline="hover"
         >
-          <ToggleButton value={FILTER_OPTIONS.all}>Todos</ToggleButton>
-          <ToggleButton value={FILTER_OPTIONS.depositos}>
-            Depósitos
-          </ToggleButton>
-          <ToggleButton value={FILTER_OPTIONS.sin_agendar}>
-            Transferencias sin agendar
-          </ToggleButton>
-          <ToggleButton value={FILTER_OPTIONS.agendadas}>
-            Transferencias agendadas
-          </ToggleButton>
-        </ToggleButtonGroup>
+          Ver histórico completo →
+        </Link>
       </Box>
 
-      {/* Payment Items */}
+      {/* Queue */}
       <Stack spacing={2}>
-        {filteredItems.length === 0 && !loading && (
+        {!loading && items.length === 0 && (
           <Typography
             variant="body2"
             color="text.secondary"
             align="center"
-            sx={{py: 4}}
+            sx={{ py: 4 }}
           >
-            No hay pagos en esta categoría
+            No hay pagos esperando acción.
           </Typography>
         )}
 
-        {filteredItems.map((item) => {
-          const borderColor = item.status === "pending" ? "#ed6c02" : "#2e7d32";
-          const statusLabel =
-            item.status === "pending" ? "Pendiente" : "Pagado";
-
-          if (item.type === "deposit") {
-            return (
-              <Card
-                key={`deposit-${item.deposit_id}`}
-                sx={{borderLeft: `4px solid ${borderColor}`}}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {item.customer_name}
-                    </Typography>
-                    <Chip
-                      label={statusLabel}
-                      color={item.status === "pending" ? "warning" : "success"}
-                      size="small"
-                    />
-                  </Box>
-
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{mb: 1}}
-                  >
-                    {item.treatment_name}
-                  </Typography>
-
-                  <Box
-                    sx={{
-                      mt: 1,
-                      p: 1,
-                      backgroundColor: "#f5f5f5",
-                      borderRadius: 1,
-                    }}
-                  >
-                    <Typography variant="body2">
-                      <strong>Depósito</strong> • Total: $
-                      {item.full_amount.toFixed(2)} • Pagado: $
-                      {item.paid_amount.toFixed(2)}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="error"
-                      fontWeight="bold"
-                      sx={{mt: 0.5}}
-                    >
-                      Falta: ${item.remaining.toFixed(2)}
-                    </Typography>
-                  </Box>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleAddRemainderClick(item)}
-                  >
-                    Agregar cobro
-                  </Button>
-                </CardActions>
-              </Card>
-            );
-          } else if (item.type === "transfer_pending") {
-            return (
-              <Card
-                key={`transfer-pending-${item.id}`}
-                sx={{borderLeft: `4px solid ${borderColor}`}}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {item.customer_name}
-                    </Typography>
-                    <Chip
-                      label={statusLabel}
-                      color={item.status === "pending" ? "warning" : "success"}
-                      size="small"
-                    />
-                  </Box>
-
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{mb: 1}}
-                  >
-                    {item.treatment_name}
-                  </Typography>
-
-                  <Box
-                    sx={{
-                      mt: 1,
-                      p: 1,
-                      backgroundColor: "#f5f5f5",
-                      borderRadius: 1,
-                    }}
-                  >
-                    <Typography variant="body2">
-                      <strong>Transferencia</strong> • Monto: $
-                      {item.amount.toFixed(2)}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{mt: 0.5}}
-                    >
-                      Subida:{" "}
-                      {item.created_at
-                        ? new Date(item.created_at).toLocaleDateString("es-UY")
-                        : "—"}
-                    </Typography>
-                  </Box>
-
-                  {item.comprobante_url && (
-                    <Box sx={{mt: 1}}>
-                      {isPdf(item) ? (
-                        <Chip
-                          icon={<PictureAsPdfIcon />}
-                          label="Ver comprobante PDF"
-                          size="small"
-                          clickable
-                          onClick={() => {
-                            setReceiptItem({
-                              id: item.id,
-                              url: item.comprobante_url,
-                              isPdf: true,
-                              status: item.status,
-                            });
-                          }}
-                        />
-                      ) : (
-                        <Box
-                          component="img"
-                          src={item.comprobante_url}
-                          alt="Comprobante"
-                          sx={{
-                            maxWidth: "80px",
-                            maxHeight: "80px",
-                            objectFit: "contain",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            setReceiptItem({
-                              id: item.id,
-                              url: item.comprobante_url,
-                              isPdf: false,
-                              status: item.status,
-                            });
-                          }}
-                        />
-                      )}
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          } else if (item.type === "transfer_scheduled") {
-            return (
-              <Card
-                key={`transfer-scheduled-${item.id}`}
-                sx={{borderLeft: `4px solid ${borderColor}`}}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {item.customer_name}
-                    </Typography>
-                    <Chip
-                      label={statusLabel}
-                      color={item.status === "pending" ? "warning" : "success"}
-                      size="small"
-                    />
-                  </Box>
-
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{mb: 1}}
-                  >
-                    {item.treatment_name}
-                  </Typography>
-
-                  <Box
-                    sx={{
-                      mt: 1,
-                      p: 1,
-                      backgroundColor: "#f5f5f5",
-                      borderRadius: 1,
-                    }}
-                  >
-                    <Typography variant="body2">
-                      <strong>Transferencia</strong> • Monto: $
-                      {item.amount.toFixed(2)}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{mt: 0.5}}
-                    >
-                      Turno:{" "}
-                      {item.appointment_date
-                        ? new Date(item.appointment_date).toLocaleDateString(
-                            "es-UY",
-                            {
-                              weekday: "short",
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )
-                        : "—"}
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{mt: 1, display: "flex", gap: 1}}>
-                    <Chip
-                      label={item.appointment_status || "—"}
-                      size="small"
-                      color={
-                        item.appointment_status === "confirmed"
-                          ? "success"
-                          : item.appointment_status === "pending"
-                            ? "warning"
-                            : "default"
-                      }
-                    />
-                    <Chip
-                      label={item.status}
-                      size="small"
-                      color={
-                        item.status === "completed" ? "success" : "warning"
-                      }
-                    />
-                  </Box>
-
-                  {item.comprobante_url && (
-                    <Box sx={{mt: 1}}>
-                      {isPdf(item) ? (
-                        <Chip
-                          icon={<PictureAsPdfIcon />}
-                          label="Ver comprobante PDF"
-                          size="small"
-                          clickable
-                          onClick={() => {
-                            setReceiptItem({
-                              id: item.id,
-                              url: item.comprobante_url,
-                              isPdf: true,
-                              status: item.status,
-                            });
-                          }}
-                        />
-                      ) : (
-                        <Box
-                          component="img"
-                          src={item.comprobante_url}
-                          alt="Comprobante"
-                          sx={{
-                            maxWidth: "80px",
-                            maxHeight: "80px",
-                            objectFit: "contain",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            setReceiptItem({
-                              id: item.id,
-                              url: item.comprobante_url,
-                              isPdf: false,
-                              status: item.status,
-                            });
-                          }}
-                        />
-                      )}
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          }
-          return null;
-        })}
+        {items.map((item) => (
+          <PaymentCard
+            key={item.id}
+            payment={item}
+            onAddRemainder={handleAddRemainderClick}
+            onOpenComprobante={(receiptData) => setReceiptItem(receiptData)}
+            onOpenHistory={(apptId) => setHistoryAppointmentId(apptId)}
+          />
+        ))}
       </Stack>
 
       {/* Deposit Remainder Modal */}
       <DepositRemainderModal
-        open={depositRemainderModalOpen}
-        onClose={handleRemainderModalClose}
-        selectedDeposit={selectedDeposit}
+        open={depositRemainderOpen}
+        onClose={handleRemainderClose}
+        selectedDeposit={depositForModal}
         remainderAmount={remainderAmount}
         setRemainderAmount={setRemainderAmount}
         remainderMethod={remainderMethod}
         setRemainderMethod={setRemainderMethod}
+        remainderDiscount={remainderDiscount}
+        setRemainderDiscount={setRemainderDiscount}
         savingRemainder={savingRemainder}
         onConfirm={handleAddDepositRemainder}
         title="Agregar Cobro del Depósito"
@@ -533,15 +189,26 @@ export default function PagosTab() {
         open={!!receiptItem}
         receiptUrl={receiptItem?.url}
         isPdf={receiptItem?.isPdf}
+        paymentId={receiptItem?.id}
         onClose={() => setReceiptItem(null)}
-        canConfirm={receiptItem?.status === 'pending'}
+        canConfirm={receiptItem?.status === "pending"}
         onConfirm={async () => {
           await handleConfirmTransfer(receiptItem.id);
           setReceiptItem(null);
         }}
+        onReject={() => {
+          setReceiptItem(null);
+          loadPayments();
+        }}
       />
 
-      {/* Success Message */}
+      {/* Payment History Modal */}
+      <PaymentHistoryModal
+        open={!!historyAppointmentId}
+        appointmentId={historyAppointmentId}
+        onClose={() => setHistoryAppointmentId(null)}
+      />
+
       <Snackbar
         open={!!successMessage}
         autoHideDuration={3000}

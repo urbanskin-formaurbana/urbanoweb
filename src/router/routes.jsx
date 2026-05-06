@@ -12,6 +12,7 @@ import AppointmentHistoryPage from '../pages/user/AppointmentHistoryPage.jsx'
 import ProtectedAdminRoute from '../components/ProtectedAdminRoute.jsx'
 import ProtectedUserRoute from '../components/ProtectedUserRoute.jsx'
 import AdminPage from '../pages/admin/AdminPage.jsx'
+import PagosLedgerPage from '../pages/admin/PagosLedgerPage.jsx'
 import CinturonOrion from '../pages/landing/CinturonOrion.jsx'
 import CinturonTitan from '../pages/landing/CinturonTitan.jsx'
 import CinturonAcero from '../pages/landing/CinturonAcero.jsx'
@@ -62,6 +63,14 @@ export default function AppRoutes() {
         element={
           <ProtectedAdminRoute>
             <AdminPage />
+          </ProtectedAdminRoute>
+        }
+      />
+      <Route
+        path="/admin/pagos"
+        element={
+          <ProtectedAdminRoute>
+            <PagosLedgerPage />
           </ProtectedAdminRoute>
         }
       />

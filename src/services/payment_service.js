@@ -154,6 +154,7 @@ export const paymentService = {
 
   /**
    * Get deposits awaiting remainder payment
+   * @deprecated Use listPayments({ needs_attention: true }) instead.
    * @returns {Promise<object>} - { deposits: [...], total }
    */
   async getPendingDeposits() {
@@ -262,11 +263,48 @@ export const paymentService = {
 
   /**
    * Get all transfer payments with receipts (admin only)
+   * @deprecated Use listPayments({ needs_attention: true }) instead.
    * @returns {Promise<object>} - { transfers: [...], total }
    */
   async getTransfersWithReceipt() {
     return apiCall('/payments/admin/transfers', {
       method: 'GET',
+    });
+  },
+
+  /**
+   * Unified admin payment ledger with filtering and pagination.
+   * @param {object} params - { status, method, date_from, date_to, customer_search,
+   *   has_comprobante, is_deposit, needs_attention, limit, skip, sort_by }
+   * @returns {Promise<object>} - { items: [...], total, has_more }
+   */
+  async listPayments(params = {}) {
+    const qs = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+    });
+    return apiCall(`/payments/admin/list?${qs.toString()}`, { method: 'GET' });
+  },
+
+  /**
+   * Full payment timeline for a single appointment.
+   * @param {string} appointmentId
+   * @returns {Promise<object>} - { appointment, payments, summary }
+   */
+  async getAppointmentPaymentHistory(appointmentId) {
+    return apiCall(`/payments/admin/appointment/${appointmentId}/history`, { method: 'GET' });
+  },
+
+  /**
+   * Reject a pending transfer comprobante.
+   * @param {string} paymentId
+   * @param {object} data - { reason: string }
+   * @returns {Promise<object>}
+   */
+  async rejectTransfer(paymentId, data) {
+    return apiCall(`/payments/admin/${paymentId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   },
 

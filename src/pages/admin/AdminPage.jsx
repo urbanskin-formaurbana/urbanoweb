@@ -32,9 +32,9 @@ export default function AdminPage() {
     requestAnimationFrame(() => window.scrollTo(0, 0));
   }, []);
 
-  const [activeTab, setActiveTab] = useState(2);
+  const [activeTab, setActiveTab] = useState(0);
 
-  const tabLabels = ['Pendientes', 'Confirmadas', 'Todas', 'Pagos', 'Plantillas', 'Tratamientos', 'Socios', 'Reportes', 'Campañas', 'Datos del Negocio'];
+  const tabLabels = ['Bandeja', 'Pendientes', 'Confirmadas', 'Todas', 'Plantillas', 'Tratamientos', 'Socios', 'Reportes', 'Campañas', 'Datos del Negocio'];
 
   const handleLogout = () => {
     logout();
@@ -84,10 +84,10 @@ export default function AdminPage() {
       )}
 
       {/* Tab Content */}
-      {(activeTab === 0 || activeTab === 1 || activeTab === 2) && (
-        <AppointmentsTab activeTab={activeTab} onGoToPagos={() => setActiveTab(3)} />
+      {activeTab === 0 && <PagosTab />}
+      {(activeTab === 1 || activeTab === 2 || activeTab === 3) && (
+        <AppointmentsTab activeTab={activeTab - 1} onGoToPagos={() => setActiveTab(0)} />
       )}
-      {activeTab === 3 && <PagosTab />}
       {activeTab === 4 && <TemplatesTab />}
       {activeTab === 5 && <TreatmentsTab />}
       {activeTab === 6 && <SociosTab />}
