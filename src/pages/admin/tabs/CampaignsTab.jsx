@@ -3,20 +3,12 @@ import {
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   FormControl,
-  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
-  Stack,
-  Switch,
   Tab,
   Tabs,
-  TextField,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
@@ -25,9 +17,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CampaignAdminTab from '../../../components/CampaignAdminTab';
 import campaignService from '../../../services/campaign_service';
 import adminService from '../../../services/admin_service';
-import RichTextDescriptionEditor from '../../../components/RichTextDescriptionEditor';
-import CategoryImageUpload from '../../../components/CategoryImageUpload';
-import { Typography } from '@mui/material';
+import ProductTypeDialog from '../../../components/ProductTypeDialog';
 
 export default function CampaignsTab() {
   const theme = useTheme();
@@ -43,6 +33,8 @@ export default function CampaignsTab() {
   const [productType, setProductType] = useState('');
   const [productLabel, setProductLabel] = useState('');
   const [productDescription, setProductDescription] = useState('');
+  const [productCardDescription, setProductCardDescription] = useState('');
+  const [productSubtitle, setProductSubtitle] = useState('');
   const [isGenderSplit, setIsGenderSplit] = useState(false);
   const [productImageUrl, setProductImageUrl] = useState('');
   const [productImageUrlHombres, setProductImageUrlHombres] = useState('');
@@ -82,6 +74,8 @@ export default function CampaignsTab() {
     setProductType('');
     setProductLabel('');
     setProductDescription('');
+    setProductCardDescription('');
+    setProductSubtitle('');
     setIsGenderSplit(false);
     setProductImageUrl('');
     setProductImageUrlHombres('');
@@ -96,6 +90,8 @@ export default function CampaignsTab() {
     setProductType(selected.product_type);
     setProductLabel(selected.product_label || '');
     setProductDescription(selected.product_description || '');
+    setProductCardDescription(selected.card_description || '');
+    setProductSubtitle(selected.subtitle || '');
     setIsGenderSplit(selected.is_gender_split || false);
     setProductImageUrl(selected.image_url || '');
     setProductImageUrlHombres(selected.image_url_hombres || '');
@@ -113,7 +109,9 @@ export default function CampaignsTab() {
         productLabel.trim(),
         productDescription.trim(),
         isGenderSplit,
-        productImageUrl
+        productImageUrl,
+        productCardDescription.trim(),
+        productSubtitle.trim(),
       );
 
       if (!isEditMode) {
@@ -131,6 +129,35 @@ export default function CampaignsTab() {
     }
   };
 
+  const dialog = (
+    <ProductTypeDialog
+      open={productDialogOpen}
+      onClose={() => setProductDialogOpen(false)}
+      isEditMode={isEditMode}
+      productType={productType}
+      productLabel={productLabel}
+      productDescription={productDescription}
+      productCardDescription={productCardDescription}
+      productSubtitle={productSubtitle}
+      isGenderSplit={isGenderSplit}
+      productImageUrl={productImageUrl}
+      productImageUrlHombres={productImageUrlHombres}
+      productImageUrlMujeres={productImageUrlMujeres}
+      editingProductType={editingProductType}
+      savingProduct={savingProduct}
+      generateSlug={generateSlug}
+      onSave={handleSaveProduct}
+      setProductType={setProductType}
+      setProductLabel={setProductLabel}
+      setProductDescription={setProductDescription}
+      setProductCardDescription={setProductCardDescription}
+      setProductSubtitle={setProductSubtitle}
+      setIsGenderSplit={setIsGenderSplit}
+      setProductImageUrl={setProductImageUrl}
+      setProductImageUrlHombres={setProductImageUrlHombres}
+      setProductImageUrlMujeres={setProductImageUrlMujeres}
+    />
+  );
 
   if (loadingProductTypes) {
     return (
@@ -156,68 +183,7 @@ export default function CampaignsTab() {
         <Box sx={{ textAlign: 'center', py: 4 }}>
           No hay tipos de productos disponibles. Crea uno para comenzar.
         </Box>
-
-        {/* Shared dialog - mounted once outside all conditionals */}
-        <Dialog open={productDialogOpen} onClose={() => setProductDialogOpen(false)} fullWidth maxWidth="xs">
-          <DialogTitle>{isEditMode ? `Editar producto — ${productType}` : 'Nuevo Tipo de Producto'}</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField
-                label="Nombre visible"
-                value={productLabel}
-                onChange={(e) => {
-                  setProductLabel(e.target.value);
-                  if (!isEditMode) setProductType(generateSlug(e.target.value));
-                }}
-                placeholder="ej: HIFU Corporal, Criólisis"
-                fullWidth
-              />
-              <TextField
-                label="Identificador (slug)"
-                value={productType}
-                onChange={(e) => {
-                  if (!isEditMode) setProductType(e.target.value.replace(/[^a-z0-9_-]/g, ''));
-                }}
-                placeholder="ej: hifu, criolipolisis"
-                helperText="Se genera automáticamente, pero puedes editarlo"
-                fullWidth
-                disabled={isEditMode}
-              />
-              <RichTextDescriptionEditor
-                value={productDescription}
-                onChange={setProductDescription}
-                label="Descripción (para la sección en la home)"
-              />
-              <FormControlLabel
-                control={<Switch checked={isGenderSplit} onChange={(e) => setIsGenderSplit(e.target.checked)} />}
-                label="Dividir por género (Hombres / Mujeres)"
-              />
-              {isEditMode && (
-                <CategoryImageUpload
-                  isGenderSplit={isGenderSplit}
-                  productImageUrl={productImageUrl}
-                  productImageUrlHombres={productImageUrlHombres}
-                  productImageUrlMujeres={productImageUrlMujeres}
-                  editingProductType={editingProductType}
-                  onImageChange={setProductImageUrl}
-                  onImageChangeHombres={setProductImageUrlHombres}
-                  onImageChangeMujeres={setProductImageUrlMujeres}
-                />
-              )}
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setProductDialogOpen(false)}>Cancelar</Button>
-            <Button
-              variant="contained"
-              onClick={handleSaveProduct}
-              disabled={savingProduct || !productType.trim() || !productLabel.trim()}
-              startIcon={savingProduct ? <CircularProgress size={18} /> : null}
-            >
-              {savingProduct ? 'Guardando...' : isEditMode ? 'Guardar' : 'Crear'}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        {dialog}
       </Box>
     );
   }
@@ -286,67 +252,7 @@ export default function CampaignsTab() {
         />
       )}
 
-      {/* Shared dialog - mounted once outside all conditionals */}
-      <Dialog open={productDialogOpen} onClose={() => setProductDialogOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>{isEditMode ? `Editar producto — ${productType}` : 'Nuevo Tipo de Producto'}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Nombre visible"
-              value={productLabel}
-              onChange={(e) => {
-                setProductLabel(e.target.value);
-                if (!isEditMode) setProductType(generateSlug(e.target.value));
-              }}
-              placeholder="ej: HIFU Corporal, Criólisis"
-              fullWidth
-            />
-            <TextField
-              label="Identificador (slug)"
-              value={productType}
-              onChange={(e) => {
-                if (!isEditMode) setProductType(e.target.value.replace(/[^a-z0-9_-]/g, ''));
-              }}
-              placeholder="ej: hifu, criolipolisis"
-              helperText="Se genera automáticamente, pero puedes editarlo"
-              fullWidth
-              disabled={isEditMode}
-            />
-            <RichTextDescriptionEditor
-              value={productDescription}
-              onChange={setProductDescription}
-              label="Descripción (para la sección en la home)"
-            />
-            <FormControlLabel
-              control={<Switch checked={isGenderSplit} onChange={(e) => setIsGenderSplit(e.target.checked)} />}
-              label="Dividir por género (Hombres / Mujeres)"
-            />
-            {isEditMode && (
-              <CategoryImageUpload
-                isGenderSplit={isGenderSplit}
-                productImageUrl={productImageUrl}
-                productImageUrlHombres={productImageUrlHombres}
-                productImageUrlMujeres={productImageUrlMujeres}
-                editingProductType={editingProductType}
-                onImageChange={setProductImageUrl}
-                onImageChangeHombres={setProductImageUrlHombres}
-                onImageChangeMujeres={setProductImageUrlMujeres}
-              />
-            )}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setProductDialogOpen(false)}>Cancelar</Button>
-          <Button
-            variant="contained"
-            onClick={handleSaveProduct}
-            disabled={savingProduct || !productType.trim() || !productLabel.trim()}
-            startIcon={savingProduct ? <CircularProgress size={18} /> : null}
-          >
-            {savingProduct ? 'Guardando...' : isEditMode ? 'Guardar' : 'Crear'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {dialog}
     </Box>
   );
 }

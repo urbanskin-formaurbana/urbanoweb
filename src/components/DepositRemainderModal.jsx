@@ -37,13 +37,47 @@ export default function DepositRemainderModal({
   const total = Number(selectedDeposit?.full_amount ?? 0);
   const paid = Number(selectedDeposit?.paid_amount ?? 0);
   const existingDiscount = Number(selectedDeposit?.discount_amount ?? 0);
+  const outstanding = Math.max(total - paid - existingDiscount, 0);
+
   const inputAmount = parseFloat(remainderAmount) || 0;
   const inputDiscount = parseFloat(remainderDiscount) || 0;
-  const projectedRemaining = Math.max(
-    total - paid - existingDiscount - inputAmount - inputDiscount,
-    0,
-  );
+  const projectedRemaining = Math.max(outstanding - inputAmount - inputDiscount, 0);
+
   const supportsDiscount = typeof setRemainderDiscount === 'function';
+
+  const handleAmountChange = (e) => {
+    const raw = e.target.value;
+    const newAmount = parseFloat(raw) || 0;
+
+    if (total > 0) {
+      const clamped = Math.min(newAmount, outstanding);
+      setRemainderAmount(clamped === newAmount ? raw : String(clamped));
+      if (supportsDiscount) {
+        const maxDiscount = Math.max(outstanding - clamped, 0);
+        if (inputDiscount > maxDiscount) {
+          setRemainderDiscount(String(maxDiscount));
+        }
+      }
+    } else {
+      setRemainderAmount(raw);
+    }
+  };
+
+  const handleDiscountChange = (e) => {
+    const raw = e.target.value;
+    const newDiscount = parseFloat(raw) || 0;
+
+    if (total > 0) {
+      const clamped = Math.min(newDiscount, outstanding);
+      setRemainderDiscount(clamped === newDiscount ? raw : String(clamped));
+      const maxAmount = Math.max(outstanding - clamped, 0);
+      if (inputAmount > maxAmount) {
+        setRemainderAmount(String(maxAmount));
+      }
+    } else {
+      setRemainderDiscount(raw);
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -93,7 +127,7 @@ export default function DepositRemainderModal({
               size="small"
               inputProps={{ step: '0.01', min: '0' }}
               value={remainderAmount}
-              onChange={(e) => setRemainderAmount(e.target.value)}
+              onChange={handleAmountChange}
               fullWidth
             />
 
@@ -104,7 +138,7 @@ export default function DepositRemainderModal({
                 size="small"
                 inputProps={{ step: '0.01', min: '0' }}
                 value={remainderDiscount}
-                onChange={(e) => setRemainderDiscount(e.target.value)}
+                onChange={handleDiscountChange}
                 helperText="Cierra parte del saldo sin contar como pago faltante."
                 fullWidth
               />

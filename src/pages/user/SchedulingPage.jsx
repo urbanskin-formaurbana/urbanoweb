@@ -19,6 +19,7 @@ import {useAuth} from "../../contexts/AuthContext";
 import appointmentService from "../../services/appointment_service";
 import authService from "../../services/auth_service";
 import treatmentService from "../../services/treatment_service";
+import categoryConfigService from "../../services/category_config_service";
 import {
   isCampaignTreatment,
   filterSlotsForCustomer,
@@ -69,6 +70,8 @@ export default function SchedulingPage() {
   const [treatmentDescription, setTreatmentDescription] = useState(null);
   const [treatmentSubtitle, setTreatmentSubtitle] = useState(null);
   const [treatmentCategory, setTreatmentCategory] = useState(null);
+  const [treatmentCategoryLabel, setTreatmentCategoryLabel] = useState(null);
+  const [resolvedItemName, setResolvedItemName] = useState(null);
   const [singleSessionPrice, setSingleSessionPrice] = useState(null);
   const [evaluationPrice, setEvaluationPrice] = useState(null);
   const [duration, setDuration] = useState(null);
@@ -97,6 +100,8 @@ export default function SchedulingPage() {
   const sessionInfo = location.state?.sessionInfo;
   const isEvaluation = location.state?.isEvaluation ?? false;
   const campaignItemType = location.state?.campaignItemType;
+  const campaignDescription = location.state?.campaignDescription;
+  const isHardRefresh = !location.state;
   const isPackageMode = !!purchasedPackageId;
   const isCampaign = isCampaignTreatment(treatment);
 
@@ -132,6 +137,47 @@ export default function SchedulingPage() {
   }, [restoredDate, restoredTime]);
 
   useEffect(() => {
+    if (isCampaign || (isHardRefresh && (treatment.category || productType))) {
+      const category = treatment.category || productType;
+      const initialDescription = campaignDescription || null;
+      const initialSubtitle = treatment.subtitle || null;
+
+      setTreatmentDescription(initialDescription);
+      setTreatmentSubtitle(initialSubtitle);
+      setTreatmentCategory(category || null);
+
+      if (treatment.slug && treatment.slug !== "evaluation") {
+        treatmentService
+          .getTreatmentPackages(treatment.slug)
+          .then((data) => {
+            if (!data) return;
+            if (data.name) setResolvedItemName(data.name);
+            if (data.duration_minutes) setDuration(data.duration_minutes);
+            if (data.single_session_price != null) {
+              setSingleSessionPrice(data.single_session_price);
+            }
+          })
+          .catch(() => {});
+      }
+
+      if (category) {
+        categoryConfigService
+          .getByCategory(category)
+          .then((config) => {
+            if (!config) return;
+            if (config.label) setTreatmentCategoryLabel(config.label);
+            if (!initialDescription && config.card_description) {
+              setTreatmentDescription(config.card_description);
+            }
+            if (!initialSubtitle && config.subtitle) {
+              setTreatmentSubtitle(config.subtitle);
+            }
+          })
+          .catch(() => {});
+      }
+      return;
+    }
+
     if (treatment.slug && treatment.slug !== "evaluation") {
       treatmentService
         .getTreatmentPackages(treatment.slug)
@@ -178,6 +224,9 @@ export default function SchedulingPage() {
     treatment.subtitle,
     isEvaluation,
     productType,
+    isCampaign,
+    isHardRefresh,
+    campaignDescription,
   ]);
 
   useEffect(() => {
@@ -292,6 +341,10 @@ export default function SchedulingPage() {
   }
 
   const showSummary = Boolean(selectedDate && selectedTime);
+  const resolvedCategorySlug =
+    treatmentCategory || treatment.category || productType;
+  const displayCategoryLabel =
+    treatmentCategoryLabel || formatCategoryLabel(resolvedCategorySlug);
 
   return (
     <div className="fu-booking-page" style={{overflowX: "clip"}}>
@@ -308,8 +361,8 @@ export default function SchedulingPage() {
       </div>
 
       <TreatmentIntroBlock
-        category={treatmentCategory || treatment.category || productType}
-        title={treatment.name}
+        category={displayCategoryLabel || resolvedCategorySlug}
+        title={resolvedItemName || treatment.name}
         subtitle={
           treatmentSubtitle ||
           (isEvaluation
@@ -368,7 +421,14 @@ export default function SchedulingPage() {
           >
             <div>
               <BookingPanel
-                title={`Agendá tu ${isEvaluation ? "evaluación" : treatment.name}`}
+                title={(() => {
+                  if (isEvaluation) return "Agendá tu evaluación";
+                  const itemName = resolvedItemName || treatment.name;
+                  if (isCampaign && displayCategoryLabel) {
+                    return `Agendá tu ${displayCategoryLabel} – ${itemName}`;
+                  }
+                  return `Agendá tu ${itemName}`;
+                })()}
                 lead={`Elegí el día y horario que mejor te queden. ${isEvaluation ? "La evaluación dura ~20 min." : `La sesión dura ${duration || SESSION_DURATION} min.`}`}
               >
                 {showCuponeraCta && (() => {
@@ -515,11 +575,7 @@ export default function SchedulingPage() {
 
             {showSummary && (
               <BookingSummaryCard
-                title={
-                  formatCategoryLabel(
-                    treatmentCategory || treatment.category || productType,
-                  ) || treatment.name
-                }
+                title={displayCategoryLabel || treatment.name}
                 rows={[
                   {
                     label: "Tratamiento",

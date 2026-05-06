@@ -17,8 +17,6 @@ import {
   CardContent,
   CardActions,
   Chip,
-  Menu,
-  MenuItem,
 } from '@mui/material';
 import DepositRemainderModal from '../../../components/DepositRemainderModal';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -27,19 +25,19 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/locale/es';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import WarningIcon from '@mui/icons-material/Warning';
 import adminService from '../../../services/admin_service';
 import paymentService from '../../../services/payment_service';
 import CreateAppointmentModal from '../../../components/CreateAppointmentModal';
+import AppointmentDetailModal from '../../../components/AppointmentDetailModal';
+import AppointmentActions from '../../../components/AppointmentActions';
 import DateTimeSlotPicker from '../../../components/DateTimeSlotPicker';
 import { filterSlotsForEmployee } from '../../../utils/slotUtils';
 import {
   TEMPLATE_USAGES,
-  formatTemplateMessage,
   normalizeTemplate,
   resolveConfirmationTemplate,
+  formatTemplateMessage,
 } from '../../../utils/messageTemplates';
 import logger from '../../../utils/logger';
 import analytics from '../../../utils/analytics';
@@ -129,7 +127,22 @@ function treatmentFromAppointment(appt) {
   };
 }
 
-function AppointmentCard({ appointment, onConfirm, confirming, templates, categoryConfigs, onReschedule, onComplete, onNoShow, onOpenAddPayment, pendingDeposit }) {
+function AppointmentCard({
+  appointment,
+  onConfirm,
+  confirming,
+  templates,
+  categoryConfigs,
+  onReschedule,
+  onComplete,
+  onNoShow,
+  onOpenAddPayment,
+  pendingDeposit,
+  onGoToPagos,
+  onApproveTransfer,
+  approvingTransferId,
+  onOpenDetail,
+}) {
   const statusColor = STATUS_COLORS[appointment.status] || 'default';
   const statusLabel = STATUS_LABELS[appointment.status] || appointment.status;
   const borderColor = {
@@ -139,114 +152,28 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, catego
     cancelled: '#d32f2f',
   }[appointment.status] || '#9e9e9e';
 
-  const [whatsappAnchor, setWhatsappAnchor] = useState(null);
-  const [completarAnchor, setCompletarAnchor] = useState(null);
-  const phone = formatPhoneForWhatsApp(appointment.customer_phone);
-
-  const isCuponeraSession =
-    appointment.is_cuponera_session === true ||
-    !!appointment.purchased_package_id;
-
-  // Build a unified payment context for the "Agregar Pago" button. Prefer
-  // server-computed paid/remaining amounts; fall back to deposit-specific data
-  // for older responses that haven't been re-fetched yet.
-  let pendingPaymentContext = null;
-  if (!isCuponeraSession) {
-    const totalFromAppt = Number(appointment.total_amount ?? 0);
-    const paidFromAppt = Number(appointment.paid_amount ?? 0);
-    const discountFromAppt = Number(appointment.discount_amount ?? 0);
-    const remainingFromAppt =
-      appointment.remaining_amount != null
-        ? Number(appointment.remaining_amount)
-        : Math.max(totalFromAppt - paidFromAppt - discountFromAppt, 0);
-
-    if (remainingFromAppt > 0 && totalFromAppt > 0) {
-      pendingPaymentContext = {
-        appointment_id: appointment.id,
-        customer_name: appointment.customer_name,
-        treatment_name: appointment.treatment_name,
-        full_amount: totalFromAppt,
-        paid_amount: paidFromAppt,
-        discount_amount: discountFromAppt,
-        remaining: remainingFromAppt,
-      };
-    } else if (pendingDeposit) {
-      // Legacy fallback for deposits when the appointment payload pre-dates the
-      // paid_amount/remaining_amount enrichment.
-      pendingPaymentContext = {
-        ...pendingDeposit,
-        paid_amount: pendingDeposit.paid_amount ?? pendingDeposit.paid ?? 0,
-        discount_amount: pendingDeposit.discount_amount ?? 0,
-      };
-    } else if (
-      appointment.payment_status === 'awaiting_payment' &&
-      totalFromAppt > 0
-    ) {
-      pendingPaymentContext = {
-        appointment_id: appointment.id,
-        customer_name: appointment.customer_name,
-        treatment_name: appointment.treatment_name,
-        full_amount: totalFromAppt,
-        paid_amount: 0,
-        discount_amount: 0,
-        remaining: totalFromAppt,
-      };
-    }
-  }
-
+  const payOnArrival =
+    appointment.payment_method_expected === 'efectivo' ||
+    appointment.payment_method_expected === 'posnet';
   const allowConfirmWithoutPayment =
-    appointment.allow_confirm_without_payment === true ||
-    appointment.payment_plan === 'pay_later' ||
-    appointment.payment_plan === 'deposit';
-  const canConfirmAppointment =
+    appointment.allow_confirm_without_payment === true || payOnArrival;
+  const blockedAwaitingTransfer =
     appointment.status === 'pending' &&
-    (
-      appointment.payment_status !== 'awaiting_payment' ||
-      allowConfirmWithoutPayment
-    );
+    appointment.payment_status === 'awaiting_payment' &&
+    !allowConfirmWithoutPayment;
 
-  const handleWhatsappMenuClick = (e) => {
-    setWhatsappAnchor(e.currentTarget);
-  };
-
-  const handleWhatsappMenuClose = () => {
-    setWhatsappAnchor(null);
-  };
-
-  const handleCompletarMenuClick = (e) => {
-    setCompletarAnchor(e.currentTarget);
-  };
-
-  const handleCompletarMenuClose = () => {
-    setCompletarAnchor(null);
-  };
-
-  const handleCompletarClick = () => {
-    handleCompletarMenuClose();
-    onComplete(appointment);
-  };
-
-  const handleNoShowClick = () => {
-    handleCompletarMenuClose();
-    onNoShow(appointment);
-  };
-
-  const handleWhatsappTemplateSelect = (template) => {
-    const formattedMessage = formatTemplateMessage(template.message, appointment, categoryConfigs);
-    const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(formattedMessage)}`;
-    analytics.trackWhatsAppClick({
-      source: 'admin_template',
-      context: {
-        appointmentId: appointment.id,
-        templateId: template.id,
-      },
-    });
-    window.open(waLink, '_blank', 'noopener,noreferrer');
-    handleWhatsappMenuClose();
-  };
+  const stop = (e) => e.stopPropagation();
 
   return (
-    <Card sx={{ borderLeft: `4px solid ${borderColor}` }}>
+    <Card
+      sx={{
+        borderLeft: `4px solid ${borderColor}`,
+        cursor: 'pointer',
+        transition: 'box-shadow 0.15s ease',
+        '&:hover': { boxShadow: 3 },
+      }}
+      onClick={() => onOpenDetail(appointment)}
+    >
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
           <Typography variant="subtitle1" fontWeight="bold">
@@ -302,101 +229,49 @@ function AppointmentCard({ appointment, onConfirm, confirming, templates, catego
             </Typography>
           </Box>
         )}
+
+        {blockedAwaitingTransfer && (
+          <Alert
+            severity="warning"
+            sx={{ mt: 1 }}
+            onClick={stop}
+            action={
+              onGoToPagos ? (
+                <Button color="inherit" size="small" onClick={(e) => { stop(e); onGoToPagos(); }}>
+                  Ir a Pagos
+                </Button>
+              ) : null
+            }
+          >
+            Confirmá el pago en la pestaña <strong>Pagos</strong> antes de
+            confirmar el turno.
+          </Alert>
+        )}
       </CardContent>
 
-      <CardActions sx={{ gap: 0.5, flexWrap: 'nowrap', overflow: 'auto' }}>
-        {pendingPaymentContext && (
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={() => onOpenAddPayment(pendingPaymentContext)}
-            sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
-          >
-            Agregar Pago
-          </Button>
-        )}
-
-        {canConfirmAppointment && (
-          <Button
-            size="small"
-            variant="contained"
-            color="success"
-            onClick={() => onConfirm(appointment.id)}
-            disabled={confirming === appointment.id}
-            sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
-          >
-            {confirming === appointment.id ? <CircularProgress size={16} /> : 'Confirmar'}
-          </Button>
-        )}
-
-        {appointment.status === 'confirmed' && (
-          <>
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={handleCompletarMenuClick}
-              sx={{ padding: '4px 12px' }}
-            >
-              <ArrowDropDownIcon sx={{ fontSize: '1.2rem' }} />
-            </Button>
-            <Menu
-              anchorEl={completarAnchor}
-              open={Boolean(completarAnchor)}
-              onClose={handleCompletarMenuClose}
-            >
-              <MenuItem onClick={handleCompletarClick}>Completar</MenuItem>
-              <MenuItem onClick={handleNoShowClick}>No-show</MenuItem>
-            </Menu>
-          </>
-        )}
-
-        {(appointment.status === 'pending' || appointment.status === 'confirmed') && (
-          <Button
-            size="small"
-            variant="outlined"
-            color="primary"
-            onClick={() => onReschedule(appointment)}
-            sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
-          >
-            Reagendar
-          </Button>
-        )}
-
-        {phone && (
-          <>
-            <Button
-              size="small"
-              variant="outlined"
-              color="success"
-              startIcon={<WhatsAppIcon sx={{ fontSize: '1rem' }} />}
-              endIcon={<ArrowDropDownIcon sx={{ fontSize: '1rem' }} />}
-              onClick={handleWhatsappMenuClick}
-              sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
-            >
-              WA
-            </Button>
-            <Menu
-              anchorEl={whatsappAnchor}
-              open={!!whatsappAnchor}
-              onClose={handleWhatsappMenuClose}
-            >
-              {templates.length > 0 ? (
-                templates.map((template) => (
-                  <MenuItem
-                    key={template.id}
-                    onClick={() => handleWhatsappTemplateSelect(template)}
-                  >
-                    {template.name}
-                  </MenuItem>
-                ))
-              ) : (
-                <MenuItem disabled>No hay plantillas disponibles</MenuItem>
-              )}
-            </Menu>
-          </>
-        )}
+      <CardActions
+        onClick={stop}
+        sx={{
+          gap: 0.5,
+          flexWrap: 'nowrap',
+          overflow: 'auto',
+        }}
+      >
+        <AppointmentActions
+          appointment={appointment}
+          pendingDeposit={pendingDeposit}
+          templates={templates}
+          categoryConfigs={categoryConfigs}
+          confirming={confirming}
+          onConfirm={onConfirm}
+          onReschedule={onReschedule}
+          onComplete={onComplete}
+          onNoShow={onNoShow}
+          onOpenAddPayment={onOpenAddPayment}
+          onApproveTransfer={onApproveTransfer}
+          approvingTransferId={approvingTransferId}
+          sx={{ flexWrap: 'nowrap' }}
+        />
       </CardActions>
     </Card>
   );
@@ -418,7 +293,7 @@ function closeDialogSafely(closerFn) {
   });
 }
 
-export default function AppointmentsTab({ activeTab }) {
+export default function AppointmentsTab({ activeTab, onGoToPagos }) {
   const [appointments, setAppointments] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [categoryConfigs, setCategoryConfigs] = useState([]);
@@ -447,9 +322,14 @@ export default function AppointmentsTab({ activeTab }) {
   // Create appointment modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
+  // Appointment detail modal state
+  const [detailModalAppointment, setDetailModalAppointment] = useState(null);
+
   // Deposit remainder modal state
 
   const [depositRemainderModalOpen, setDepositRemainderModalOpen] = useState(false);
+  const [completeAfterPayment, setCompleteAfterPayment] = useState(false);
+  const [approvingTransferId, setApprovingTransferId] = useState(null);
   const [selectedDeposit, setSelectedDeposit] = useState(null);
   const [remainderMethod, setRemainderMethod] = useState('efectivo');
   const [remainderAmount, setRemainderAmount] = useState('');
@@ -667,6 +547,36 @@ export default function AppointmentsTab({ activeTab }) {
     }
     setSelectedAppointmentForCompletion(appointment);
     setCompletionFeedback('');
+
+    // Confirmed cash/transfer/posnet appointments still owe a payment when the
+    // customer arrives. Route through the same "Agregar Pago" modal the card
+    // exposes so the admin records the cobro before logging session feedback.
+    if (appointment.payment_status === 'awaiting_payment') {
+      const total = Number(appointment.total_amount ?? 0);
+      const paid = Number(appointment.paid_amount ?? 0);
+      const discount = Number(appointment.discount_amount ?? 0);
+      const remaining =
+        appointment.remaining_amount != null
+          ? Number(appointment.remaining_amount)
+          : Math.max(total - paid - discount, 0);
+      handleOpenAddPayment(
+        {
+          appointment_id: appointment.id,
+          customer_name: appointment.customer_name,
+          treatment_name: appointment.treatment_name,
+          full_amount: total,
+          paid_amount: paid,
+          discount_amount: discount,
+          remaining,
+        },
+        {
+          method: appointment.payment_method_expected || 'efectivo',
+          completeAfter: true,
+        },
+      );
+      return;
+    }
+
     setCompleteModalOpen(true);
   };
 
@@ -728,14 +638,15 @@ export default function AppointmentsTab({ activeTab }) {
     }
   };
 
-  const handleOpenAddPayment = (paymentContext) => {
+  const handleOpenAddPayment = (paymentContext, options = {}) => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
     setSelectedDeposit(paymentContext);
     setRemainderAmount((paymentContext.remaining || 0).toString());
-    setRemainderMethod('efectivo');
+    setRemainderMethod(options.method || 'efectivo');
     setRemainderDiscount('');
+    setCompleteAfterPayment(options.completeAfter === true);
     setDepositRemainderModalOpen(true);
   };
 
@@ -746,6 +657,7 @@ export default function AppointmentsTab({ activeTab }) {
       setRemainderMethod('efectivo');
       setRemainderAmount('');
       setRemainderDiscount('');
+      setCompleteAfterPayment(false);
     });
 
   const handleAddDepositRemainder = async () => {
@@ -777,12 +689,42 @@ export default function AppointmentsTab({ activeTab }) {
         : `Cobro de ${remainderMethod} registrado`;
       setSuccessMessage(summary);
       await Promise.all([loadAppointments(), loadPendingDeposits()]);
+
+      const shouldComplete =
+        completeAfterPayment && !!selectedAppointmentForCompletion;
       handleRemainderModalClose();
+
+      if (shouldComplete) {
+        // Re-open the completion dialog so the admin can log session feedback
+        // now that the cobro has been recorded.
+        setCompletionFeedback('');
+        setCompleteModalOpen(true);
+      }
     } catch (err) {
       logger.error('Error adding payment', err);
       setError('No se pudo registrar el cobro');
     } finally {
       setSavingRemainder(false);
+    }
+  };
+
+  const handleApproveTransfer = async (appointmentId, paymentId) => {
+    if (!paymentId) return;
+    setApprovingTransferId(paymentId);
+    try {
+      await paymentService.confirmTransferPayment(paymentId);
+      analytics.trackOfflinePaymentConfirmed({
+        appointmentId,
+        paymentMethod: 'transferencia',
+        amount: 0,
+      });
+      setSuccessMessage('Transferencia aprobada');
+      await Promise.all([loadAppointments(), loadPendingDeposits()]);
+    } catch (err) {
+      logger.error('Error approving transfer', err);
+      setError('No se pudo aprobar la transferencia');
+    } finally {
+      setApprovingTransferId(null);
     }
   };
 
@@ -830,6 +772,10 @@ export default function AppointmentsTab({ activeTab }) {
                 onNoShow={handleNoShowClick}
                 onOpenAddPayment={handleOpenAddPayment}
                 pendingDeposit={pendingDeposit}
+                onGoToPagos={onGoToPagos}
+                onApproveTransfer={handleApproveTransfer}
+                approvingTransferId={approvingTransferId}
+                onOpenDetail={setDetailModalAppointment}
               />
             );
           })}
@@ -975,6 +921,28 @@ export default function AppointmentsTab({ activeTab }) {
         onClose={() => setCreateModalOpen(false)}
         onCreated={handleAppointmentCreated}
         prefilledCustomer={null}
+      />
+
+      {/* Appointment Detail Modal */}
+      <AppointmentDetailModal
+        open={!!detailModalAppointment}
+        appointment={detailModalAppointment}
+        pendingDeposit={
+          detailModalAppointment
+            ? pendingDeposits.find(d => d.appointment_id === detailModalAppointment.id)
+            : null
+        }
+        templates={manualTemplates}
+        categoryConfigs={categoryConfigs}
+        confirming={confirming}
+        onClose={() => setDetailModalAppointment(null)}
+        onConfirm={handleConfirmAppointment}
+        onReschedule={handleRescheduleClick}
+        onComplete={handleCompleteClick}
+        onNoShow={handleNoShowClick}
+        onOpenAddPayment={handleOpenAddPayment}
+        onApproveTransfer={handleApproveTransfer}
+        approvingTransferId={approvingTransferId}
       />
 
     </>

@@ -85,7 +85,7 @@ export default function AdminPage() {
 
       {/* Tab Content */}
       {(activeTab === 0 || activeTab === 1 || activeTab === 2) && (
-        <AppointmentsTab activeTab={activeTab} />
+        <AppointmentsTab activeTab={activeTab} onGoToPagos={() => setActiveTab(3)} />
       )}
       {activeTab === 3 && <PagosTab />}
       {activeTab === 4 && <TemplatesTab />}

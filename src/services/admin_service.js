@@ -11,6 +11,10 @@ const adminService = {
     return result;
   },
 
+  async getAppointmentPayments(appointmentId) {
+    return apiCall(`/admin/appointments/${appointmentId}/payments`, { method: 'GET' });
+  },
+
   async rescheduleAppointment(appointmentId, newScheduledAt) {
     return apiCall(`/admin/appointments/${appointmentId}/reschedule`, {
       method: 'PATCH',
@@ -187,10 +191,24 @@ const adminService = {
     return apiCall('/category-configs', { method: 'GET' });
   },
 
-  async upsertCategoryConfig(category, label, description, isGenderSplit = false, imageUrl = null) {
+  async upsertCategoryConfig(
+    category,
+    label,
+    description,
+    isGenderSplit = false,
+    imageUrl = null,
+    cardDescription = null,
+    subtitle = null,
+  ) {
     const body = { label, description, is_gender_split: isGenderSplit };
     if (imageUrl) {
       body.image_url = imageUrl;
+    }
+    if (cardDescription !== null) {
+      body.card_description = cardDescription;
+    }
+    if (subtitle !== null) {
+      body.subtitle = subtitle;
     }
     return apiCall(`/category-configs/${category}`, {
       method: 'PUT',

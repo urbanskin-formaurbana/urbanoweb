@@ -272,7 +272,7 @@ export default function HomePage() {
                                 key={gender}
                                 treatment={{
                                   slug: `${productType}-${gender}`,
-                                  subtitle: "Ver zonas y paquetes disponibles",
+                                  subtitle: campaign.subtitle || "Ver zonas y paquetes disponibles",
                                   name: label,
                                   price: genderMinPrice || 0,
                                   image_url: imageField || null,
@@ -289,7 +289,7 @@ export default function HomePage() {
                           <TreatmentCard
                             treatment={{
                               slug: productType,
-                              subtitle: "Zonas y paquetes personalizados",
+                              subtitle: campaign.subtitle || "Zonas y paquetes personalizados",
                               name: "Consultar disponibilidad",
                               price: overallMinPrice || 0,
                               image_url: campaign.image_url || null,
@@ -359,6 +359,8 @@ export default function HomePage() {
                     }}
                     productType={productType}
                     modalTitle={`${label} - ${gender === "hombres" ? "Hombres" : "Mujeres"}`}
+                    cardDescription={campaign.card_description}
+                    subtitle={campaign.subtitle}
                   />
                 );
               })}
@@ -380,6 +382,8 @@ export default function HomePage() {
             }}
             productType={productType}
             modalTitle={label}
+            cardDescription={campaign.card_description}
+            subtitle={campaign.subtitle}
           />
         );
       })}

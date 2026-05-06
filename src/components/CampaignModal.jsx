@@ -122,6 +122,8 @@ function CampaignModal({
   treatments = [],
   isAuthenticated,
   onLoginRequired,
+  cardDescription = null,
+  subtitle = null,
 }) {
   const navigate = useNavigate();
   const { whatsappPhone } = useBusiness();
@@ -194,10 +196,17 @@ function CampaignModal({
       onClose();
       navigate("/schedule", {
         state: {
-          treatment: { name: item.name, slug: item.slug, item_type: item.item_type, category: productType },
+          treatment: {
+            name: item.name,
+            slug: item.slug,
+            item_type: item.item_type,
+            category: productType,
+            subtitle,
+          },
           selectedPackageId: null,
           campaignItemType: item.item_type,
           productType: productType,
+          campaignDescription: cardDescription,
         },
       });
     } catch (error) {
