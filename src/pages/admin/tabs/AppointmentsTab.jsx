@@ -139,8 +139,6 @@ function AppointmentCard({
   onOpenAddPayment,
   pendingDeposit,
   onGoToPagos,
-  onApproveTransfer,
-  approvingTransferId,
   onOpenDetail,
 }) {
   const statusColor = STATUS_COLORS[appointment.status] || 'default';
@@ -268,8 +266,6 @@ function AppointmentCard({
           onComplete={onComplete}
           onNoShow={onNoShow}
           onOpenAddPayment={onOpenAddPayment}
-          onApproveTransfer={onApproveTransfer}
-          approvingTransferId={approvingTransferId}
           sx={{ flexWrap: 'nowrap' }}
         />
       </CardActions>
@@ -329,7 +325,6 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
 
   const [depositRemainderModalOpen, setDepositRemainderModalOpen] = useState(false);
   const [completeAfterPayment, setCompleteAfterPayment] = useState(false);
-  const [approvingTransferId, setApprovingTransferId] = useState(null);
   const [selectedDeposit, setSelectedDeposit] = useState(null);
   const [remainderMethod, setRemainderMethod] = useState('efectivo');
   const [remainderAmount, setRemainderAmount] = useState('');
@@ -708,26 +703,6 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
     }
   };
 
-  const handleApproveTransfer = async (appointmentId, paymentId) => {
-    if (!paymentId) return;
-    setApprovingTransferId(paymentId);
-    try {
-      await paymentService.confirmTransferPayment(paymentId);
-      analytics.trackOfflinePaymentConfirmed({
-        appointmentId,
-        paymentMethod: 'transferencia',
-        amount: 0,
-      });
-      setSuccessMessage('Transferencia aprobada');
-      await Promise.all([loadAppointments(), loadPendingDeposits()]);
-    } catch (err) {
-      logger.error('Error approving transfer', err);
-      setError('No se pudo aprobar la transferencia');
-    } finally {
-      setApprovingTransferId(null);
-    }
-  };
-
   const handleAppointmentCreated = async () => {
     await Promise.all([loadAppointments(), loadPendingDeposits()]);
   };
@@ -773,8 +748,6 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
                 onOpenAddPayment={handleOpenAddPayment}
                 pendingDeposit={pendingDeposit}
                 onGoToPagos={onGoToPagos}
-                onApproveTransfer={handleApproveTransfer}
-                approvingTransferId={approvingTransferId}
                 onOpenDetail={setDetailModalAppointment}
               />
             );
@@ -941,8 +914,6 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
         onComplete={handleCompleteClick}
         onNoShow={handleNoShowClick}
         onOpenAddPayment={handleOpenAddPayment}
-        onApproveTransfer={handleApproveTransfer}
-        approvingTransferId={approvingTransferId}
       />
 
     </>

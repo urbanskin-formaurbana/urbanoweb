@@ -84,8 +84,6 @@ export default function AppointmentActions({
   onComplete,
   onNoShow,
   onOpenAddPayment,
-  onApproveTransfer,
-  approvingTransferId,
   size = 'small',
   sx,
 }) {
@@ -135,27 +133,7 @@ export default function AppointmentActions({
         ...sx,
       }}
     >
-      {pendingPaymentContext && appointment.pending_transfer_payment_id ? (
-        <Button
-          size={size}
-          variant="contained"
-          color="primary"
-          onClick={() =>
-            onApproveTransfer?.(
-              appointment.id,
-              appointment.pending_transfer_payment_id,
-            )
-          }
-          disabled={approvingTransferId === appointment.pending_transfer_payment_id}
-          sx={{ px: 1 }}
-        >
-          {approvingTransferId === appointment.pending_transfer_payment_id ? (
-            <CircularProgress size={14} />
-          ) : (
-            'Aprobar Pago'
-          )}
-        </Button>
-      ) : pendingPaymentContext && (payOnArrival || pendingDeposit) && (pendingPaymentContext.remaining > 0 || (payOnArrival && appointment.payment_status === 'awaiting_payment')) ? (
+      {pendingPaymentContext && (payOnArrival || pendingDeposit) && (pendingPaymentContext.remaining > 0 || (payOnArrival && appointment.payment_status === 'awaiting_payment')) ? (
         <Button
           size={size}
           variant="contained"

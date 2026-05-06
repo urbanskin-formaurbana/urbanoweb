@@ -119,8 +119,6 @@ export default function AppointmentDetailModal({
   onComplete,
   onNoShow,
   onOpenAddPayment,
-  onApproveTransfer,
-  approvingTransferId,
 }) {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -396,12 +394,6 @@ export default function AppointmentDetailModal({
           onComplete={(appt) => { onClose(); onComplete(appt); }}
           onNoShow={(appt) => { onClose(); onNoShow(appt); }}
           onOpenAddPayment={(ctx) => { onClose(); onOpenAddPayment(ctx); }}
-          onApproveTransfer={
-            onApproveTransfer
-              ? (apptId, paymentId) => { onClose(); onApproveTransfer(apptId, paymentId); }
-              : undefined
-          }
-          approvingTransferId={approvingTransferId}
         />
       </Box>
     </Dialog>
