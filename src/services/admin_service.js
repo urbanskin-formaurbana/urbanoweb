@@ -11,6 +11,10 @@ const adminService = {
     return result;
   },
 
+  async getAppointment(appointmentId) {
+    return apiCall(`/admin/appointments/${appointmentId}`, { method: 'GET' });
+  },
+
   async getAppointmentPayments(appointmentId) {
     return apiCall(`/admin/appointments/${appointmentId}/payments`, { method: 'GET' });
   },

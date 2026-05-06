@@ -510,7 +510,7 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
     setRescheduling(true);
     try {
       const dateStr = rescheduleDate.format('YYYY-MM-DD');
-      const timeStr = rescheduleTime.format('HH:mm');
+      const timeStr = typeof rescheduleTime === 'string' ? rescheduleTime : rescheduleTime.format('HH:mm');
       const localTime = dayjs.tz(`${dateStr} ${timeStr}`, 'YYYY-MM-DD HH:mm', 'America/Montevideo');
       const utcTime = localTime.utc();
       const newDateTime = utcTime.toISOString();
@@ -523,7 +523,8 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
         newScheduledAt: newDateTime,
       });
 
-      setAppointments(prev => prev.filter(appt => appt.id !== selectedAppointmentForReschedule.id));
+      const updated = await adminService.getAppointment(selectedAppointmentForReschedule.id);
+      setAppointments(prev => prev.map(appt => appt.id === updated.id ? updated : appt));
       setSuccessMessage('Cita reagendada correctamente.');
       closeRescheduleModal();
       setSelectedAppointmentForReschedule(null);

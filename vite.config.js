@@ -60,6 +60,7 @@ export default defineConfig({
     watch: {
       usePolling: process.env.CHOKIDAR_USEPOLLING === 'true',
       interval: process.env.CHOKIDAR_INTERVAL ? Number(process.env.CHOKIDAR_INTERVAL) : undefined,
+      ignored: ['**/node_modules/**', '**/.git/**'],
     },
     allowedHosts: ['localhost', '127.0.0.1'],
   },
