@@ -1,5 +1,4 @@
 import {
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -13,6 +12,7 @@ import {
   TextField,
   CircularProgress,
 } from '@mui/material';
+import SafeDialog from './common/SafeDialog';
 
 function formatMoney(value) {
   const n = Number(value);
@@ -80,7 +80,7 @@ export default function DepositRemainderModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <SafeDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ pt: 2 }}>
         {selectedDeposit && (
@@ -157,6 +157,6 @@ export default function DepositRemainderModal({
           {savingRemainder ? <CircularProgress size={20} /> : 'Registrar Cobro'}
         </Button>
       </DialogActions>
-    </Dialog>
+    </SafeDialog>
   );
 }

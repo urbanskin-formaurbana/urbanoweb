@@ -26,7 +26,7 @@ import BusinessDetailsTab from './tabs/BusinessDetailsTab';
 export default function AdminPage() {
   const { user, logout } = useAuth();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     requestAnimationFrame(() => window.scrollTo(0, 0));
@@ -42,7 +42,7 @@ export default function AdminPage() {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 2, minHeight: '100vh' }}>
+    <Container maxWidth="xl" sx={{ py: 2, minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" fontWeight="bold">
@@ -74,8 +74,9 @@ export default function AdminPage() {
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
-          variant="fullWidth"
-          sx={{ mb: 2 }}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
         >
           {tabLabels.map((label, index) => (
             <Tab key={index} label={label} />

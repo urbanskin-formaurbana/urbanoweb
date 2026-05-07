@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBusiness } from "../contexts/BusinessContext";
 import {
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -23,6 +22,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { createCampaignService } from "../services/campaign_service";
 import analytics from "../utils/analytics";
+import SafeDialog from "./common/SafeDialog";
 
 function TabPanel({ children, value, index }) {
   return (
@@ -259,7 +259,7 @@ function CampaignModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth scroll="paper">
+    <SafeDialog open={open} onClose={onClose} maxWidth="sm" fullWidth scroll="paper">
       <DialogTitle
         sx={{
           fontWeight: "bold",
@@ -435,7 +435,7 @@ function CampaignModal({
           Cerrar
         </Button>
       </DialogActions>
-    </Dialog>
+    </SafeDialog>
   );
 }
 

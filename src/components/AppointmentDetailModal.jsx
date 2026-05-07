@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Dialog,
   DialogContent,
   Box,
   Typography,
@@ -20,6 +19,7 @@ import 'dayjs/locale/es';
 import AppointmentActions from './AppointmentActions';
 import adminService from '../services/admin_service';
 import logger from '../utils/logger';
+import SafeDialog from './common/SafeDialog';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -169,7 +169,7 @@ export default function AppointmentDetailModal({
     !!appointment.purchased_package_id;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <SafeDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <Box sx={{ position: 'relative', p: 3 }}>
         <IconButton
           onClick={onClose}
@@ -396,6 +396,6 @@ export default function AppointmentDetailModal({
           onOpenAddPayment={(ctx) => { onClose(); onOpenAddPayment(ctx); }}
         />
       </Box>
-    </Dialog>
+    </SafeDialog>
   );
 }

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -16,6 +15,7 @@ import {
   Box,
 } from "@mui/material";
 import treatmentService from "../services/treatment_service";
+import SafeDialog from "./common/SafeDialog";
 
 export default function PurchaseOptionsDialog({ open, onClose, treatment, onConfirm }) {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -64,7 +64,7 @@ export default function PurchaseOptionsDialog({ open, onClose, treatment, onConf
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <SafeDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Comprar {treatment?.name}</DialogTitle>
       <DialogContent>
         {loading && <CircularProgress />}
@@ -205,6 +205,6 @@ export default function PurchaseOptionsDialog({ open, onClose, treatment, onConf
           Continuar
         </Button>
       </DialogActions>
-    </Dialog>
+    </SafeDialog>
   );
 }

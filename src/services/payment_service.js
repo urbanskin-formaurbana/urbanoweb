@@ -296,6 +296,15 @@ export const paymentService = {
   },
 
   /**
+   * Hard-delete a payment record (admin only). Irreversible.
+   * @param {string} paymentId
+   * @returns {Promise<object>} - { success, deleted_id }
+   */
+  async deletePayment(paymentId) {
+    return apiCall(`/payments/admin/${paymentId}`, { method: 'DELETE' });
+  },
+
+  /**
    * Reject a pending transfer comprobante.
    * @param {string} paymentId
    * @param {object} data - { reason: string }

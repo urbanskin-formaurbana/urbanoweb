@@ -32,6 +32,7 @@ import {
 import adminService from "../../../services/admin_service";
 import RichTextDescriptionEditor from "../../../components/RichTextDescriptionEditor";
 import {isHtml} from "../../../utils/richText";
+import SlideToConfirm from "../../../components/common/SlideToConfirm";
 
 function closeDialogSafely(closerFn) {
   if (document.activeElement instanceof HTMLElement) {
@@ -458,8 +459,15 @@ export default function TreatmentsTab() {
     }
   };
 
-  const handleDeletePackage = async (pkg) => {
-    if (!window.confirm(`¿Eliminar la cuponera "${pkg.name}"?`)) return;
+  const [deletePackageTarget, setDeletePackageTarget] = useState(null);
+
+  const handleDeletePackage = (pkg) => {
+    setDeletePackageTarget(pkg);
+  };
+
+  const handleDeletePackageConfirmed = async () => {
+    const pkg = deletePackageTarget;
+    setDeletePackageTarget(null);
     try {
       await adminService.deletePackage(pkg.id);
       setSuccessMessage("Cuponera eliminada");
@@ -1489,6 +1497,26 @@ export default function TreatmentsTab() {
               "Crear Cuponera"
             )}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete cuponera confirmation */}
+      <Dialog open={!!deletePackageTarget} onClose={() => setDeletePackageTarget(null)}>
+        <DialogTitle>Eliminar cuponera</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Eliminar la cuponera{" "}
+            <strong>"{deletePackageTarget?.name}"</strong>?
+            Esta acción es irreversible.
+          </Typography>
+          <SlideToConfirm
+            key={deletePackageTarget?.id}
+            label="Deslizá para eliminar"
+            onConfirm={handleDeletePackageConfirmed}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeletePackageTarget(null)}>Cancelar</Button>
         </DialogActions>
       </Dialog>
 

@@ -1,6 +1,5 @@
 import {useState, useEffect} from "react";
 import {
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -39,6 +38,7 @@ import {
   filterSlotsForEmployee,
   fetchAvailableSlots,
 } from "../utils/slotUtils";
+import SafeDialog from "./common/SafeDialog";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -1851,7 +1851,7 @@ export default function CreateAppointmentModal({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <SafeDialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Crear nueva sesión</DialogTitle>
       <DialogContent>
         <Box sx={{mb: 3, mt: 1}}>
@@ -1982,6 +1982,6 @@ export default function CreateAppointmentModal({
           </>
         )}
       </DialogActions>
-    </Dialog>
+    </SafeDialog>
   );
 }

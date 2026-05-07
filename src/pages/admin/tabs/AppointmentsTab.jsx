@@ -318,6 +318,9 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
   // Create appointment modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
+  // Name filter state
+  const [nameFilter, setNameFilter] = useState('');
+
   // Appointment detail modal state
   const [detailModalAppointment, setDetailModalAppointment] = useState(null);
 
@@ -720,20 +723,33 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
 
       {/* Appointments View */}
       <Box>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2 }}>
+          <TextField
+            size="small"
+            placeholder="Filtrar por nombre..."
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            sx={{ flex: 1, maxWidth: 280 }}
+          />
           <Button variant="contained" onClick={() => setCreateModalOpen(true)}>
             + Nueva sesión
           </Button>
         </Box>
 
-        <Stack spacing={2}>
-          {appointments.length === 0 && !loading && (
-            <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
-              No hay citas en esta categoría
-            </Typography>
-          )}
-
-          {appointments.map(appointment => {
+        {(() => {
+          const filtered = nameFilter.trim()
+            ? appointments.filter(a =>
+                a.customer_name?.toLowerCase().includes(nameFilter.trim().toLowerCase())
+              )
+            : appointments;
+          return (
+            <Stack spacing={2}>
+              {filtered.length === 0 && !loading && (
+                <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
+                  No hay citas en esta categoría
+                </Typography>
+              )}
+              {filtered.map(appointment => {
             const pendingDeposit = pendingDeposits.find(d => d.appointment_id === appointment.id);
             return (
               <AppointmentCard
@@ -753,7 +769,9 @@ export default function AppointmentsTab({ activeTab, onGoToPagos }) {
               />
             );
           })}
-        </Stack>
+            </Stack>
+          );
+        })()}
       </Box>
 
 

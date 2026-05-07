@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -14,6 +13,7 @@ import {
 import * as pdfjsLib from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import paymentService from '../services/payment_service';
+import SafeDialog from './common/SafeDialog';
 
 // Set up PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -118,7 +118,7 @@ export default function ReceiptModal({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <SafeDialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>Comprobante de pago</DialogTitle>
       <DialogContent sx={{ p: 2, minHeight: 400, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'auto' }}>
         {isPdf ? (
@@ -234,6 +234,6 @@ export default function ReceiptModal({
           </>
         )}
       </DialogActions>
-    </Dialog>
+    </SafeDialog>
   );
 }

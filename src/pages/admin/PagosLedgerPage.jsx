@@ -13,13 +13,19 @@ import {
   Switch,
   Paper,
   IconButton,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
+import SafeDialog from "../../components/common/SafeDialog";
+import SlideToConfirm from "../../components/common/SlideToConfirm";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import paymentService from "../../services/payment_service";
 import PaymentCard from "../../components/admin/PaymentCard";
 import ReceiptModal from "../../components/ReceiptModal";
-import PaymentHistoryModal from "../../components/admin/PaymentHistoryModal";
+import AppointmentDetailModal from "../../components/admin/AppointmentDetailModal";
 
 // ── KPI tile ──────────────────────────────────────────────────────────────────
 function StatTile({ label, value }) {
@@ -105,6 +111,33 @@ function paramsFromFilters(filters, skip) {
   return p;
 }
 
+// ── Feature flag — set to false to hide the delete button from all cards ──────
+const ENABLE_DELETE = true;
+
+// ── Group payment items by appointment ────────────────────────────────────────
+// Items sorted newest-first by the API. For each appointment, fold all its
+// payments into the first (most-recent) item's `allPayments` array so the
+// ledger shows one card per appointment instead of one card per payment.
+function groupByAppointment(items) {
+  const seen = new Map();
+  const result = [];
+  for (const item of items) {
+    const apptId = item.appointment?.id;
+    if (!apptId) {
+      result.push({ ...item, allPayments: [item] });
+      continue;
+    }
+    if (seen.has(apptId)) {
+      seen.get(apptId).allPayments.push(item);
+    } else {
+      const group = { ...item, allPayments: [item] };
+      seen.set(apptId, group);
+      result.push(group);
+    }
+  }
+  return result;
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function PagosLedgerPage() {
   const navigate = useNavigate();
@@ -136,8 +169,10 @@ export default function PagosLedgerPage() {
 
   // Receipt modal
   const [receiptItem, setReceiptItem] = useState(null);
-  // History modal
-  const [historyAppointmentId, setHistoryAppointmentId] = useState(null);
+  // Appointment detail modal
+  const [apptDetailPayment, setApptDetailPayment] = useState(null);
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   // Debounce search
   const searchDebounce = useRef(null);
@@ -245,17 +280,23 @@ export default function PagosLedgerPage() {
     }
   };
 
+  const handleDeleteConfirmed = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget.id;
+    setDeleteTarget(null);
+    try {
+      await paymentService.deletePayment(id);
+      setItems((prev) => prev.filter((p) => p.id !== id));
+      setTotal((prev) => prev - 1);
+    } catch {
+      setError("No se pudo borrar el registro");
+    }
+  };
+
   return (
-    <Container maxWidth="sm" sx={{ py: 2, minHeight: "100vh" }}>
+    <Container maxWidth="xl" sx={{ py: 2, minHeight: "100vh" }}>
       {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          mb: 2,
-        }}
-      >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <IconButton size="small" onClick={() => navigate("/admin")}>
           <ArrowBackIcon />
         </IconButton>
@@ -264,143 +305,175 @@ export default function PagosLedgerPage() {
         </Typography>
       </Box>
 
-      {/* KPI strip */}
-      {stats && (
-        <Box sx={{ display: "flex", gap: 1, mb: 3, flexWrap: "wrap" }}>
-          <StatTile label="Completados" value={stats.completed_count} />
-          <StatTile label="Pendientes" value={stats.pending_count} />
-          <StatTile label="Fallidos" value={stats.failed_count} />
-          <StatTile
-            label="Ingresos totales"
-            value={`$${(stats.total_revenue || 0).toFixed(0)}`}
-          />
-        </Box>
-      )}
-
-      {/* Filter bar */}
-      <Stack spacing={1.5} sx={{ mb: 2 }}>
-        <ChipGroup
-          label="Estado"
-          options={STATUS_OPTIONS}
-          value={filters.status}
-          onChange={(v) => setFilter("status", v)}
-        />
-        <ChipGroup
-          label="Método"
-          options={METHOD_OPTIONS}
-          value={filters.method}
-          onChange={(v) => setFilter("method", v)}
-        />
-
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <TextField
-            label="Desde"
-            type="date"
-            size="small"
-            InputLabelProps={{ shrink: true }}
-            value={filters.date_from}
-            onChange={(e) => setFilter("date_from", e.target.value)}
-            sx={{ flex: 1 }}
-          />
-          <TextField
-            label="Hasta"
-            type="date"
-            size="small"
-            InputLabelProps={{ shrink: true }}
-            value={filters.date_to}
-            onChange={(e) => setFilter("date_to", e.target.value)}
-            sx={{ flex: 1 }}
-          />
-        </Box>
-
-        <TextField
-          label="Buscar cliente"
-          size="small"
-          fullWidth
-          value={filters.customer_search}
-          onChange={handleSearchChange}
-        />
-
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={filters.has_comprobante}
-                onChange={(e) => setFilter("has_comprobante", e.target.checked)}
-                size="small"
+      {/* Two-column layout on desktop */}
+      <Box
+        sx={{
+          display: "flex",
+          gap: 3,
+          alignItems: "flex-start",
+          flexDirection: { xs: "column", md: "row" },
+        }}
+      >
+        {/* ── Sidebar: KPIs + Filters ── */}
+        <Box
+          sx={{
+            width: { xs: "100%", md: 300 },
+            flexShrink: 0,
+            position: { md: "sticky" },
+            top: { md: 16 },
+          }}
+        >
+          {/* KPI strip */}
+          {stats && (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 1,
+                mb: 2,
+              }}
+            >
+              <StatTile label="Completados" value={stats.completed_count} />
+              <StatTile label="Pendientes" value={stats.pending_count} />
+              <StatTile label="Fallidos" value={stats.failed_count} />
+              <StatTile
+                label="Ingresos totales"
+                value={`$${(stats.total_revenue || 0).toFixed(0)}`}
               />
-            }
-            label={<Typography variant="body2">Solo con comprobante</Typography>}
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={filters.is_deposit}
-                onChange={(e) => setFilter("is_deposit", e.target.checked)}
+            </Box>
+          )}
+
+          {/* Filter bar */}
+          <Stack spacing={1.5}>
+            <ChipGroup
+              label="Estado"
+              options={STATUS_OPTIONS}
+              value={filters.status}
+              onChange={(v) => setFilter("status", v)}
+            />
+            <ChipGroup
+              label="Método"
+              options={METHOD_OPTIONS}
+              value={filters.method}
+              onChange={(v) => setFilter("method", v)}
+            />
+
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <TextField
+                label="Desde"
+                type="date"
                 size="small"
+                InputLabelProps={{ shrink: true }}
+                value={filters.date_from}
+                onChange={(e) => setFilter("date_from", e.target.value)}
+                sx={{ flex: 1 }}
               />
-            }
-            label={<Typography variant="body2">Solo depósitos</Typography>}
-          />
+              <TextField
+                label="Hasta"
+                type="date"
+                size="small"
+                InputLabelProps={{ shrink: true }}
+                value={filters.date_to}
+                onChange={(e) => setFilter("date_to", e.target.value)}
+                sx={{ flex: 1 }}
+              />
+            </Box>
+
+            <TextField
+              label="Buscar cliente"
+              size="small"
+              fullWidth
+              value={filters.customer_search}
+              onChange={handleSearchChange}
+            />
+
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={filters.has_comprobante}
+                    onChange={(e) => setFilter("has_comprobante", e.target.checked)}
+                    size="small"
+                  />
+                }
+                label={<Typography variant="body2">Solo con comprobante</Typography>}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={filters.is_deposit}
+                    onChange={(e) => setFilter("is_deposit", e.target.checked)}
+                    size="small"
+                  />
+                }
+                label={<Typography variant="body2">Solo depósitos</Typography>}
+              />
+            </Box>
+          </Stack>
         </Box>
-      </Stack>
 
-      {loading && !items.length && <LinearProgress sx={{ mb: 1 }} />}
+        {/* ── Main content: list ── */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          {loading && !items.length && <LinearProgress sx={{ mb: 1 }} />}
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          )}
 
-      {/* Results summary */}
-      {!loading && (
-        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
-          {total} resultado{total !== 1 ? "s" : ""}
-        </Typography>
-      )}
+          {/* Results summary */}
+          {!loading && (
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
+              {total} resultado{total !== 1 ? "s" : ""}
+            </Typography>
+          )}
 
-      {/* Payment list */}
-      <Stack spacing={2}>
-        {!loading && items.length === 0 && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            align="center"
-            sx={{ py: 4 }}
-          >
-            No hay pagos para los filtros seleccionados.
-          </Typography>
-        )}
+          {/* Payment list */}
+          <Stack spacing={2}>
+            {!loading && items.length === 0 && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                align="center"
+                sx={{ py: 4 }}
+              >
+                No hay pagos para los filtros seleccionados.
+              </Typography>
+            )}
 
-        {items.map((item) => (
-          <PaymentCard
-            key={item.id}
-            payment={item}
-            variant="ledger"
-            onOpenComprobante={(rd) => setReceiptItem(rd)}
-            onOpenHistory={
-              item.appointment?.id
-                ? (apptId) => setHistoryAppointmentId(apptId)
-                : undefined
-            }
-          />
-        ))}
-      </Stack>
+            {groupByAppointment(items).map((item) => (
+              <PaymentCard
+                key={item.appointment?.id || item.id}
+                payment={item}
+                allPayments={item.allPayments}
+                variant="ledger"
+                onOpenComprobante={(rd) => setReceiptItem(rd)}
+                onViewAppointment={
+                  item.appointment?.id
+                    ? () => setApptDetailPayment(item)
+                    : undefined
+                }
+                onDelete={ENABLE_DELETE ? (p) => setDeleteTarget(p) : undefined}
+              />
+            ))}
+          </Stack>
 
-      {/* Load more */}
-      {hasMore && (
-        <Box sx={{ textAlign: "center", mt: 2 }}>
-          <Button
-            onClick={handleLoadMore}
-            disabled={loading}
-            variant="outlined"
-            size="small"
-          >
-            {loading ? "Cargando..." : "Cargar más"}
-          </Button>
+          {/* Load more */}
+          {hasMore && (
+            <Box sx={{ textAlign: "center", mt: 2 }}>
+              <Button
+                onClick={handleLoadMore}
+                disabled={loading}
+                variant="outlined"
+                size="small"
+              >
+                {loading ? "Cargando..." : "Cargar más"}
+              </Button>
+            </Box>
+          )}
         </Box>
-      )}
+      </Box>
 
       {/* Receipt modal — read-only from ledger, but confirm/reject still works */}
       <ReceiptModal
@@ -421,12 +494,37 @@ export default function PagosLedgerPage() {
         }}
       />
 
-      {/* History modal */}
-      <PaymentHistoryModal
-        open={!!historyAppointmentId}
-        appointmentId={historyAppointmentId}
-        onClose={() => setHistoryAppointmentId(null)}
+      {/* Appointment detail modal */}
+      <AppointmentDetailModal
+        open={!!apptDetailPayment}
+        appointmentId={apptDetailPayment?.appointment?.id}
+        payment={apptDetailPayment}
+        onClose={() => setApptDetailPayment(null)}
+        onDeleted={() => { setSkip(0); fetchPage(filters, 0, false); }}
       />
+
+      {/* Delete confirmation */}
+      <SafeDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
+        <DialogTitle>Borrar registro de pago</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro que querés borrar este pago de{" "}
+            <strong>
+              {deleteTarget?.customer?.full_name || deleteTarget?.customer_name || "este cliente"}
+            </strong>
+            {deleteTarget?.amount ? ` por $${Number(deleteTarget.amount).toFixed(2)}` : ""}?
+            Esta acción es irreversible.
+          </DialogContentText>
+          <SlideToConfirm
+            key={deleteTarget?.id}
+            label="Deslizá para borrar"
+            onConfirm={handleDeleteConfirmed}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTarget(null)}>Cancelar</Button>
+        </DialogActions>
+      </SafeDialog>
     </Container>
   );
 }

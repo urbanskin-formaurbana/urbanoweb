@@ -26,6 +26,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import SlideToConfirm from './common/SlideToConfirm';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -739,16 +740,13 @@ export default function CampaignAdminTab({ productType, productLabel }) {
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Solo se eliminarán los turnos disponibles (sin reserva).
           </Typography>
+          <SlideToConfirm
+            label="Deslizá para eliminar"
+            onConfirm={() => { setConfirmBulkDeleteOpen(false); handleBulkDeleteSlots(); }}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmBulkDeleteOpen(false)}>Cancelar</Button>
-          <Button
-            onClick={handleBulkDeleteSlots}
-            variant="contained"
-            color="error"
-          >
-            Eliminar
-          </Button>
         </DialogActions>
       </Dialog>
     </Box>

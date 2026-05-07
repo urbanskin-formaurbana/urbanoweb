@@ -1,7 +1,6 @@
 import {
   Button,
   CircularProgress,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -12,6 +11,7 @@ import {
 } from '@mui/material';
 import RichTextDescriptionEditor from './RichTextDescriptionEditor';
 import CategoryImageUpload from './CategoryImageUpload';
+import SafeDialog from './common/SafeDialog';
 
 export default function ProductTypeDialog({
   open,
@@ -41,7 +41,7 @@ export default function ProductTypeDialog({
   setProductImageUrlMujeres,
 }) {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <SafeDialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>
         {isEditMode ? `Editar producto — ${productType}` : 'Nuevo Tipo de Producto'}
       </DialogTitle>
@@ -119,6 +119,6 @@ export default function ProductTypeDialog({
           {savingProduct ? 'Guardando...' : isEditMode ? 'Guardar' : 'Crear'}
         </Button>
       </DialogActions>
-    </Dialog>
+    </SafeDialog>
   );
 }

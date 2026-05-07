@@ -32,6 +32,7 @@ import {
   toCategoryKey,
 } from '../../../utils/messageTemplates';
 import logger from '../../../utils/logger';
+import SlideToConfirm from '../../../components/common/SlideToConfirm';
 
 const DEFAULT_CATEGORY_OPTION = '__default__';
 
@@ -278,17 +279,23 @@ export default function TemplatesTab() {
     }
   };
 
-  const handleDeleteTemplate = async (templateId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta plantilla?')) {
-      try {
-        await adminService.deleteMessageTemplate(templateId);
-        setSuccessMessage('Plantilla eliminada correctamente');
-        await loadTemplates();
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } catch (err) {
-        logger.error('Error deleting template', err);
-        setError('No se pudo eliminar la plantilla');
-      }
+  const [deleteTemplateTarget, setDeleteTemplateTarget] = useState(null);
+
+  const handleDeleteTemplate = (templateId) => {
+    setDeleteTemplateTarget(templateId);
+  };
+
+  const handleDeleteTemplateConfirmed = async () => {
+    const templateId = deleteTemplateTarget;
+    setDeleteTemplateTarget(null);
+    try {
+      await adminService.deleteMessageTemplate(templateId);
+      setSuccessMessage('Plantilla eliminada correctamente');
+      await loadTemplates();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      logger.error('Error deleting template', err);
+      setError('No se pudo eliminar la plantilla');
     }
   };
 
@@ -586,6 +593,24 @@ export default function TemplatesTab() {
           >
             {updatingTemplate ? <CircularProgress size={20} /> : 'Guardar Cambios'}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete template confirmation */}
+      <Dialog open={!!deleteTemplateTarget} onClose={() => setDeleteTemplateTarget(null)}>
+        <DialogTitle>Eliminar plantilla</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Eliminar esta plantilla? Esta acción es irreversible.
+          </Typography>
+          <SlideToConfirm
+            key={deleteTemplateTarget}
+            label="Deslizá para eliminar"
+            onConfirm={handleDeleteTemplateConfirmed}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTemplateTarget(null)}>Cancelar</Button>
         </DialogActions>
       </Dialog>
 

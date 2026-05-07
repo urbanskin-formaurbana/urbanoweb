@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -11,8 +10,13 @@ import {
   Alert,
   Chip,
   Divider,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import paymentService from "../../services/payment_service";
+import SafeDialog from "../common/SafeDialog";
+import SlideToConfirm from "../common/SlideToConfirm";
 
 const METHOD_LABEL = {
   efectivo: "Efectivo",
@@ -47,10 +51,22 @@ function formatDateTime(raw) {
   });
 }
 
-export default function PaymentHistoryModal({ open, onClose, appointmentId }) {
+export default function PaymentHistoryModal({ open, onClose, appointmentId, onDeleted }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const reload = () => {
+    if (!appointmentId) return;
+    setLoading(true);
+    setError(null);
+    paymentService
+      .getAppointmentPaymentHistory(appointmentId)
+      .then(setData)
+      .catch(() => setError("No se pudo cargar el historial"))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
     if (!open || !appointmentId) return;
@@ -64,12 +80,25 @@ export default function PaymentHistoryModal({ open, onClose, appointmentId }) {
       .finally(() => setLoading(false));
   }, [open, appointmentId]);
 
+  const handleDeleteConfirmed = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget.id;
+    setDeleteTarget(null);
+    try {
+      await paymentService.deletePayment(id);
+      reload();
+      if (onDeleted) onDeleted(id);
+    } catch {
+      setError("No se pudo borrar el registro");
+    }
+  };
+
   const appt = data?.appointment;
   const payments = data?.payments || [];
   const summary = data?.summary;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <SafeDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Historial de pagos del turno</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         {loading && (
@@ -133,11 +162,24 @@ export default function PaymentHistoryModal({ open, onClose, appointmentId }) {
                             "—"}{" "}
                           • ${(p.amount || 0).toFixed(2)}
                         </Typography>
-                        <Chip
-                          label={statusLabel(p.status)}
-                          color={statusChipColor(p.status)}
-                          size="small"
-                        />
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                          <Chip
+                            label={statusLabel(p.status)}
+                            color={statusChipColor(p.status)}
+                            size="small"
+                          />
+                          {p.id && (
+                            <Tooltip title="Borrar este registro">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => setDeleteTarget(p)}
+                              >
+                                <DeleteOutlineIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </Box>
                       </Box>
                       {p.discount_applied > 0 && (
                         <Typography
@@ -216,6 +258,29 @@ export default function PaymentHistoryModal({ open, onClose, appointmentId }) {
       <DialogActions>
         <Button onClick={onClose}>Cerrar</Button>
       </DialogActions>
-    </Dialog>
+
+      {/* Delete confirmation */}
+      <SafeDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
+        <DialogTitle>Borrar registro de pago</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Borrar{" "}
+            <strong>
+              {METHOD_LABEL[deleteTarget?.payment_method] || deleteTarget?.payment_method}
+              {" "}• ${(deleteTarget?.amount || 0).toFixed(2)}
+            </strong>
+            ? Esta acción es irreversible.
+          </Typography>
+          <SlideToConfirm
+            key={deleteTarget?.id}
+            label="Deslizá para borrar"
+            onConfirm={handleDeleteConfirmed}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTarget(null)}>Cancelar</Button>
+        </DialogActions>
+      </SafeDialog>
+    </SafeDialog>
   );
 }

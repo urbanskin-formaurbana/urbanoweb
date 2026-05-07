@@ -13,6 +13,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+import SlideToConfirm from "../../components/common/SlideToConfirm";
 import {useNavigate, useLocation, Navigate} from "react-router-dom";
 import {useAuth} from "../../contexts/AuthContext";
 import {useBusiness} from "../../contexts/BusinessContext";
@@ -743,6 +744,10 @@ export default function ExistingAppointmentPage() {
             <Typography sx={{fontSize: 15, color: "#141414"}}>
               ¿Estás seguro de que querés cancelar esta sesión? La cancelación es sin costo hasta 24hs antes.
             </Typography>
+            <SlideToConfirm
+              label="Deslizá para cancelar sesión"
+              onConfirm={handleDeleteConfirm}
+            />
           </DialogContent>
           <DialogActions sx={{p: 2, gap: 1}}>
             <Button
@@ -750,22 +755,6 @@ export default function ExistingAppointmentPage() {
               sx={{color: "#5b5b5b", textTransform: "none", fontFamily: "'Work Sans'"}}
             >
               Volver
-            </Button>
-            <Button
-              onClick={handleDeleteConfirm}
-              variant="contained"
-              disabled={deleting}
-              startIcon={deleting ? <CircularProgress size={16} /> : undefined}
-              sx={{
-                bgcolor: "#b42a2a",
-                "&:hover": {bgcolor: "#8b1f1f"},
-                fontFamily: "'Work Sans'",
-                fontWeight: 600,
-                textTransform: "none",
-                borderRadius: "8px",
-              }}
-            >
-              {deleting ? "Cancelando…" : "Sí, cancelar"}
             </Button>
           </DialogActions>
         </Dialog>
