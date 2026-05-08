@@ -78,10 +78,10 @@ export default function SiteFooter({
         </div>
         <section
           className="fu-footer__brands"
-          aria-label="Tecnología y marcas asociadas"
+          aria-label="Productos y equipos que utilizamos"
         >
           <h4 className="fu-footer__brands-title">
-            Tecnologías y marcas asociadas
+            Marcas y equipos con los que trabajamos
           </h4>
           <ul className="fu-footer__brands-row">
             {BRAND_LOGOS.map((brand) => (
