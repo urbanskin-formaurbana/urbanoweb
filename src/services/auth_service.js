@@ -1,23 +1,12 @@
 /**
  * Auth Service
- * Handles all authentication-related API calls
+ * Handles authenticated API calls for the current user.
+ * Session management (login, logout, refresh) is owned by SuperTokens.
  */
 
 import { apiCall } from './api.js';
 
 export const authService = {
-  /**
-   * Login with Google OAuth token
-   * @param {string} idToken - Google ID token from OAuth
-   * @returns {Promise<object>} - Access and refresh tokens
-   */
-  async loginWithGoogle(idToken) {
-    return apiCall('/auth/google', {
-      method: 'POST',
-      body: JSON.stringify({ id_token: idToken }),
-    });
-  },
-
   /**
    * Get current authenticated user profile
    * @returns {Promise<object>} - User profile data
@@ -38,58 +27,6 @@ export const authService = {
       method: 'PUT',
       body: JSON.stringify(data),
     });
-  },
-
-  /**
-   * Refresh access token using refresh token
-   * @returns {Promise<object>} - New access token
-   */
-  async refreshToken() {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-    return apiCall('/auth/refresh', {
-      method: 'POST',
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-  },
-
-  /**
-   * Save tokens to localStorage
-   * @param {object} response - Auth response with tokens
-   */
-  saveTokens(response) {
-    if (response.access_token) {
-      localStorage.setItem('access_token', response.access_token);
-    }
-    if (response.refresh_token) {
-      localStorage.setItem('refresh_token', response.refresh_token);
-    }
-  },
-
-  /**
-   * Get stored access token
-   * @returns {string|null} - Access token or null
-   */
-  getAccessToken() {
-    return localStorage.getItem('access_token');
-  },
-
-  /**
-   * Check if user is authenticated
-   * @returns {boolean} - True if access token exists
-   */
-  isAuthenticated() {
-    return !!localStorage.getItem('access_token');
-  },
-
-  /**
-   * Logout user (clear tokens)
-   */
-  logout() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
   },
 
   /**

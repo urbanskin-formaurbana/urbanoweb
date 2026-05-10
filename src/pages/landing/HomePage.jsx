@@ -145,16 +145,10 @@ export default function HomePage() {
 
   const handleTreatmentClick = (treatment, productType = "body") => {
     analytics.trackSelectItem(treatment, productType);
-    if (!isAuthenticated) {
-      analytics.trackLoginModalOpened({ trigger: "treatment_click" });
-      setLoginModalOpen(true);
-      return;
-    }
     if (user?.user_type === "employee") {
       navigate("/admin");
       return;
     }
-
     navigate("/schedule", { state: { treatment, productType } });
   };
 

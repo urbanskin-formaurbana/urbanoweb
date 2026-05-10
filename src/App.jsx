@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Alert, Snackbar } from '@mui/material'
 import AppRoutes from './router/routes.jsx'
+import AuthErrorToast from './auth/AuthErrorToast.jsx'
 
 // Load MercadoPago SDK with public key
 const mpPublicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY
@@ -48,6 +49,7 @@ export default function App() {
   return (
     <>
       <AppRoutes />
+      <AuthErrorToast />
       <Snackbar
         open={sessionExpired}
         autoHideDuration={3000}

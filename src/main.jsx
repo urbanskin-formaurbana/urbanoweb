@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import { GoogleOAuthProvider } from '@react-oauth/google'
+import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react'
 import * as Sentry from '@sentry/react'
 import App from './App.jsx'
 import './index.css'
@@ -10,6 +10,11 @@ import { ThemeProvider, CssBaseline, createTheme } from '@mui/material'
 import { AuthProvider } from './contexts/AuthContext'
 import { BusinessProvider } from './contexts/BusinessContext'
 import { ColdStartProvider } from './contexts/ColdStartContext'
+import supertokensConfig from './auth/supertokensConfig'
+import { getAnonymousId } from './analytics/anonymousId'
+
+SuperTokens.init(supertokensConfig)
+getAnonymousId()
 
 
 // Initialize Sentry as early as possible
@@ -126,14 +131,12 @@ const theme = createTheme({
   },
 })
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <ColdStartProvider>
-        <GoogleOAuthProvider clientId={googleClientId}>
+    <SuperTokensWrapper>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <ColdStartProvider>
           <BrowserRouter>
             <AuthProvider>
               <BusinessProvider>
@@ -141,8 +144,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               </BusinessProvider>
             </AuthProvider>
           </BrowserRouter>
-        </GoogleOAuthProvider>
-      </ColdStartProvider>
-    </ThemeProvider>
+        </ColdStartProvider>
+      </ThemeProvider>
+    </SuperTokensWrapper>
   </React.StrictMode>
 )

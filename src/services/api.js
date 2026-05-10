@@ -3,6 +3,9 @@
  * Centralized fetch helper for all backend API calls
  * Uses VITE_API_URL from environment variables
  * Includes cold-start queue for backend wake-up
+ *
+ * Auth headers are injected automatically by supertokens-website's global fetch
+ * interceptor, which is installed when SuperTokens.init() is called in main.jsx.
  */
 
 import logger from '../utils/logger';
@@ -23,12 +26,6 @@ async function rawApiCall(endpoint, options = {}) {
     'Content-Type': 'application/json',
   };
 
-  // Add authorization token if available
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    defaultHeaders['Authorization'] = `Bearer ${token}`;
-  }
-
   const { suppressErrorLog, ...fetchOptions } = options;
 
   const config = {
@@ -39,17 +36,6 @@ async function rawApiCall(endpoint, options = {}) {
 
   try {
     const response = await fetch(url, config);
-
-    // Handle 401 - token expired or invalid, force re-login
-    if (response.status === 401) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user');
-      window.dispatchEvent(new CustomEvent('auth:logout'));
-      const err = new Error('Session expired - please log in again');
-      err._silent = true;
-      throw err;
-    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: response.statusText }));

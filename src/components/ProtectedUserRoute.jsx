@@ -1,9 +1,10 @@
 import { Navigate } from 'react-router-dom';
+import { SessionAuth } from 'supertokens-auth-react/recipe/session';
 import { useAuth } from '../contexts/AuthContext';
 import { Box, CircularProgress } from '@mui/material';
 
-export default function ProtectedUserRoute({ children }) {
-  const { user, loading } = useAuth();
+function UserGuard({ children }) {
+  const { user, loading, isAuthenticated } = useAuth();
 
   if (loading) {
     return (
@@ -13,7 +14,7 @@ export default function ProtectedUserRoute({ children }) {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
@@ -22,4 +23,12 @@ export default function ProtectedUserRoute({ children }) {
   }
 
   return children;
+}
+
+export default function ProtectedUserRoute({ children }) {
+  return (
+    <SessionAuth>
+      <UserGuard>{children}</UserGuard>
+    </SessionAuth>
+  );
 }

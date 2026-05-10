@@ -1,61 +1,12 @@
 import { Navigate } from 'react-router-dom';
+import { SessionAuth } from 'supertokens-auth-react/recipe/session';
 import { useAuth } from '../contexts/AuthContext';
 import { Box, CircularProgress } from '@mui/material';
-import { useState, useEffect } from 'react';
 
-export default function ProtectedAdminRoute({ children }) {
+function AdminGuard({ children }) {
   const { user, loading } = useAuth();
-  const [sessionVerified, setSessionVerified] = useState(false);
-  const [sessionValid, setSessionValid] = useState(true);
 
-  // Verify session is still valid on backend
-  useEffect(() => {
-    if (loading || !user) {
-      setSessionVerified(true);
-      return;
-    }
-
-    const verifySession = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-          setSessionValid(false);
-          setSessionVerified(true);
-          return;
-        }
-
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }).catch(() => null); // Suppress network errors
-
-        if (!response) {
-          // Network error, allow to proceed and let API handle it
-          setSessionValid(true);
-        } else if (response.status === 401) {
-          // Token expired, clear auth state
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          localStorage.removeItem('user');
-          window.dispatchEvent(new CustomEvent('auth:logout'));
-          setSessionValid(false);
-        } else if (response.ok) {
-          setSessionValid(true);
-        }
-      } catch (error) {
-        // Unexpected error, allow to proceed and let API handle it
-        setSessionValid(true);
-      } finally {
-        setSessionVerified(true);
-      }
-    };
-
-    verifySession();
-  }, [loading, user]);
-
-  if (loading || !sessionVerified) {
+  if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <CircularProgress />
@@ -63,9 +14,17 @@ export default function ProtectedAdminRoute({ children }) {
     );
   }
 
-  if (!user || !sessionValid || user.user_type !== 'employee') {
+  if (!user || user.user_type !== 'employee') {
     return <Navigate to="/" replace />;
   }
 
   return children;
+}
+
+export default function ProtectedAdminRoute({ children }) {
+  return (
+    <SessionAuth>
+      <AdminGuard>{children}</AdminGuard>
+    </SessionAuth>
+  );
 }

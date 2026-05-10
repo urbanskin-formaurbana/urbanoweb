@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBusiness } from "../contexts/BusinessContext";
 import {
@@ -148,6 +148,24 @@ function CampaignModal({
 
   const campaignService = createCampaignService(productType);
 
+  // Pre-warm slot cache when the modal opens so the first "Contratar" click is fast
+  useEffect(() => {
+    if (!open || !isAuthenticated) return;
+    let cancelled = false;
+    campaignService.getActiveCampaign()
+      .then((campaign) => {
+        if (!campaign || cancelled) return;
+        const uniqueDurations = [...new Set(
+          [...zonas, ...paquetes].map((t) => t.duration_minutes).filter(Boolean)
+        )];
+        uniqueDurations.forEach((d) => {
+          if (!cancelled) campaignService.getAvailableSlots(d).catch(() => {});
+        });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [open, isAuthenticated]);
+
   const handleContratar = async (item) => {
     analytics.trackCampaignItemSelected({ productType, gender, item });
     if (!isAuthenticated) {
@@ -202,6 +220,7 @@ function CampaignModal({
             item_type: item.item_type,
             category: productType,
             subtitle,
+            duration_minutes: item.duration_minutes,
           },
           selectedPackageId: null,
           campaignItemType: item.item_type,

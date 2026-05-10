@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import LandingLayout from '../layouts/LandingLayout.jsx'
+import GoogleAuthCallback from '../auth/GoogleAuthCallback.jsx'
 import NotFound from '../pages/NotFound.jsx'
 import { LANDINGS } from '../pages/_registry.js'
 import React from 'react'
@@ -24,12 +25,19 @@ const regularLandings = LANDINGS.map(
   ({ path, import: importer }) => ({ path, Page: React.lazy(importer) })
 )
 
-export default function AppRoutes() {
+const Spinner = (
+  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+    <CircularProgress />
+  </Box>
+)
 
+export default function AppRoutes() {
   return (
     <Routes>
+      <Route path="/auth/callback/google" element={<GoogleAuthCallback />} />
+
       <Route element={<LandingLayout />}>
-        <Route index element={<React.Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>}><HomePage /></React.Suspense>} />
+        <Route index element={<React.Suspense fallback={Spinner}><HomePage /></React.Suspense>} />
         {/* Explicit Cinturon Routes */}
         <Route path="/cinturon-orion" element={<CinturonOrion />} />
         <Route path="/cinturon-titan" element={<CinturonTitan />} />
@@ -38,25 +46,18 @@ export default function AppRoutes() {
           <Route
             key={path}
             path={path}
-            element={
-              <React.Suspense
-                fallback={
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                    <CircularProgress />
-                  </Box>
-                }
-              >
-                <Page />
-              </React.Suspense>
-            }
+            element={<React.Suspense fallback={Spinner}><Page /></React.Suspense>}
           />
         ))}
-        {/* Booking Flow Routes */}
+        {/* Public booking entry: /schedule has no auth gate — the "Continuar al pago"
+            button checks the session and redirects to /auth if needed */}
+        <Route path="/schedule" element={<SchedulingPage />} />
+        {/* Protected user routes */}
         <Route path="/payment" element={<ProtectedUserRoute><PaymentPage /></ProtectedUserRoute>} />
-        <Route path="/schedule" element={<ProtectedUserRoute><SchedulingPage /></ProtectedUserRoute>} />
         <Route path="/appointment-confirmed" element={<ProtectedUserRoute><AppointmentConfirmedPage /></ProtectedUserRoute>} />
         <Route path="/my-appointments" element={<ProtectedUserRoute><AppointmentHistoryPage /></ProtectedUserRoute>} />
         <Route path="/appointment" element={<ProtectedUserRoute><ExistingAppointmentPage /></ProtectedUserRoute>} />
+        <Route path="*" element={<NotFound />} />
       </Route>
       <Route
         path="/admin"
@@ -74,7 +75,6 @@ export default function AppRoutes() {
           </ProtectedAdminRoute>
         }
       />
-      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }

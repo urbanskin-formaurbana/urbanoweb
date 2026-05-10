@@ -6,7 +6,6 @@ import {
   CardActions,
   CardContent,
   Container,
-  Paper,
   Stack,
   Typography,
 } from "@mui/material";
@@ -49,89 +48,64 @@ export default function NotFound() {
     <Container
       maxWidth="lg"
       sx={{
-        py: { xs: 2, md: 10 },
+        py: { xs: 6, md: 10 },
         display: "flex",
         flexDirection: "column",
-        gap: { xs: 6, md: 8 },
+        gap: { xs: 8, md: 10 },
       }}
     >
-      <Stack alignItems="center" spacing={{ xs: 4, md: 5 }} textAlign="center">
-        <Paper
-          elevation={0}
+      {/* Hero */}
+      <Stack alignItems="center" spacing={2} textAlign="center">
+        <Box
+          component="img"
+          src={FormaUrbanaLogo}
+          alt="FORMA Urbana"
+          sx={{ width: 120, opacity: 0.55, mb: 1 }}
+        />
+        <Typography
+          variant="h1"
+          color="primary.main"
           sx={{
-            width: "100%",
-            maxWidth: 860,
-            px: { xs: 3, md: 5 },
-            py: { xs: 3, md: 4 },
-            borderRadius: 4,
-            bgcolor: "success.light",
-            color: "success.contrastText",
+            fontSize: "clamp(80px, 15vw, 140px)",
+            fontWeight: 700,
+            lineHeight: 1,
+            letterSpacing: "-0.04em",
           }}
         >
-          <Stack spacing={{ xs: 3, md: 4 }} alignItems="stretch">
-            <Stack
-              direction={{ xs: "column", md: "row" }}
-              spacing={3}
-              alignItems={{ xs: "center", md: "stretch" }}
-            >
-              <Box
-                component="img"
-                src={FormaUrbanaLogo}
-                alt="FORMA Urbana"
-                sx={{
-                  width: { xs: "60vw", sm: "40vw", md: "100%" },
-                  flexBasis: { xs: "auto", md: "40%" },
-                  flexGrow: 1,
-                  maxWidth: { xs: 260, md: 360 },
-                  filter: "brightness(0) invert(1)",
-                  mx: { xs: "auto", md: 0 },
-                }}
-              />
-              <Stack
-                spacing={1.5}
-                justifyContent="center"
-                sx={{ flexBasis: { xs: "100%", md: "60%" }, flexGrow: 1 }}
-              >
-                <Typography
-                  component="div"
-                  variant="overline"
-                  sx={{ textTransform: "uppercase" }}
-                  textAlign="center"
-                >
-                  Error 404
-                </Typography>
-                <Typography
-                  component="div"
-                  variant="h4"
-                  sx={{ textTransform: "uppercase" }}
-                  textAlign="center"
-                >
-                  Parece que esta web no existe
-                </Typography>
-                <Typography>
-                  Exploramos todas las páginas de FORMA Urbana y no encontramos
-                  la página que buscabas. Elegí uno de nuestros programas o
-                  escribinos al WhatsApp.
-                </Typography>
-              </Stack>
-            </Stack>
-            <Button
-              component="a"
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="outlined"
-              color="inherit"
-              size="large"
-              onClick={() => analytics.trackWhatsAppClick({ source: "not_found" })}
-              sx={{ alignSelf: "center" }}
-            >
-              Hablar por WhatsApp
-            </Button>
-          </Stack>
-        </Paper>
+          404
+        </Typography>
+        <Typography variant="h2" color="text.primary">
+          Esta página no existe
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 480 }}>
+          Puede que la URL haya cambiado o el enlace esté roto.
+        </Typography>
+        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+          <Button
+            component={RouterLink}
+            to="/"
+            variant="contained"
+            color="primary"
+            size="large"
+          >
+            Ir al inicio
+          </Button>
+          <Button
+            component="a"
+            href={WHATSAPP_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="outlined"
+            color="primary"
+            size="large"
+            onClick={() => analytics.trackWhatsAppClick({ source: "not_found" })}
+          >
+            WhatsApp
+          </Button>
+        </Stack>
       </Stack>
 
+      {/* Programme cards */}
       <Box component="section">
         <Typography
           variant="h4"
@@ -144,24 +118,19 @@ export default function NotFound() {
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={3}
-          sx={{
-            pb: 1,
-            justifyContent: { xs: "center", lg: "center" },
-            alignItems: "center",
-          }}
+          alignItems={{ xs: "center", md: "stretch" }}
         >
           {LANDING_LINKS.map(({ to, label, description }) => (
             <Card
               key={to}
-              elevation={10}
+              elevation={2}
               sx={{
-                minWidth: { xs: 260, md: 320 },
-                maxWidth: { xs: 320, md: "none" },
-                flex: { xs: "0 0 auto", md: "1 1 0" },
+                width: { xs: "100%", sm: 320, md: "auto" },
+                maxWidth: { xs: 400, md: "none" },
+                flex: "1 1 0",
                 display: "flex",
                 flexDirection: "column",
-                borderRadius: 3,
-                bgcolor: "common.white",
+                borderRadius: 1,
               }}
             >
               <CardContent sx={{ flexGrow: 1, px: 3, pt: 3 }}>
@@ -172,7 +141,7 @@ export default function NotFound() {
                 >
                   {label}
                 </Typography>
-                <Typography color="text.secondary" variant="subtitle2">
+                <Typography color="text.secondary" variant="body2">
                   {description}
                 </Typography>
               </CardContent>
@@ -181,8 +150,7 @@ export default function NotFound() {
                   component={RouterLink}
                   to={to}
                   variant="contained"
-                  sx={{ bgcolor: "#4caf50", "&:hover": { bgcolor: "#388e3c" } }}
-                  color="success"
+                  color="primary"
                   fullWidth
                 >
                   Ver detalles

@@ -21,6 +21,8 @@
  *   }
  */
 
+import { getAnonymousId } from "../analytics/anonymousId";
+
 const isDev = import.meta.env.DEV;
 const CURRENCY = "UYU";
 
@@ -35,7 +37,7 @@ function push(payload) {
   if (payload.ecommerce) {
     window.dataLayer.push({ ecommerce: null });
   }
-  window.dataLayer.push(payload);
+  window.dataLayer.push({ anonymous_id: getAnonymousId(), ...payload });
   if (isDev) {
     // eslint-disable-next-line no-console
     console.debug("[analytics]", payload.event, payload);

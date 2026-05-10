@@ -1,4 +1,4 @@
-import {useState, useMemo, useEffect, useCallback} from "react";
+import {useState, useMemo, useEffect, useRef} from "react";
 import {Alert} from "@mui/material";
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import {useNavigate, useLocation} from "react-router-dom";
@@ -8,7 +8,8 @@ import timezone from "dayjs/plugin/timezone";
 import "dayjs/locale/es";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import LoginModal from "../../components/LoginModal";
+import { doesSessionExist } from "supertokens-auth-react/recipe/session";
+import LoginModal from "../../components/LoginModal.jsx";
 import PurchaseOptionsDialog from "../../components/PurchaseOptionsDialog.jsx";
 import FlowStepper from "../../components/booking/FlowStepper.jsx";
 import BookingPanel from "../../components/booking/BookingPanel.jsx";
@@ -25,6 +26,7 @@ import {
   filterSlotsForCustomer,
 } from "../../utils/slotUtils";
 import analytics from "../../utils/analytics";
+import { track } from "../../analytics/track";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -62,6 +64,7 @@ export default function SchedulingPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const {user} = useAuth();
+  const autoSubmitRef = useRef(false);
 
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
@@ -81,6 +84,7 @@ export default function SchedulingPage() {
     location.state?.selectedPackageId || null,
   );
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [canPurchasePackages, setCanPurchasePackages] = useState(false);
   const [disableSingleSession, setDisableSingleSession] = useState(false);
 
@@ -135,6 +139,47 @@ export default function SchedulingPage() {
       setSelectedTime(restoredTime);
     }
   }, [restoredDate, restoredTime]);
+
+  // After returning from /auth login, restore the saved booking intent and
+  // re-navigate with it as location.state so all derived values update correctly.
+  useEffect(() => {
+    if (!user) return;
+    const raw = sessionStorage.getItem("fu.bookingIntent");
+    if (!raw) return;
+    let intent;
+    try {
+      intent = JSON.parse(raw);
+    } catch {
+      return;
+    }
+    sessionStorage.removeItem("fu.bookingIntent");
+    sessionStorage.removeItem("fu.bookingReturn");
+    navigate("/schedule", {
+      state: {
+        treatment: intent.treatment,
+        isEvaluation: intent.isEvaluation ?? false,
+        purchased_package_id: intent.purchasedPackageId ?? null,
+        selectedPackageId: intent.selectedPackageId ?? null,
+        productType: intent.productType ?? null,
+        campaignItemType: intent.campaignItemType ?? null,
+        selectedDate: intent.selectedDate,
+        selectedTime: intent.selectedTime,
+        _restoreAutoSubmit: true,
+      },
+      replace: true,
+    });
+  }, [user, navigate]);
+
+  // Auto-submit once date+time are populated after an intent restore
+  useEffect(() => {
+    if (!location.state?._restoreAutoSubmit) return;
+    if (!selectedDate || !selectedTime) return;
+    if (autoSubmitRef.current) return;
+    autoSubmitRef.current = true;
+    handleCreateAppointment();
+    // handleCreateAppointment reads current state at call time; deps excluded intentionally
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state?._restoreAutoSubmit, selectedDate, selectedTime]);
 
   useEffect(() => {
     if (isCampaign || (isHardRefresh && (treatment.category || productType))) {
@@ -289,6 +334,25 @@ export default function SchedulingPage() {
       return;
     }
 
+    const isAuthed = await doesSessionExist();
+    if (!isAuthed) {
+      const intent = {
+        treatment,
+        selectedDate: selectedDate.format("YYYY-MM-DD"),
+        selectedTime,
+        isEvaluation,
+        purchasedPackageId,
+        selectedPackageId,
+        productType,
+        campaignItemType,
+        notes,
+      };
+      sessionStorage.setItem("fu.bookingIntent", JSON.stringify(intent));
+      sessionStorage.setItem("fu.bookingReturn", "/schedule");
+      setLoginModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
@@ -333,12 +397,6 @@ export default function SchedulingPage() {
       setLoading(false);
     }
   };
-
-  if (!user) {
-    return (
-      <LoginModal open onClose={() => navigate("/")} onSuccess={() => {}} />
-    );
-  }
 
   const showSummary = Boolean(selectedDate && selectedTime);
   const resolvedCategorySlug =
@@ -491,19 +549,19 @@ export default function SchedulingPage() {
                   paymentMode={isEvaluation ? "evaluacion" : null}
                   selectedDate={selectedDate}
                   onDateChange={(d) => {
-                    analytics.trackDateSelected({
-                      treatment,
-                      selectedDate: d ? d.format("YYYY-MM-DD") : null,
+                    track("date_selected", {
+                      treatment_id: treatment?.slug,
+                      date_iso: d ? d.format("YYYY-MM-DD") : null,
                     });
                     setSelectedDate(d);
                     setSelectedTime(null);
                   }}
                   selectedTime={selectedTime}
                   onTimeChange={(nuevoTime) => {
-                    analytics.trackTimeSlotSelected({
-                      treatment,
-                      selectedDate: selectedDate ? selectedDate.format("YYYY-MM-DD") : null,
-                      selectedTime: nuevoTime,
+                    track("time_selected", {
+                      treatment_id: treatment?.slug,
+                      date_iso: selectedDate ? selectedDate.format("YYYY-MM-DD") : null,
+                      time_iso: nuevoTime,
                     });
                     setSelectedTime(nuevoTime);
                   }}
@@ -635,6 +693,12 @@ export default function SchedulingPage() {
         onClose={() => setPurchaseDialogOpen(false)}
         treatment={treatment}
         onConfirm={handlePurchaseDialogConfirm}
+      />
+
+      <LoginModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        context="reserve"
       />
     </div>
   );

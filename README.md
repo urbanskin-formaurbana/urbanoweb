@@ -35,6 +35,12 @@ This brings up:
 - `backend` — FastAPI on http://localhost:8000 / https://localhost:8443.
 - `mongo` — MongoDB 7 on 127.0.0.1:27017.
 - `mongo-restore` — one-shot init container that pulls the latest backup from S3 and restores it into `mongo`. Idempotent (skips if the latest backup is already loaded).
+- `supertokens-postgres` — PostgreSQL 15 backing the local SuperTokens core (internal only).
+- `supertokens` — SuperTokens core on http://supertokens:3567 (also exposed on 127.0.0.1:3567 for debugging).
+
+Authentication runs on a local SuperTokens core, brought up by the same
+`docker compose up`. The backend's auth code lives in `urbanoweb_backend`;
+see [`urbanoweb_backend/docs/auth.md`](../urbanoweb_backend/docs/auth.md).
 
 The frontend (in the browser at https://localhost:5173) talks to the backend at https://localhost:8443/api/v1.
 

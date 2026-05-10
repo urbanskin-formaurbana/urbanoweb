@@ -127,11 +127,16 @@ export default function DateTimeSlotPicker({
       });
   }, [isCampaign]);
 
+  const treatmentCategory = treatment?.category;
+  const treatmentItemType = treatment?.item_type;
+  const treatmentDurationMinutes = treatment?.duration_minutes;
+
   useEffect(() => {
-    if (!isCampaign) return;
+    if (!isCampaign || !treatmentCategory) return;
     let cancelled = false;
     setLoadingCampaignSlots(true);
-    fetchAllCampaignSlots(treatment, paymentMode)
+    const treatmentForFetch = { category: treatmentCategory, item_type: treatmentItemType, duration_minutes: treatmentDurationMinutes };
+    fetchAllCampaignSlots(treatmentForFetch, paymentMode)
       .then((slots) => {
         if (!cancelled) setAllCampaignSlots(slots);
       })
@@ -144,7 +149,7 @@ export default function DateTimeSlotPicker({
     return () => {
       cancelled = true;
     };
-  }, [isCampaign, treatment, paymentMode]);
+  }, [isCampaign, treatmentCategory, treatmentItemType, treatmentDurationMinutes, paymentMode]);
 
   const durationReady =
     paymentMode === "evaluacion" ||
@@ -172,12 +177,8 @@ export default function DateTimeSlotPicker({
     setEmptyDays(initialEmpty);
 
     const BATCH_SLICES = [
-      [0, 1],
-      [1, 2],
-      [2, 4],
-      [4, 7],
-      [7, 12],
-      [12, undefined],
+      [0, 3],
+      [3, undefined],
     ];
 
     const runBatches = async () => {
