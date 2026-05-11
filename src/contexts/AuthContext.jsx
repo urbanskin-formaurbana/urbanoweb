@@ -13,17 +13,24 @@ const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const sessionCtx = useSessionContext();
   const [user, setUser] = useState(null);
-  const [profileLoading, setProfileLoading] = useState(false);
+  // resolvedForHasSession holds the value of hasSession we've fully resolved
+  // the profile for. While it differs from the current hasSession, we treat
+  // the auth state as still-loading — this prevents a transient frame where
+  // sessionCtx.loading flips to false but the /auth/me fetch hasn't started,
+  // which would otherwise read as "no session" and fire premature redirects.
+  const [resolvedForHasSession, setResolvedForHasSession] = useState(null);
 
   const hasSession = !sessionCtx.loading && sessionCtx.doesSessionExist;
 
   useEffect(() => {
+    if (sessionCtx.loading) return;
+
     if (!hasSession) {
       setUser(null);
-      setProfileLoading(false);
+      setResolvedForHasSession(false);
       return;
     }
-    setProfileLoading(true);
+
     apiCall('/auth/me')
       .then((userData) => {
         setUser({
@@ -40,10 +47,9 @@ export const AuthProvider = ({ children }) => {
         logger.error('Failed to fetch user profile:', err);
         setUser(null);
       })
-      .finally(() => setProfileLoading(false));
-  }, [hasSession]);
+      .finally(() => setResolvedForHasSession(true));
+  }, [hasSession, sessionCtx.loading]);
 
-  // Redirect employees to the admin panel after login
   useEffect(() => {
     if (hasSession && user?.user_type === 'employee') {
       window.dispatchEvent(new CustomEvent('auth:employee_login'));
@@ -59,6 +65,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, []);
 
+  const profileLoading = resolvedForHasSession !== hasSession;
   const loading = sessionCtx.loading || profileLoading;
   const isAuthenticated = !loading && hasSession && user !== null;
 

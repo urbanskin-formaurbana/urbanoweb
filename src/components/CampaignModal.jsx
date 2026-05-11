@@ -168,11 +168,6 @@ function CampaignModal({
 
   const handleContratar = async (item) => {
     analytics.trackCampaignItemSelected({ productType, gender, item });
-    if (!isAuthenticated) {
-      analytics.trackLoginModalOpened({ trigger: "campaign_click" });
-      onLoginRequired();
-      return;
-    }
 
     try {
       setHasCampaign(null);
@@ -234,6 +229,11 @@ function CampaignModal({
   };
 
   const handleJoinWaitlist = async () => {
+    if (!isAuthenticated) {
+      analytics.trackLoginModalOpened({ trigger: "campaign_waitlist" });
+      onLoginRequired();
+      return;
+    }
     try {
       setWaitlistJoining(true);
       await campaignService.joinWaitlist();

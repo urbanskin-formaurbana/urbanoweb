@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signInAndUp } from 'supertokens-auth-react/recipe/thirdparty'
 import { Box, CircularProgress } from '@mui/material'
+import { notifyAuth } from './notifyAuth'
 
 export default function GoogleAuthCallback() {
   const navigate = useNavigate()
@@ -22,14 +23,7 @@ export default function GoogleAuthCallback() {
           throw new Error(result.reason ?? `Status: ${result.status}`)
         }
       } catch (err) {
-        sessionStorage.setItem(
-          'fu.authError',
-          JSON.stringify({
-            message: 'No pudimos iniciar sesión con Google. Intentá nuevamente.',
-            detail: err?.message ?? null,
-            at: new Date().toISOString(),
-          })
-        )
+        notifyAuth('oauth_error', { detail: err?.message ?? null })
         const returnPath = sessionStorage.getItem('fu.bookingReturn')
         sessionStorage.removeItem('fu.bookingReturn')
         navigate(returnPath || '/', { replace: true })

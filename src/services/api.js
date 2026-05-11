@@ -12,6 +12,13 @@ import logger from '../utils/logger';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:8443/api/v1';
 
+// Capture the native fetch before SuperTokens.init() replaces it with its interceptor.
+// This module is imported transitively by main.jsx, so it evaluates before the top-level
+// SuperTokens.init() call. Used for unauthenticated requests (like the health check) that
+// must bypass the session/refresh machinery — otherwise the interceptor pre-emptively hits
+// /auth/session/refresh on stale local state and produces a noisy 401 in the console.
+const nativeFetch = typeof window !== 'undefined' && window.fetch ? window.fetch.bind(window) : fetch;
+
 // Cold-start queue state
 let backendReady = sessionStorage.getItem('backend_warmed') === '1';
 const pendingQueue = [];
@@ -77,7 +84,9 @@ export async function apiCall(endpoint, options = {}) {
 export async function checkHealth() {
   try {
     const healthUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '') + '/api/health';
-    const response = await fetch(healthUrl, { method: 'GET' });
+    // Use nativeFetch + credentials: 'omit' so the SuperTokens interceptor
+    // never sees this request — keeps the console clean on first visit.
+    const response = await nativeFetch(healthUrl, { method: 'GET', credentials: 'omit' });
     return response.ok;
   } catch {
     return false;
