@@ -92,3 +92,32 @@ Note the AWS profile divergence: `mongo-restore` uses profile `default`, the bac
 
 - **Local DB name vs prod DB name:** local stack uses DB `urbanoweb` (compose `MONGODB_URL` and `restore.sh` `TARGET_DB`); production (Coolify) uses `urbano_db`. Functional today because the app reads the DB name from `MONGODB_URL`, but it's needless divergence. Consider aligning local to `urbano_db`.
 - **`VITE_REPO_URL`** is declared in `.env.example` and Vercel but not consumed by app code. Consider removing.
+
+## Deployment (Vercel)
+
+The repo is connected to Vercel via the GitHub integration. Any push to `main` triggers an automatic production deploy — there is no manual promotion step. No other branches are configured for production; only `main` deploys to the production URL.
+
+- **Production URL:** `https://formaurbana.skin`
+- **Trigger:** push to `main` → Vercel build → production rollout.
+- **Preview deploys:** non-main branches follow Vercel's default behavior (build per push, unique preview URL per deployment). No manual configuration beyond defaults.
+
+This repo is the **frontend only**. The backend lives in the sibling repo `urbanoweb_backend` and runs on a separate stack (Coolify); for backend deployment, environment, and runbook details see [urbanoweb_backend/OPERATIONS.md](../urbanoweb_backend/OPERATIONS.md).
+
+## Authentication (SuperTokens)
+
+The frontend uses [`supertokens-auth-react`](https://github.com/supertokens/supertokens-auth-react) with the **ThirdParty (Google)** and **Session** recipes. SuperTokens replaced the previous direct `@react-oauth/google` integration; the session backend is the Coolify-hosted SuperTokens Core fronted by the urbanoweb_backend production Application at `https://api.formaurbana.skin`.
+
+### Client wiring
+
+- **Recipes:** ThirdParty (Google provider only) + Session.
+- **Custom auth UI:** the prebuilt SuperTokens `/auth` route is **not** used. A custom `GoogleAuthCallback` component under `src/auth/` handles the OAuth redirect and session bootstrap so login can stay inline with the existing UX instead of bouncing through the prebuilt screens.
+- **Anonymous tracking pre-login:** before a user authenticates, interactions are attributed to a stable anonymous ID generated and persisted by `src/analytics/anonymousId.js`, with events emitted through `src/analytics/track.js`. After login, the anonymous ID is associated with the SuperTokens user.
+- **Public routes with gates:** `/schedule` is publicly reachable (an unauthenticated visitor can browse and pick a slot). The auth/payment gate is enforced at the payment step, not at route entry.
+
+### Production stack (cross-reference)
+
+The production SuperTokens deployment — Coolify Database service for the SuperTokens Postgres, Coolify Compose Application for the SuperTokens Core + the urbanoweb_backend API, environment variables, and the API key rotation runbook — is documented in [urbanoweb_backend/OPERATIONS.md](../urbanoweb_backend/OPERATIONS.md). Do not duplicate that content here; treat the backend OPERATIONS.md as the source of truth for the prod auth stack.
+
+### Local-dev SuperTokens
+
+For local development, SuperTokens Core (and its Postgres) runs as part of the gitignored `docker-compose.yml` in this repo, alongside the `web` (frontend dev server), `backend`, `mongo`, and `mongo-restore` containers described above. The production SuperTokens is **not** part of this compose stack — it is Coolify-hosted and managed separately.
