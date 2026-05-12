@@ -62,7 +62,8 @@ src/                   # React app source
 api/                   # Vercel serverless functions (currently: health endpoint)
 public/                # Static assets
 docker/
-  mongo-restore/       # Init-container image: pulls latest S3 backup, restores into mongo
+  mongo-restore/                 # Init-container image: pulls latest S3 backup, restores into mongo
+  supertokens-postgres-restore/  # Init-container image: pulls latest S3 backup, restores into supertokens-postgres
 docker-compose.yml     # Local dev stack
 Dockerfile             # Dev Dockerfile for the Vite container (production build is handled by Vercel)
 vercel.json            # Vercel SPA rewrite + build config
