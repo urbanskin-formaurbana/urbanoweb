@@ -55,6 +55,17 @@ export function filterSlotsForCustomer(slots) {
 }
 
 /**
+ * Filter slots for campaign products — only drop past slots, no 24h advance window
+ * Input: raw ISO datetime strings
+ */
+export function filterSlotsForCampaign(slots) {
+  const now = dayjs().tz('America/Montevideo');
+  return slots.filter(slot =>
+    dayjs.utc(slot).tz('America/Montevideo').isAfter(now)
+  );
+}
+
+/**
  * Resolve appointment duration based on treatment and payment mode
  */
 export function getSlotDuration(treatment, paymentMode) {

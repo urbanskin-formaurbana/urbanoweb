@@ -13,6 +13,7 @@ import {
   isCampaignTreatment,
   fetchAllCampaignSlots,
   filterSlotsForCustomer,
+  filterSlotsForCampaign,
 } from "../utils/slotUtils";
 
 dayjs.extend(utc);
@@ -85,14 +86,15 @@ export default function DateTimeSlotPicker({
       ? 30
       : treatment.duration_minutes || SESSION_DURATION;
   const memoizedFilterSlots = useCallback(
-    filterSlotsProp || filterSlotsForCustomer,
-    [filterSlotsProp],
+    filterSlotsProp || (isCampaign ? filterSlotsForCampaign : filterSlotsForCustomer),
+    [filterSlotsProp, isCampaign],
   );
 
   const days = useMemo(() => {
     const list = [];
     const today = dayjs().tz("America/Montevideo").startOf("day");
-    for (let i = 1; i <= 21; i += 1) {
+    const startOffset = isCampaign ? 0 : 1;
+    for (let i = startOffset; i <= 21; i += 1) {
       const d = today.add(i, "day");
       list.push({
         key: d.format("YYYY-MM-DD"),
@@ -103,7 +105,7 @@ export default function DateTimeSlotPicker({
       });
     }
     return list;
-  }, []);
+  }, [isCampaign]);
 
   const campaignDates = useMemo(() => {
     if (!isCampaign || allCampaignSlots.length === 0) return new Set();
