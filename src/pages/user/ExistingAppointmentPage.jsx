@@ -17,7 +17,7 @@ import SlideToConfirm from "../../components/common/SlideToConfirm";
 import {useNavigate, useLocation, Navigate} from "react-router-dom";
 import {useAuth} from "../../contexts/AuthContext";
 import {useBusiness} from "../../contexts/BusinessContext";
-import {filterSlotsForCustomer} from "../../utils/slotUtils";
+import {isCampaignTreatment, filterSlotsForCampaign} from "../../utils/slotUtils";
 import {LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
@@ -160,10 +160,13 @@ export default function ExistingAppointmentPage() {
   const rescheduleTreatment = useMemo(() => treatmentFromAppointment(appointmentData), [appointmentData]);
   const rescheduleFilterSlots = useCallback(
     (isoSlots) => {
+      if (isCampaignTreatment(rescheduleTreatment)) {
+        return filterSlotsForCampaign(isoSlots);
+      }
       const cutoff = dayjs().tz("America/Montevideo").add(appointmentData?.status === "confirmed" ? 48 : 24, "hour");
       return isoSlots.filter(s => dayjs.utc(s).tz("America/Montevideo").isAfter(cutoff));
     },
-    [appointmentData?.status],
+    [appointmentData?.status, rescheduleTreatment],
   );
 
   const scheduleFilterSlots = useCallback((isoSlots) => {
